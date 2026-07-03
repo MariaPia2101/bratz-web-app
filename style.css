@@ -6,7 +6,7 @@
     font-display: swap;
     src: url("assets/fonts/DrukWide-Medium.woff2") format("woff2"),
         url("assets/fonts/DrukWide-Medium.woff") format("woff"),
-        url("assets/fonts/DrukWide-Medium.ttf") format("truetype"),
+        url("assets/fonts/Druk-Wide-Medium-Regular.ttf") format("truetype"),
         url("assets/fonts/DrukWide-Medium.otf") format("opentype");
 }
 
@@ -18,6 +18,7 @@
     src: url("assets/fonts/DrukWide-Bold.woff2") format("woff2"),
         url("assets/fonts/DrukWide-Bold.woff") format("woff"),
         url("assets/fonts/DrukWide-Bold.ttf") format("truetype"),
+        url("assets/fonts/Druk-Wide-Medium-Regular.ttf") format("truetype"),
         url("assets/fonts/DrukWide-Bold.otf") format("opentype");
 }
 
@@ -30,6 +31,16 @@
         url("assets/fonts/AkkuratMono-Regular.woff") format("woff"),
         url("assets/fonts/AkkuratMonoTrialTT-Regular.ttf") format("truetype"),
         url("assets/fonts/AkkuratMono-Regular.otf") format("opentype");
+}
+
+@font-face {
+    font-family: "Akkurat Mono";
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+    src: url("assets/fonts/AkkuratMono-Bold.woff2") format("woff2"),
+        url("assets/fonts/AkkuratMono-Bold.woff") format("woff"),
+        url("assets/fonts/AkkuratMonoTrialTT-Bold.ttf") format("truetype");
 }
 
 /* ===== Design tokens estratti da Figma (onboarding_page) ===== */
@@ -54,6 +65,38 @@
     --btn-fill-active: #ffffff;
     --btn-text-active: #000000;
     --btn-stroke: #000000;
+
+    /* ===== Design tokens estratti da Figma (loading_page) ===== */
+    --bg-color: #ffffff;
+    /* fill/background_color */
+    --bar-empty: #ffffff;
+    /* fill/bar_empty */
+    --bar-stroke: #000000;
+    /* stroke/bar */
+    --bar-fill: #000000;
+    /* riempimento progressivo (mono, coerente con stroke/bar) */
+    --loading-instruction: #bebebe;
+    /* description/instruction */
+
+    /* ===== Design tokens estratti da Figma (enter_page) ===== */
+    --enter-btn-fill-active: #ffffff;
+    /* buttons/primary-button/fill_active */
+    --enter-btn-text-active: #000000;
+    /* buttons/primary-button/text_active_hover_tapped */
+    --enter-btn-fill-community: #bebebe;
+    /* buttons/primary-button/fill_disabled */
+    --enter-btn-text-community: #ffffff;
+    /* white */
+    --enter-btn-stroke: #000000;
+    /* buttons/primary-button/stroke */
+    --popup-fill: #ffffff;
+    /* fill/pop_up */
+    --popup-stroke: #000000;
+    /* stroke/pop_up */
+    --popup-text: #000000;
+
+    /* Fallback di sfondo enter_page finché l'export 3D non è presente */
+    --enter-bg-fallback: #2b1cc4;
 
     /* Font digitalizzati localmente da Figma (nessun fallback) */
     --font-title: "Druk Wide";
@@ -235,6 +278,183 @@ body {
     cursor: pointer;
 }
 
+/* ===== Transizioni SPA (fade fluido tra le pagine) ===== */
+.onboarding,
+.loading-page,
+.enter-page {
+    transition: opacity 0.45s ease;
+}
+
+/* ===== LOADING PAGE (pagina di transito) ===== */
+.loading-page {
+    display: none;
+    /* nascosta di default */
+    opacity: 0;
+    min-height: 100vh;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 16px;
+    background: var(--bg-color);
+}
+
+.loading-input {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    width: 434px;
+    max-width: calc(100% - 32px);
+}
+
+.loading-logo {
+    width: 166px;
+    height: 85px;
+    object-fit: contain;
+    user-select: none;
+}
+
+.container-bar-and-text {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    width: 100%;
+}
+
+.loading-bar {
+    width: 100%;
+    height: 8px;
+    background: var(--bar-empty);
+    border: 1px solid var(--bar-stroke);
+    overflow: hidden;
+}
+
+.loading-bar-fill {
+    width: 0%;
+    height: 100%;
+    background: var(--bar-fill);
+    transition: width 0.12s linear;
+}
+
+.loading-text {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-weight: 400;
+    font-size: 12px;
+    line-height: normal;
+    letter-spacing: -0.84px;
+    color: var(--loading-instruction);
+}
+
+/* ===== ENTER PAGE (schermata finale) ===== */
+.enter-page {
+    display: none;
+    /* nascosta di default */
+    opacity: 0;
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    background-color: var(--enter-bg-fallback);
+    background-image: url("assets/images/enter_page.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.enter-logo {
+    position: absolute;
+    top: 48px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 166px;
+    height: 85px;
+    object-fit: contain;
+    user-select: none;
+    pointer-events: none;
+}
+
+.enter-buttons {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 207px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.enter-button {
+    width: 100%;
+    padding: 13px 13px 12px;
+    font-family: var(--font-title);
+    font-weight: 700;
+    font-size: 14px;
+    line-height: normal;
+    text-transform: uppercase;
+    text-align: center;
+    border: 1px solid var(--enter-btn-stroke);
+    border-radius: 0;
+    cursor: pointer;
+}
+
+.enter-button--active {
+    background: var(--enter-btn-fill-active);
+    color: var(--enter-btn-text-active);
+}
+
+.enter-button--community {
+    background: var(--enter-btn-fill-community);
+    color: var(--enter-btn-text-community);
+}
+
+/* ===== POP-UP (segue il cursore) ===== */
+.enter-popup {
+    position: absolute;
+    /* posizione di riposo da Figma (left 50%+48px, top 33.33%+24.67px) */
+    left: calc(50% + 48px);
+    top: calc(33.33% + 24.67px);
+    width: 239px;
+    min-height: 170px;
+    box-sizing: border-box;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: var(--popup-fill);
+    border: 1px solid var(--popup-stroke);
+    will-change: left, top;
+}
+
+.enter-popup-close {
+    align-self: flex-start;
+    margin: 0;
+    padding: 0;
+    background: none;
+    border: none;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 14px;
+    line-height: 16px;
+    letter-spacing: -0.98px;
+    color: var(--popup-text);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    cursor: pointer;
+}
+
+.enter-popup-text {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 17px;
+    letter-spacing: -0.98px;
+    color: var(--popup-text);
+}
+
 /* ===== Mobile ===== */
 @media (max-width: 480px) {
     .onboarding {
@@ -252,5 +472,24 @@ body {
 
     .title {
         font-size: 30px;
+    }
+
+    .loading-logo {
+        width: 132px;
+        height: auto;
+    }
+
+    .enter-logo {
+        width: 132px;
+        height: auto;
+    }
+
+    .enter-buttons {
+        width: calc(100% - 48px);
+        max-width: 260px;
+    }
+
+    .enter-popup {
+        width: min(239px, calc(100% - 32px));
     }
 }
