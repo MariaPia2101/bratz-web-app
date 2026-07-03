@@ -229,6 +229,10 @@ body {
     cursor: not-allowed;
 }
 
+.primary-button:hover{
+    background-color: #E4D5FF;
+}
+
 .primary-button.active {
     background: var(--btn-fill-active);
     color: var(--btn-text-active);
