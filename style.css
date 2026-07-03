@@ -63,6 +63,9 @@
     --btn-fill-disabled: #bebebe;
     --btn-text-disabled: #ffffff;
     --btn-fill-active: #ffffff;
+    --btn-fill-hover: #e4d5ff;
+    --btn-fill-tapped: #c7a9ff;
+    /* text_active_hover_tapped: unico colore testo per active/hover/tapped */
     --btn-text-active: #000000;
     --btn-stroke: #000000;
 
@@ -184,7 +187,8 @@ body {
 .field {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    /* nessuno spazio di base: i tre campi restano equidistanti (gap di .fields) */
+    gap: 0;
 }
 
 .input {
@@ -235,13 +239,26 @@ body {
     border-color: var(--input-stroke-success);
 }
 
-/* Messaggio di validazione */
+/* Messaggio di validazione — collassato di base, non occupa spazio */
 .msg {
     margin: 0;
-    min-height: 15px;
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
     font-size: 12px;
     letter-spacing: -0.84px;
     line-height: 1.2;
+    transition: max-height 0.25s ease, margin-top 0.25s ease, opacity 0.25s ease;
+}
+
+/* Solo quando compare error/warning/success il messaggio si apre
+   e spinge il campo password verso il basso (gap 12px come da Figma) */
+.field.is-error .msg,
+.field.is-warning .msg,
+.field.is-success .msg {
+    max-height: 40px;
+    margin-top: 12px;
+    opacity: 1;
 }
 
 .field.is-error .msg {
@@ -256,7 +273,7 @@ body {
     color: var(--input-stroke-success);
 }
 
-/* ===== Bottone START ===== */
+/* ===== Bottone START — stati del componente primary_button (Figma) ===== */
 .primary-button {
     width: 100%;
     padding: 13px;
@@ -267,19 +284,28 @@ body {
     letter-spacing: 0;
     border: 1px solid var(--btn-stroke);
     border-radius: 0;
+    /* state=disabled */
     background: var(--btn-fill-disabled);
     color: var(--btn-text-disabled);
     cursor: not-allowed;
+    transition: background-color 0.15s ease;
 }
 
-.primary-button:hover{
-    background-color: #E4D5FF;
-}
-
+/* state=active */
 .primary-button.active {
     background: var(--btn-fill-active);
     color: var(--btn-text-active);
     cursor: pointer;
+}
+
+/* state=hover */
+.primary-button.active:hover {
+    background: var(--btn-fill-hover);
+}
+
+/* state=tapped */
+.primary-button.active:active {
+    background: var(--btn-fill-tapped);
 }
 
 /* ===== Transizioni SPA (fade fluido tra le pagine) ===== */
