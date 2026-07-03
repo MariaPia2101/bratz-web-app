@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BRATZ — Join the Worldz</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <main class="onboarding">
+        <img class="logo" src="assets/images/logo_image.gif" alt="Bratz">
+
+        <form class="card" id="onboarding-form" novalidate>
+            <div class="card-text">
+                <h1 class="title">Join the<br>Worldz</h1>
+                <p class="subtitle">
+                    You know the code.<br>
+                    Every Bratz comes with a key,<br>
+                    enter yours and step inside.
+                </p>
+            </div>
+
+            <div class="fields">
+                <!-- Fase 1: solo il Pack Code è attivo -->
+                <div class="field" data-field="pack">
+                    <input type="text" id="pack-code" class="input" placeholder="Pack code"
+                           autocomplete="off" spellcheck="false">
+                </div>
+
+                <!-- Fase 2: Nickname (sbloccato dopo il pack code valido) -->
+                <div class="field" data-field="nickname">
+                    <input type="text" id="nickname" class="input" placeholder="Nickname"
+                           autocomplete="off" spellcheck="false" disabled>
+                    <p class="msg" id="nickname-msg" aria-live="polite"></p>
+                </div>
+
+                <!-- Fase 3: Password -->
+                <div class="field" data-field="password">
+                    <input type="password" id="password" class="input" placeholder="Password"
+                           autocomplete="off" disabled>
+                </div>
+            </div>
+
+            <button type="submit" class="primary-button" id="start-btn" disabled>Start</button>
+        </form>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
