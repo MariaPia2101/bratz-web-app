@@ -5,59 +5,64 @@
     font-style: normal;
     font-display: swap;
     src: url("assets/fonts/DrukWide-Medium.woff2") format("woff2"),
-         url("assets/fonts/DrukWide-Medium.woff")  format("woff"),
-         url("assets/fonts/DrukWide-Medium.ttf")   format("truetype"),
-         url("assets/fonts/DrukWide-Medium.otf")   format("opentype");
+        url("assets/fonts/DrukWide-Medium.woff") format("woff"),
+        url("assets/fonts/DrukWide-Medium.ttf") format("truetype"),
+        url("assets/fonts/DrukWide-Medium.otf") format("opentype");
 }
+
 @font-face {
     font-family: "Druk Wide";
     font-weight: 700;
     font-style: normal;
     font-display: swap;
     src: url("assets/fonts/DrukWide-Bold.woff2") format("woff2"),
-         url("assets/fonts/DrukWide-Bold.woff")  format("woff"),
-         url("assets/fonts/DrukWide-Bold.ttf")   format("truetype"),
-         url("assets/fonts/DrukWide-Bold.otf")   format("opentype");
+        url("assets/fonts/DrukWide-Bold.woff") format("woff"),
+        url("assets/fonts/DrukWide-Bold.ttf") format("truetype"),
+        url("assets/fonts/DrukWide-Bold.otf") format("opentype");
 }
+
 @font-face {
     font-family: "Akkurat Mono";
     font-weight: 400;
     font-style: normal;
     font-display: swap;
     src: url("assets/fonts/AkkuratMono-Regular.woff2") format("woff2"),
-         url("assets/fonts/AkkuratMono-Regular.woff")  format("woff"),
-         url("assets/fonts/AkkuratMonoTrialTT-Regular.ttf")   format("truetype"),
-         url("assets/fonts/AkkuratMono-Regular.otf")   format("opentype");
+        url("assets/fonts/AkkuratMono-Regular.woff") format("woff"),
+        url("assets/fonts/AkkuratMonoTrialTT-Regular.ttf") format("truetype"),
+        url("assets/fonts/AkkuratMono-Regular.otf") format("opentype");
 }
 
 /* ===== Design tokens estratti da Figma (onboarding_page) ===== */
 :root {
-    --card-fill:   #ffffff;
+    --card-fill: #ffffff;
     --card-stroke: #000000;
 
-    --input-fill:          #ffffff;
-    --input-stroke:        #000000; /* active / disabled */
-    --input-text-active:   #000000;
+    --input-fill: #ffffff;
+    --input-stroke: #000000;
+    /* active / disabled */
+    --input-text-active: #000000;
     --input-text-disabled: #bebebe;
 
-    --input-stroke-hover:   #e4d5ff;
-    --input-stroke-tapped:  #c7a9ff;
-    --input-stroke-error:   #d52030;
+    --input-stroke-hover: #e4d5ff;
+    --input-stroke-tapped: #c7a9ff;
+    --input-stroke-error: #d52030;
     --input-stroke-warning: #ffdd00;
     --input-stroke-success: #74d200;
 
     --btn-fill-disabled: #bebebe;
     --btn-text-disabled: #ffffff;
-    --btn-fill-active:   #ffffff;
-    --btn-text-active:   #000000;
-    --btn-stroke:        #000000;
+    --btn-fill-active: #ffffff;
+    --btn-text-active: #000000;
+    --btn-stroke: #000000;
 
     /* Font digitalizzati localmente da Figma (nessun fallback) */
     --font-title: "Druk Wide";
-    --font-mono:  "Akkurat Mono";
+    --font-mono: "Akkurat Mono";
 }
 
-* { box-sizing: border-box; }
+* {
+    box-sizing: border-box;
+}
 
 body {
     margin: 0;
@@ -133,7 +138,11 @@ body {
     gap: 20px;
 }
 
-.field { display: flex; flex-direction: column; gap: 12px; }
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
 
 .input {
     width: 100%;
@@ -148,7 +157,10 @@ body {
     outline: none;
 }
 
-.input::placeholder { color: var(--input-text-disabled); opacity: 1; }
+.input::placeholder {
+    color: var(--input-text-disabled);
+    opacity: 1;
+}
 
 .input:disabled {
     color: var(--input-text-disabled);
@@ -156,16 +168,29 @@ body {
 }
 
 /* Stati hover / focus (tapped) per i campi neutri, non in validazione */
-.input:not(:disabled):hover        { border-color: var(--input-stroke-hover); }
-.input:not(:disabled):focus        { border-color: var(--input-stroke-tapped); }
+.input:not(:disabled):hover {
+    border-color: var(--input-stroke-hover);
+}
+
+.input:not(:disabled):focus {
+    border-color: var(--input-stroke-tapped);
+}
 
 /* Stati di validazione del Nickname (prevalgono su hover/focus) */
-.field.is-error   .input,
-.field.is-error   .input:focus   { border-color: var(--input-stroke-error); }
+.field.is-error .input,
+.field.is-error .input:focus {
+    border-color: var(--input-stroke-error);
+}
+
 .field.is-warning .input,
-.field.is-warning .input:focus   { border-color: var(--input-stroke-warning); }
+.field.is-warning .input:focus {
+    border-color: var(--input-stroke-warning);
+}
+
 .field.is-success .input,
-.field.is-success .input:focus   { border-color: var(--input-stroke-success); }
+.field.is-success .input:focus {
+    border-color: var(--input-stroke-success);
+}
 
 /* Messaggio di validazione */
 .msg {
@@ -175,9 +200,18 @@ body {
     letter-spacing: -0.84px;
     line-height: 1.2;
 }
-.field.is-error   .msg { color: var(--input-stroke-error); }
-.field.is-warning .msg { color: var(--input-stroke-warning); }
-.field.is-success .msg { color: var(--input-stroke-success); }
+
+.field.is-error .msg {
+    color: var(--input-stroke-error);
+}
+
+.field.is-warning .msg {
+    color: var(--input-stroke-warning);
+}
+
+.field.is-success .msg {
+    color: var(--input-stroke-success);
+}
 
 /* ===== Bottone START ===== */
 .primary-button {
@@ -203,8 +237,20 @@ body {
 
 /* ===== Mobile ===== */
 @media (max-width: 480px) {
-    .onboarding { gap: 40px; }
-    .logo { width: 132px; }
-    .card { padding: 32px 24px; gap: 36px; }
-    .title { font-size: 30px; }
+    .onboarding {
+        gap: 40px;
+    }
+
+    .logo {
+        width: 132px;
+    }
+
+    .card {
+        padding: 32px 24px;
+        gap: 36px;
+    }
+
+    .title {
+        font-size: 30px;
+    }
 }
