@@ -1,12 +1,9 @@
-// ===== USER PAGE: iniezione nickname + loading legato al caricamento REALE =====
+// ===== MY DOLLZ PAGE: nickname + loading reale + navigazione =====
 
-// ---------- Nickname scelto nell'onboarding (persistito in localStorage) ----------
+// ---------- Nickname (persistito nell'onboarding) nel bottone header ----------
 const nickname = (localStorage.getItem("bratz_nickname") || "marpi.dollz").trim();
-
 const dollzBtn = document.getElementById("user-dollz-btn");
-const welcome = document.getElementById("user-welcome");
 if (dollzBtn) dollzBtn.textContent = nickname;
-if (welcome) welcome.innerHTML = `Welcome ${nickname},<br>your stories are waiting for you.`;
 
 // ---------- Animazione "Loading" (1 → 2 → 3 punti in loop) ----------
 const loadingText = document.getElementById("loading-text");
@@ -30,7 +27,7 @@ function stopDots() {
 const loadingPage = document.getElementById("loading-page");
 const loadingBar = document.getElementById("loading-bar");
 const loadingFill = document.getElementById("loading-bar-fill");
-const content = document.getElementById("user-content");
+const content = document.getElementById("mydollz-content");
 
 const images = Array.from(document.images);
 const total = images.length || 1;
@@ -56,13 +53,11 @@ function finish() {
     finished = true;
     setProgress(100);
     stopDots();
-    // dissolvenza dell'overlay e comparsa fluida del contenuto
     content.classList.add("is-ready");
     loadingPage.style.opacity = "0";
     setTimeout(() => { loadingPage.style.display = "none"; }, 450);
 }
 
-// Conta ogni immagine man mano che finisce di caricare (load o error)
 images.forEach((img) => {
     if (img.complete && img.naturalWidth > 0) {
         markLoaded();
@@ -71,18 +66,26 @@ images.forEach((img) => {
         img.addEventListener("error", markLoaded, { once: true });
     }
 });
-
-// Rete di sicurezza: quando l'intera pagina è caricata, completa comunque
 window.addEventListener("load", finish);
 
-// ---------- "See more" di My Dollz → mydollz_page con loading di transito reale ----------
-const seeMoreMydollz = document.getElementById("see-more-mydollz");
-if (seeMoreMydollz) {
-    seeMoreMydollz.addEventListener("click", () => {
+// ---------- Back: torna a user_page con loading di transito ----------
+const backBtn = document.getElementById("mydollz-back-btn");
+if (backBtn) {
+    backBtn.addEventListener("click", () => {
         setProgress(0);
         loadingPage.style.display = "flex";
         loadingPage.style.opacity = "1";
         startDots();
-        setTimeout(() => { window.location.href = "mydollz_page.html"; }, 60);
+        setTimeout(() => { window.location.href = "user_page.html"; }, 60);
     });
 }
+
+// ---------- Chiusura dei pop-up (fissi) ----------
+document.querySelectorAll(".doll-popup__close").forEach((btn) => {
+    btn.addEventListener("click", () => {
+        const popup = btn.closest(".doll-popup");
+        popup.style.transition = "opacity 0.3s ease";
+        popup.style.opacity = "0";
+        setTimeout(() => { popup.style.display = "none"; }, 300);
+    });
+});

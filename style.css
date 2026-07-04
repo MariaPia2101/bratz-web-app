@@ -742,3 +742,259 @@ body {
         font-size: 30px;
     }
 }
+
+/* ===== Token mydollz_page (Figma) ===== */
+:root {
+    --title-doll-name: #000000;
+    /* title/doll_name */
+    --subtitle-doll-collection: #000000;
+    /* subtitle/doll_collection */
+    --icon-btn-fill: #ffffff;
+    /* buttons/icon-button/fill_active */
+    --icon-btn-stroke: #000000;
+    /* buttons/icon-button/stroke_button */
+}
+
+/* ===== MY DOLLZ PAGE ===== */
+.mydollz-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px;
+    overflow: auto;
+    background: var(--bg-color);
+}
+
+.mydollz-page__content {
+    opacity: 0;
+    transition: opacity 0.45s ease;
+}
+
+.mydollz-page__content.is-ready {
+    opacity: 1;
+}
+
+/* container_mydollz_page = upper_container_user_pages + bottom_container_mydollz_page */
+.container-mydollz-page {
+    width: 1344px;
+    max-width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.upper-container-mydollz {
+    display: flex;
+    flex-direction: column;
+    gap: 72px;
+    width: 100%;
+}
+
+/* container_title = icon_button (back) + "My dollz" */
+.container-title {
+    display: flex;
+    align-items: flex-end;
+    gap: 20px;
+}
+
+/* icon_button (back / plus) — stessi stati del bottone START */
+.icon-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 9px;
+    background: var(--icon-btn-fill);
+    border: 1px solid var(--icon-btn-stroke);
+    border-radius: 0;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.icon-button:hover {
+    background: var(--btn-fill-hover);
+}
+
+.icon-button:active {
+    background: var(--btn-fill-tapped);
+}
+
+.icon-button__inner {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px;
+}
+
+.icon-button__arrow {
+    display: block;
+    width: 27px;
+    height: auto;
+}
+
+.icon-button__plus {
+    display: block;
+    width: 20px;
+    height: 20px;
+}
+
+/* bottom_container_mydollz_page: canvas 1344x717 fedele a Figma */
+.bottom-container-mydollz {
+    position: relative;
+    width: 1344px;
+    max-width: 100%;
+    height: 717px;
+}
+
+/* container_doll_button: doll + plus (gap 40) */
+.container-doll-button {
+    position: absolute;
+    left: 512px;
+    top: 2px;
+    display: flex;
+    align-items: center;
+    gap: 40px;
+}
+
+/* container_doll_photo_text: foto + nome (gap 32) */
+.container-doll-photo-text {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 32px;
+}
+
+.doll-photo {
+    width: 326px;
+    height: 645px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.doll-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    user-select: none;
+}
+
+/* container_doll_text */
+.container-doll-text {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.doll-name {
+    margin: 0;
+    font-family: var(--font-title);
+    font-weight: 500;
+    font-size: 24px;
+    line-height: 24px;
+    text-transform: uppercase;
+    color: var(--title-doll-name);
+}
+
+.doll-collection {
+    margin: 0;
+    font-family: var(--font-title);
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 22px;
+    color: var(--subtitle-doll-collection);
+}
+
+/* pop_up hint (fissi, come da scelta sull'enter_page) */
+.doll-popup {
+    position: absolute;
+    box-sizing: border-box;
+    width: 239px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    background: var(--popup-fill);
+    border: 1px solid var(--popup-stroke);
+}
+
+.doll-popup--profile {
+    left: 357px;
+    top: 59px;
+}
+
+.doll-popup--add {
+    left: 908px;
+    top: 261px;
+}
+
+.doll-popup__close {
+    align-self: flex-start;
+    margin: 0;
+    padding: 0;
+    background: none;
+    border: none;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 14px;
+    line-height: 16px;
+    letter-spacing: -0.98px;
+    color: var(--popup-text);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    cursor: pointer;
+}
+
+.doll-popup__text {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 17px;
+    letter-spacing: -0.98px;
+    color: var(--popup-text);
+}
+
+/* ===== MY DOLLZ PAGE — schermi stretti ===== */
+@media (max-width: 1440px) {
+    .mydollz-page {
+        align-items: flex-start;
+    }
+
+    .container-mydollz-page {
+        width: 1344px;
+    }
+}
+
+@media (max-width: 900px) {
+
+    /* su schermi piccoli: layout in colonna, niente canvas assoluto */
+    .bottom-container-mydollz {
+        height: auto;
+        display: flex;
+        justify-content: center;
+        padding-top: 24px;
+    }
+
+    .container-doll-button {
+        position: static;
+        flex-direction: column;
+        gap: 24px;
+    }
+
+    .doll-popup {
+        display: none;
+    }
+
+    .doll-photo {
+        width: 240px;
+        height: auto;
+    }
+
+    .doll-photo img {
+        width: 100%;
+        height: auto;
+    }
+}
