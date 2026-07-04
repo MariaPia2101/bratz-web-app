@@ -403,7 +403,7 @@ body {
 
 .enter-logo {
     position: absolute;
-    top: 48px;
+    top: 20px;
     left: 50%;
     transform: translateX(-50%);
     width: 166px;
