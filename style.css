@@ -327,7 +327,10 @@ body {
     display: none;
     /* nascosta di default */
     opacity: 0;
-    min-height: 100vh;
+    /* overlay a tutto schermo: copre la pagina durante un caricamento reale */
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
     flex-direction: column;
     align-items: center;
     justify-content: center;
@@ -484,6 +487,258 @@ body {
     }
 
     .title {
+        font-size: 30px;
+    }
+}
+
+/* ===== Token user_page e secondary_button (Figma) ===== */
+:root {
+    --title-user: #000000;
+    /* title/user_section */
+    --subtitle-user: #000000;
+    /* subtitle/user_section */
+    --description-user-page: #000000;
+    /* description/user_page */
+
+    --secondary-btn-fill: #ffffff;
+    /* buttons/secondary button/fill_active */
+    --secondary-btn-fill-hover: #e4d5ff;
+    /* fill_hover */
+    --secondary-btn-fill-tapped: #c7a9ff;
+    /* fill_tapped */
+    --secondary-btn-text: #000000;
+    /* buttons/secondary button/text */
+    --secondary-btn-stroke: #000000;
+    /* buttons/secondary button/stroke */
+}
+
+/* ===== USER PAGE ===== */
+.user-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px;
+    background: var(--bg-color);
+}
+
+/* Nascosto finché il caricamento reale non è completo (rivelato via JS) */
+.user-page__content {
+    opacity: 0;
+    transition: opacity 0.45s ease;
+}
+
+.user-page__content.is-ready {
+    opacity: 1;
+}
+
+/* container_user_page = upper_container + bottom_container_user_page */
+.container-user-page {
+    width: 1345px;
+    max-width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* upper_container_user&community_page = header + descrizione */
+.upper-container {
+    display: flex;
+    flex-direction: column;
+    gap: 70px;
+    width: 100%;
+}
+
+.user-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 85px;
+    width: 100%;
+}
+
+.user-header .primary-button {
+    width: 207px;
+}
+
+/* marpi.dollz = pagina corrente (stato tapped/selezionato da Figma) */
+.primary-button.is-current {
+    background: var(--btn-fill-tapped);
+    color: var(--btn-text-active);
+    cursor: default;
+}
+
+.user-logo {
+    width: 166px;
+    height: 85px;
+    object-fit: contain;
+    user-select: none;
+}
+
+.user-welcome {
+    margin: 0;
+    max-width: 695px;
+    font-family: var(--font-mono);
+    font-weight: 400;
+    font-size: 20px;
+    line-height: 22px;
+    letter-spacing: -1.4px;
+    color: var(--description-user-page);
+}
+
+/* bottom_container_user_page = container_cards_user_page (3 card) */
+.bottom-container-user-page {
+    width: 100%;
+}
+
+.cards-user-page {
+    display: flex;
+    gap: 20px;
+    width: 100%;
+}
+
+.card-user-page {
+    position: relative;
+    flex: 1 1 0;
+    min-width: 0;
+    height: 717px;
+    border: 1px solid var(--card-stroke);
+    padding: 40px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+}
+
+.card-user-page__bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    pointer-events: none;
+    user-select: none;
+}
+
+.card-user-page__content {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.card-title {
+    margin: 0;
+    font-family: var(--font-title);
+    font-weight: 500;
+    font-size: 36px;
+    line-height: 23px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: var(--title-user);
+}
+
+.container-text-button {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+.card-description {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 18px;
+    letter-spacing: -1.12px;
+    color: var(--subtitle-user);
+}
+
+/* ===== SECONDARY BUTTON "See more" — stessi stati del bottone START ===== */
+.secondary-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 17px;
+    width: 132px;
+    padding: 10px 13px;
+    border: 1px solid var(--secondary-btn-stroke);
+    border-radius: 0;
+    background: var(--secondary-btn-fill);
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.secondary-button:hover {
+    background: var(--secondary-btn-fill-hover);
+}
+
+.secondary-button:active {
+    background: var(--secondary-btn-fill-tapped);
+}
+
+.secondary-button__text {
+    font-family: var(--font-mono);
+    font-weight: 400;
+    font-size: 12px;
+    line-height: normal;
+    letter-spacing: -0.84px;
+    color: var(--secondary-btn-text);
+    white-space: nowrap;
+}
+
+.secondary-button__arrow {
+    width: 35px;
+    height: auto;
+    flex-shrink: 0;
+    /* la freccia dell'asset punta a sinistra: la specchio per farla puntare a destra (come Figma) */
+    transform: scaleX(-1);
+}
+
+/* ===== USER PAGE mobile / schermi stretti ===== */
+@media (max-width: 1440px) {
+    .container-user-page {
+        width: 100%;
+    }
+}
+
+@media (max-width: 980px) {
+    .cards-user-page {
+        flex-direction: column;
+    }
+
+    .card-user-page {
+        height: 560px;
+    }
+
+    .user-header {
+        gap: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .user-page {
+        padding: 24px 16px;
+    }
+
+    .user-header .primary-button {
+        width: auto;
+        flex: 1 1 0;
+    }
+
+    .user-logo {
+        width: 120px;
+        height: auto;
+    }
+
+    .user-welcome {
+        font-size: 17px;
+        line-height: 20px;
+    }
+
+    .card-title {
         font-size: 30px;
     }
 }

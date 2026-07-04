@@ -112,18 +112,22 @@ function syncDollzButton() {
 }
 nickInput.addEventListener("input", syncDollzButton);
 
-// ---------- Avvio del transito al click su START ----------
+// ---------- START: onboarding → enter_page (stessa pagina, nessun caricamento finto) ----------
 form.addEventListener("submit", (e) => {
     e.preventDefault();
     if (startBtn.disabled) return;
 
-    // Il testo digitato nel nickname è già il testo del primo bottone della enter_page
-    syncDollzButton();
+    // Persiste il nickname per le pagine successive (user_page ecc.)
+    const nick = nickInput.value.trim();
+    if (nick) {
+        localStorage.setItem("bratz_nickname", nick);
+        dollzBtn.textContent = nick;
+    }
 
-    // L'onboarding si nasconde e si apre la loading_page
+    // Passaggio diretto: non è un vero caricamento di pagina, quindi niente loading_page
     fadeOut(onboarding, () => {
-        fadeIn(loadingPage, "flex");
-        runLoading();
+        fadeIn(enterPage, "block");
+        initPopup();
     });
 });
 
@@ -144,34 +148,16 @@ function stopDots() {
     dotsTimer = null;
 }
 
-// ---------- Fase di caricamento simulato (0% → 100%) ----------
-function runLoading() {
-    let progress = 0;
+// ---------- enter_page → user_page: navigazione REALE con loading di transito ----------
+// La loading_page appare solo qui, durante il vero passaggio tra due pagine.
+dollzBtn.addEventListener("click", () => {
     loadingFill.style.width = "0%";
     loadingBar.setAttribute("aria-valuenow", "0");
+    fadeIn(loadingPage, "flex");
     startDots();
-
-    const timer = setInterval(() => {
-        progress = Math.min(100, progress + (4 + Math.random() * 8));
-        loadingFill.style.width = progress + "%";
-        loadingBar.setAttribute("aria-valuenow", String(Math.round(progress)));
-
-        if (progress >= 100) {
-            clearInterval(timer);
-            stopDots();
-            // Raggiunto il 100%: transito verso la enter_page
-            setTimeout(goToEnter, FADE_MS);
-        }
-    }, 120);
-}
-
-// ---------- Arrivo alla enter_page ----------
-function goToEnter() {
-    fadeOut(loadingPage, () => {
-        fadeIn(enterPage, "block");
-        initPopup();
-    });
-}
+    // Navigazione reale: user_page.html mostra il caricamento effettivo delle sue risorse
+    setTimeout(() => { window.location.href = "user_page.html"; }, 60);
+});
 
 // ---------- Pop-up fisso (nessuna animazione): solo chiusura ----------
 function initPopup() {
