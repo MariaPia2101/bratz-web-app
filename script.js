@@ -79,6 +79,7 @@ const onboarding   = document.querySelector(".onboarding");
 const loadingPage  = document.getElementById("loading-page");
 const loadingBar   = document.getElementById("loading-bar");
 const loadingFill  = document.getElementById("loading-bar-fill");
+const loadingText  = document.getElementById("loading-text");
 const enterPage    = document.getElementById("enter-page");
 const dollzBtn     = document.getElementById("enter-dollz-btn");
 const popup        = document.getElementById("enter-popup");
@@ -104,14 +105,20 @@ function fadeIn(el, display) {
     el.style.opacity = "1";
 }
 
+// ---------- Il nickname digitato diventa il testo del primo bottone ----------
+function syncDollzButton() {
+    const nickname = nickInput.value.trim();
+    if (nickname) dollzBtn.textContent = nickname;
+}
+nickInput.addEventListener("input", syncDollzButton);
+
 // ---------- Avvio del transito al click su START ----------
 form.addEventListener("submit", (e) => {
     e.preventDefault();
     if (startBtn.disabled) return;
 
-    // Personalizza il primo bottone della enter_page col nickname scelto
-    const nickname = nickInput.value.trim();
-    if (nickname) dollzBtn.textContent = `${nickname.toLowerCase()}.dollz`;
+    // Il testo digitato nel nickname è già il testo del primo bottone della enter_page
+    syncDollzButton();
 
     // L'onboarding si nasconde e si apre la loading_page
     fadeOut(onboarding, () => {
@@ -120,11 +127,29 @@ form.addEventListener("submit", (e) => {
     });
 });
 
+// ---------- Animazione della scritta "Loading" (1 → 2 → 3 punti, in loop) ----------
+let dotsTimer = null;
+
+function startDots() {
+    let dots = 1;
+    loadingText.textContent = "Loading" + ".".repeat(dots);
+    dotsTimer = setInterval(() => {
+        dots = dots >= 3 ? 1 : dots + 1;
+        loadingText.textContent = "Loading" + ".".repeat(dots);
+    }, 400);
+}
+
+function stopDots() {
+    clearInterval(dotsTimer);
+    dotsTimer = null;
+}
+
 // ---------- Fase di caricamento simulato (0% → 100%) ----------
 function runLoading() {
     let progress = 0;
     loadingFill.style.width = "0%";
     loadingBar.setAttribute("aria-valuenow", "0");
+    startDots();
 
     const timer = setInterval(() => {
         progress = Math.min(100, progress + (4 + Math.random() * 8));
@@ -133,6 +158,7 @@ function runLoading() {
 
         if (progress >= 100) {
             clearInterval(timer);
+            stopDots();
             // Raggiunto il 100%: transito verso la enter_page
             setTimeout(goToEnter, FADE_MS);
         }
@@ -147,52 +173,30 @@ function goToEnter() {
     });
 }
 
-// ---------- Pop-up ancorato al cursore ----------
+// ---------- Pop-up che segue il mouse SOLO quando il cursore è dentro di esso ----------
 function initPopupFollow() {
-    const OFFSET = 18;      // distanza dal puntatore
-    const EASE = 0.18;      // morbidezza dell'inseguimento
-    const cur = { x: 0, y: 0 };
-    const tgt = { x: 0, y: 0 };
-    let seeded = false;
-    let following = false;
-    let rafId = null;
+    let offX = 0;   // punto di "presa": distanza cursore-bordo interno del pop-up
+    let offY = 0;
 
     const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
 
-    function tick() {
-        cur.x += (tgt.x - cur.x) * EASE;
-        cur.y += (tgt.y - cur.y) * EASE;
-        popup.style.left = cur.x + "px";
-        popup.style.top = cur.y + "px";
-
-        const done = Math.abs(tgt.x - cur.x) < 0.5 && Math.abs(tgt.y - cur.y) < 0.5;
-        if (following || !done) {
-            rafId = requestAnimationFrame(tick);
-        } else {
-            rafId = null;
-        }
-    }
-
-    enterPage.addEventListener("pointermove", (e) => {
-        // Al primo movimento: parte dalla posizione di riposo (da Figma)
-        if (!seeded) {
-            const r = popup.getBoundingClientRect();
-            cur.x = r.left;
-            cur.y = r.top;
-            seeded = true;
-        }
-        const maxX = window.innerWidth - popup.offsetWidth;
-        const maxY = window.innerHeight - popup.offsetHeight;
-        tgt.x = clamp(e.clientX + OFFSET, 0, maxX);
-        tgt.y = clamp(e.clientY + OFFSET, 0, maxY);
-
-        following = true;
-        if (rafId === null) rafId = requestAnimationFrame(tick);
+    // All'ingresso nel pop-up si memorizza dove, al suo interno, si trova il
+    // cursore: così durante il movimento quel punto resta ancorato al puntatore.
+    popup.addEventListener("pointerenter", (e) => {
+        const r = popup.getBoundingClientRect();
+        offX = e.clientX - r.left;
+        offY = e.clientY - r.top;
     });
 
-    // Fine movimento: il pop-up si blocca quando il cursore esce dall'area
-    enterPage.addEventListener("pointerleave", () => {
-        following = false;
+    // pointermove sul pop-up stesso: si attiva solo mentre il cursore è nello
+    // spazio fisico occupato dal pop-up. Il pop-up si sposta mantenendo il
+    // cursore sul punto di presa, quindi l'inseguimento prosegue finché il
+    // puntatore non esce dal pop-up.
+    popup.addEventListener("pointermove", (e) => {
+        const left = clamp(e.clientX - offX, 0, window.innerWidth - popup.offsetWidth);
+        const top = clamp(e.clientY - offY, 0, window.innerHeight - popup.offsetHeight);
+        popup.style.left = left + "px";
+        popup.style.top = top + "px";
     });
 
     // Chiusura del pop-up
@@ -200,6 +204,5 @@ function initPopupFollow() {
         popup.style.transition = "opacity 0.3s ease";
         popup.style.opacity = "0";
         setTimeout(() => { popup.style.display = "none"; }, 300);
-        following = false;
     });
 }
