@@ -119,12 +119,12 @@ body {
 
 /* ===== Sfondo ===== */
 .onboarding {
+    position: relative;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 64px;
     padding: 48px 16px;
     /* background-color: #2b1cc4; */
     background-image: url("assets/images/cover_image.png");
@@ -133,10 +133,17 @@ body {
     background-repeat: no-repeat;
 }
 
+/* Logo con stessa size e posizione della enter_page (e delle pagine successive) */
 .logo {
+    position: absolute;
+    top: 48px;
+    left: 50%;
+    transform: translateX(-50%);
     width: 166px;
-    height: auto;
+    height: 85px;
+    object-fit: contain;
     user-select: none;
+    pointer-events: none;
 }
 
 /* ===== Card ===== */
@@ -417,34 +424,13 @@ body {
     gap: 20px;
 }
 
-.enter-button {
-    width: 100%;
-    padding: 13px 13px 12px;
-    font-family: var(--font-title);
-    font-weight: 700;
-    font-size: 14px;
-    line-height: normal;
-    text-transform: uppercase;
-    text-align: center;
-    border: 1px solid var(--enter-btn-stroke);
-    border-radius: 0;
-    cursor: pointer;
-}
+/* I bottoni della enter_page usano lo stesso componente/stati del bottone
+   START (.primary-button): disabled, active, hover, tapped. */
 
-.enter-button--active {
-    background: var(--enter-btn-fill-active);
-    color: var(--enter-btn-text-active);
-}
-
-.enter-button--community {
-    background: var(--enter-btn-fill-community);
-    color: var(--enter-btn-text-community);
-}
-
-/* ===== POP-UP (segue il cursore) ===== */
+/* ===== POP-UP (posizione fissa da Figma) ===== */
 .enter-popup {
     position: absolute;
-    /* posizione di riposo da Figma (left 50%+48px, top 33.33%+24.67px) */
+    /* posizione da Figma (left 50%+48px, top 33.33%+24.67px) */
     left: calc(50% + 48px);
     top: calc(33.33% + 24.67px);
     width: 239px;
@@ -456,7 +442,6 @@ body {
     gap: 8px;
     background: var(--popup-fill);
     border: 1px solid var(--popup-stroke);
-    will-change: left, top;
 }
 
 .enter-popup-close {
@@ -488,12 +473,9 @@ body {
 
 /* ===== Mobile ===== */
 @media (max-width: 480px) {
-    .onboarding {
-        gap: 40px;
-    }
-
     .logo {
         width: 132px;
+        height: auto;
     }
 
     .card {

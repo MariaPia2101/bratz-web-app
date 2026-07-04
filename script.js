@@ -169,37 +169,12 @@ function runLoading() {
 function goToEnter() {
     fadeOut(loadingPage, () => {
         fadeIn(enterPage, "block");
-        initPopupFollow();
+        initPopup();
     });
 }
 
-// ---------- Pop-up che segue il mouse SOLO quando il cursore è dentro di esso ----------
-function initPopupFollow() {
-    let offX = 0;   // punto di "presa": distanza cursore-bordo interno del pop-up
-    let offY = 0;
-
-    const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
-
-    // All'ingresso nel pop-up si memorizza dove, al suo interno, si trova il
-    // cursore: così durante il movimento quel punto resta ancorato al puntatore.
-    popup.addEventListener("pointerenter", (e) => {
-        const r = popup.getBoundingClientRect();
-        offX = e.clientX - r.left;
-        offY = e.clientY - r.top;
-    });
-
-    // pointermove sul pop-up stesso: si attiva solo mentre il cursore è nello
-    // spazio fisico occupato dal pop-up. Il pop-up si sposta mantenendo il
-    // cursore sul punto di presa, quindi l'inseguimento prosegue finché il
-    // puntatore non esce dal pop-up.
-    popup.addEventListener("pointermove", (e) => {
-        const left = clamp(e.clientX - offX, 0, window.innerWidth - popup.offsetWidth);
-        const top = clamp(e.clientY - offY, 0, window.innerHeight - popup.offsetHeight);
-        popup.style.left = left + "px";
-        popup.style.top = top + "px";
-    });
-
-    // Chiusura del pop-up
+// ---------- Pop-up fisso (nessuna animazione): solo chiusura ----------
+function initPopup() {
     popupClose.addEventListener("click", () => {
         popup.style.transition = "opacity 0.3s ease";
         popup.style.opacity = "0";
