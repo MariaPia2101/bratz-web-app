@@ -1,0 +1,77 @@
+name: Deploy to GitHub Pages
+
+# Sostituisce il deploy "legacy" di Pages (deploy-da-branch, senza retry) con
+# un deploy via GitHub Actions che RITENTA automaticamente il passo di deploy
+# quando GitHub Pages restituisce l'errore transitorio
+# "Deployment failed, try again later." (fase syncing_files).
+
+on:
+  push:
+    branches:
+      - main
+      - claude/loading-enter-page-spa-qm18wc
+  workflow_dispatch:
+
+# Permessi minimi necessari per pubblicare su Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Un solo deploy alla volta; non annullare quello in corso
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # enablement: true imposta la sorgente di Pages su "GitHub Actions"
+      # (necessario perché il deploy avvenga tramite questo workflow)
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.d1.outputs.page_url || steps.d2.outputs.page_url || steps.d3.outputs.page_url }}
+    steps:
+      # Tentativo 1
+      - name: Deploy (attempt 1)
+        id: d1
+        continue-on-error: true
+        uses: actions/deploy-pages@v4
+
+      - name: Wait before retry 2
+        if: steps.d1.outcome == 'failure'
+        run: sleep 20
+
+      # Tentativo 2 (solo se il 1° è fallito)
+      - name: Deploy (attempt 2)
+        id: d2
+        if: steps.d1.outcome == 'failure'
+        continue-on-error: true
+        uses: actions/deploy-pages@v4
+
+      - name: Wait before retry 3
+        if: steps.d1.outcome == 'failure' && steps.d2.outcome == 'failure'
+        run: sleep 30
+
+      # Tentativo 3, finale (fallisce il job solo se anche questo non riesce)
+      - name: Deploy (attempt 3, final)
+        id: d3
+        if: steps.d1.outcome == 'failure' && steps.d2.outcome == 'failure'
+        uses: actions/deploy-pages@v4
