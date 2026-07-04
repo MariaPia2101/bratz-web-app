@@ -798,20 +798,35 @@ body {
     gap: 20px;
 }
 
-/* Bottone back = asset arrowbutton.svg (box + freccia già inclusi) */
+/* Bottone back — riproduce arrowbutton.svg (box 53x34 + freccia) ma con
+   box CSS ricolorabile, per avere gli stati hover/tapped come lo START */
 .back-button {
+    box-sizing: border-box;
+    width: 53px;
+    height: 34px;
     padding: 0;
-    border: none;
-    background: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--icon-btn-stroke);
+    background: var(--icon-btn-fill);
     cursor: pointer;
-    line-height: 0;
+    transition: background-color 0.15s ease;
 }
 
-.back-button img {
+.back-button:hover {
+    background: var(--btn-fill-hover);
+}
+
+.back-button:active {
+    background: var(--btn-fill-tapped);
+}
+
+.back-button__arrow {
     display: block;
-    width: 53px;
-    height: auto;
-    user-select: none;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
 }
 
 /* icon_button (plus) — stessi stati del bottone START */
@@ -886,6 +901,10 @@ body {
     align-items: center;
     justify-content: center;
     overflow: hidden;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
 }
 
 .doll-photo img {
@@ -1012,5 +1031,261 @@ body {
     .doll-photo img {
         width: 100%;
         height: auto;
+    }
+}
+
+/* ===== YASMIN / PERSONALITY PAGE ===== */
+.personality-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px;
+    overflow: auto;
+    background: var(--bg-color);
+}
+
+.personality-page__content {
+    opacity: 0;
+    transition: opacity 0.45s ease;
+}
+
+.personality-page__content.is-ready {
+    opacity: 1;
+}
+
+/* container_doll/personality_page = upper_container_doll_page + bottom_container */
+.container-personality {
+    width: 1345px;
+    max-width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.upper-personality {
+    display: flex;
+    flex-direction: column;
+    gap: 72px;
+    width: 100%;
+}
+
+/* container_text_and_button = container_title + subtitle */
+.container-text-and-button {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+}
+
+.personality-subtitle {
+    margin: 0;
+    font-family: var(--font-title);
+    font-weight: 500;
+    font-size: 24px;
+    line-height: 22px;
+    color: var(--subtitle-user);
+}
+
+/* bottom_container = container_side_30% + container_side_70% */
+.bottom-personality {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    width: 100%;
+}
+
+/* container_side_30% */
+.side-30 {
+    position: relative;
+    width: 435px;
+    flex-shrink: 0;
+}
+
+.slider-lateral {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 22px;
+    width: 207px;
+    margin-top: 32px;
+}
+
+.doll-photo-small {
+    width: 206px;
+    height: 408px;
+    overflow: hidden;
+}
+
+.doll-photo-small img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    user-select: none;
+}
+
+/* container_buttons (IDENTITY / GOALZ / TROPHIES / STORIES / MAGAZINES) */
+.container-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 207px;
+}
+
+/* pop_up hint (fisso) accanto alla doll */
+.personality-popup {
+    position: absolute;
+    left: 152px;
+    top: 195px;
+    box-sizing: border-box;
+    width: 239px;
+    padding: 16px;
+    background: var(--popup-fill);
+    border: 1px solid var(--popup-stroke);
+}
+
+.personality-popup__text {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 17px;
+    letter-spacing: -0.98px;
+    color: var(--popup-text);
+}
+
+/* container_side_70% */
+.side-70 {
+    width: 890px;
+    flex-shrink: 0;
+    margin-top: 73px;
+}
+
+.cards-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    width: 100%;
+}
+
+/* complete_card_button = upper_button + below_button */
+.persona-card {
+    display: flex;
+    flex-direction: column;
+}
+
+.persona-card__upper {
+    box-sizing: border-box;
+    height: 229px;
+    padding: 16px;
+    background: var(--card-fill);
+    border: 1px solid var(--card-stroke);
+}
+
+.persona-card__desc {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 17px;
+    letter-spacing: -0.98px;
+    color: var(--card-stroke);
+}
+
+.persona-card__below {
+    box-sizing: border-box;
+    padding: 16px;
+    background: var(--card-fill);
+    border: 1px solid var(--card-stroke);
+    border-top: none;
+}
+
+.container-below-button {
+    display: flex;
+    align-items: flex-end;
+    gap: 64px;
+}
+
+.container-text-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    width: 132px;
+}
+
+.persona-card__title {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 14px;
+    line-height: 17px;
+    letter-spacing: -0.98px;
+    color: var(--card-stroke);
+}
+
+.persona-card__subtitle {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 17px;
+    letter-spacing: -0.98px;
+    color: var(--card-stroke);
+}
+
+/* primary_button "SELECT" nella card */
+.card-select {
+    width: 207px;
+    flex-shrink: 0;
+}
+
+/* Stato "SELECTED" (tapped persistente) */
+.primary-button.is-selected,
+.primary-button.is-selected:hover,
+.primary-button.is-selected:active {
+    background: var(--btn-fill-tapped);
+    color: var(--btn-text-active);
+    cursor: pointer;
+}
+
+/* ===== PERSONALITY PAGE — schermi stretti ===== */
+@media (max-width: 1440px) {
+    .personality-page {
+        align-items: flex-start;
+    }
+
+    .container-personality {
+        width: 1345px;
+    }
+}
+
+@media (max-width: 980px) {
+    .bottom-personality {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .side-30,
+    .side-70 {
+        width: 100%;
+        max-width: 435px;
+        margin-top: 0;
+    }
+
+    .side-70 {
+        max-width: 890px;
+    }
+
+    .slider-lateral {
+        margin: 0 auto;
+    }
+
+    .personality-popup {
+        display: none;
+    }
+
+    .cards-grid {
+        grid-template-columns: 1fr;
     }
 }

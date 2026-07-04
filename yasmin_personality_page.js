@@ -1,6 +1,6 @@
-// ===== MY DOLLZ PAGE: nickname + loading reale + navigazione =====
+// ===== YASMIN / PERSONALITY PAGE: nickname + loading reale + interazioni =====
 
-// ---------- Nickname (persistito nell'onboarding) nel bottone header ----------
+// ---------- Nickname nell'header ----------
 const nickname = (localStorage.getItem("bratz_nickname") || "marpi.dollz").trim();
 const dollzBtn = document.getElementById("user-dollz-btn");
 if (dollzBtn) dollzBtn.textContent = nickname;
@@ -23,11 +23,11 @@ function stopDots() {
     dotsTimer = null;
 }
 
-// ---------- Loading REALE: la barra avanza col caricamento effettivo delle immagini ----------
+// ---------- Loading REALE: barra legata al caricamento effettivo delle immagini ----------
 const loadingPage = document.getElementById("loading-page");
 const loadingBar = document.getElementById("loading-bar");
 const loadingFill = document.getElementById("loading-bar-fill");
-const content = document.getElementById("mydollz-content");
+const content = document.getElementById("personality-content");
 
 const images = Array.from(document.images);
 const total = images.length || 1;
@@ -68,36 +68,48 @@ images.forEach((img) => {
 });
 window.addEventListener("load", finish);
 
-// ---------- Back: torna a user_page con loading di transito ----------
-const backBtn = document.getElementById("mydollz-back-btn");
+// ---------- Back: torna a mydollz_page con loading di transito ----------
+const backBtn = document.getElementById("personality-back-btn");
 if (backBtn) {
     backBtn.addEventListener("click", () => {
         setProgress(0);
         loadingPage.style.display = "flex";
         loadingPage.style.opacity = "1";
         startDots();
-        setTimeout(() => { window.location.href = "user_page.html"; }, 60);
+        setTimeout(() => { window.location.href = "mydollz_page.html"; }, 60);
     });
 }
 
-// ---------- Click sulla doll → yasmin/personality_page con loading di transito ----------
-const dollBtn = document.getElementById("mydollz-doll");
-if (dollBtn) {
-    dollBtn.addEventListener("click", () => {
-        setProgress(0);
-        loadingPage.style.display = "flex";
-        loadingPage.style.opacity = "1";
-        startDots();
-        setTimeout(() => { window.location.href = "yasmin_personality_page.html"; }, 60);
-    });
-}
+// ---------- Interazioni personalità (task 3/4/5) ----------
+const selectButtons = Array.from(document.querySelectorAll(".card-select"));
+const lockedButtons = Array.from(document.querySelectorAll(".side-locked"));
+const popupText = document.getElementById("personality-popup-text");
 
-// ---------- Chiusura dei pop-up (fissi) ----------
-document.querySelectorAll(".doll-popup__close").forEach((btn) => {
+let unlocked = false;
+
+selectButtons.forEach((btn) => {
     btn.addEventListener("click", () => {
-        const popup = btn.closest(".doll-popup");
-        popup.style.transition = "opacity 0.3s ease";
-        popup.style.opacity = "0";
-        setTimeout(() => { popup.style.display = "none"; }, 300);
+        // Task 5: il bottone cliccato → tapped + "SELECTED"; gli altri tornano "SELECT"
+        selectButtons.forEach((b) => {
+            b.classList.remove("is-selected");
+            b.textContent = "select";
+        });
+        btn.classList.add("is-selected");
+        btn.textContent = "selected";
+
+        // Task 4: alla prima scelta, i bottoni laterali disabilitati diventano attivi
+        if (!unlocked) {
+            unlocked = true;
+            lockedButtons.forEach((b) => {
+                b.disabled = false;
+                b.classList.remove("side-locked");
+                b.classList.add("active");
+            });
+            // il pop_up cambia testo, come nella selected_page di Figma
+            if (popupText) {
+                popupText.textContent =
+                    "From now on, this will be the unique vibe inspiring all your upcoming stories.";
+            }
+        }
     });
 });
