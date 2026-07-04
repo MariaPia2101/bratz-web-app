@@ -136,7 +136,7 @@ body {
 /* Logo con stessa size e posizione della enter_page (e delle pagine successive) */
 .logo {
     position: absolute;
-    top: 48px;
+    top: 20px;
     left: 50%;
     transform: translateX(-50%);
     width: 166px;
