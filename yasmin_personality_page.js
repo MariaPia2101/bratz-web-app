@@ -109,8 +109,12 @@ function updatePopup() {
         popup.classList.remove("is-hidden");
         popupText.textContent = "Complete these challenges to level up your vibe and unlock the runway.";
         popupPlay.hidden = false;
+    } else if (activeTab === "trophies") {
+        popup.classList.remove("is-hidden");
+        popupText.textContent = "Your fashion hall of fame. Flex all the exclusive badges you've earned.";
+        popupPlay.hidden = false;
     } else {
-        // trophies / stories / magazines: contenuto non ancora disponibile
+        // stories / magazines: contenuto non ancora disponibile
         popup.classList.add("is-hidden");
     }
 }

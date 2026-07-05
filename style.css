@@ -1299,6 +1299,27 @@ body {
     .cards-grid {
         grid-template-columns: 1fr;
     }
+
+    /* trofei: niente altezza fissa/scroll su mobile, card impilate */
+    .tab-panel--scroll {
+        height: auto;
+        max-height: none;
+    }
+
+    .trophy-card {
+        flex-direction: column;
+    }
+
+    .trophy-card__photo {
+        width: 100%;
+    }
+
+    .trophy-card__side {
+        height: auto;
+        border-left: 1px solid var(--card-stroke);
+        border-top: none;
+        gap: 24px;
+    }
 }
 
 /* box_goalz: riquadro istruzioni del tab GOALZ (in alto nella colonna 70%) */
@@ -1323,6 +1344,101 @@ body {
     font-size: 14px;
     line-height: 17px;
     letter-spacing: -0.98px;
+    color: var(--card-stroke);
+}
+
+/* ===== TAB TROPHIES: container 70% SCROLLABILE, il resto della pagina resta fisso ===== */
+.tab-panel--scroll {
+    height: 717px;
+    max-height: calc(100vh - 340px);
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.trophies-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+}
+
+.trophy-card {
+    display: flex;
+    width: 100%;
+}
+
+.trophy-card__photo {
+    position: relative;
+    width: 433px;
+    height: 296px;
+    flex-shrink: 0;
+    box-sizing: border-box;
+    border: 1px solid var(--card-stroke);
+}
+
+.trophy-card__photo img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* overlay "locked" (trofeo non ancora sbloccato) */
+.trophy-card__overlay {
+    position: absolute;
+    inset: 0;
+    box-sizing: border-box;
+    background: rgba(255, 255, 255, 0.5);
+    border: 1px solid var(--card-stroke);
+}
+
+.trophy-card__side {
+    flex: 1 1 0;
+    min-width: 0;
+    height: 296px;
+    box-sizing: border-box;
+    padding: 16px 20px;
+    background: var(--card-fill);
+    border: 1px solid var(--card-stroke);
+    border-left: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.trophy-card__titlebar {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.trophy-card__title {
+    margin: 0;
+    font-family: var(--font-title);
+    font-weight: 500;
+    font-size: 24px;
+    line-height: 22px;
+    color: var(--card-stroke);
+}
+
+.trophy-bar {
+    width: 416px;
+    max-width: 100%;
+    height: 8px;
+    box-sizing: border-box;
+    background: var(--bar-empty);
+    border: 1px solid var(--bar-stroke);
+}
+
+.trophy-card__desc {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 18px;
+    letter-spacing: -1.12px;
     color: var(--card-stroke);
 }
 
