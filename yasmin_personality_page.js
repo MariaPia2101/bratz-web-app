@@ -104,7 +104,7 @@ function updatePopup() {
         popupText.textContent = selected
             ? "From now on, this will be the unique vibe inspiring all your upcoming stories."
             : "It's time to bring me to life. Choose the right personality now, babe.";
-        popupPlay.hidden = true;
+        popupPlay.hidden = !selected;   // visibile solo dopo aver scelto la personalità
     } else if (activeTab === "goalz") {
         popup.classList.remove("is-hidden");
         popupText.textContent = "Complete these challenges to level up your vibe and unlock the runway.";
@@ -120,7 +120,7 @@ function updatePopup() {
     } else if (activeTab === "magazines") {
         popup.classList.remove("is-hidden");
         popupText.textContent = "Stack up your stories to design and print ultimate magazines.";
-        popupPlay.hidden = true;   // magazines/empty_page: popup senza bottone
+        popupPlay.hidden = false;
     } else {
         popup.classList.add("is-hidden");
     }
