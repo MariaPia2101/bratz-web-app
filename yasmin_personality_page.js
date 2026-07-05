@@ -171,3 +171,7 @@ selectButtons.forEach((btn) => {
         updatePopup();
     });
 });
+
+// Stato iniziale del popup (tab identity): impostato via JS ora che il bottone
+// non ha più l'attributo HTML "hidden"
+updatePopup();
