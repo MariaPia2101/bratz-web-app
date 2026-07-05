@@ -1,12 +1,9 @@
-// ===== USER PAGE: iniezione nickname + loading legato al caricamento REALE =====
+// ===== MY FAVES / EMPTY PAGE: nickname + loading reale + navigazione =====
 
-// ---------- Nickname scelto nell'onboarding (persistito in localStorage) ----------
+// ---------- Nickname (persistito nell'onboarding) nel bottone header ----------
 const nickname = (localStorage.getItem("bratz_nickname") || "marpi.dollz").trim();
-
 const dollzBtn = document.getElementById("user-dollz-btn");
-const welcome = document.getElementById("user-welcome");
 if (dollzBtn) dollzBtn.textContent = nickname;
-if (welcome) welcome.innerHTML = `Welcome ${nickname},<br>your stories are waiting for you.`;
 
 // ---------- Animazione "Loading" (1 → 2 → 3 punti in loop) ----------
 const loadingText = document.getElementById("loading-text");
@@ -30,7 +27,7 @@ function stopDots() {
 const loadingPage = document.getElementById("loading-page");
 const loadingBar = document.getElementById("loading-bar");
 const loadingFill = document.getElementById("loading-bar-fill");
-const content = document.getElementById("user-content");
+const content = document.getElementById("faves-content");
 
 const images = Array.from(document.images);
 const total = images.length || 1;
@@ -56,13 +53,11 @@ function finish() {
     finished = true;
     setProgress(100);
     stopDots();
-    // dissolvenza dell'overlay e comparsa fluida del contenuto
     content.classList.add("is-ready");
     loadingPage.style.opacity = "0";
     setTimeout(() => { loadingPage.style.display = "none"; }, 450);
 }
 
-// Conta ogni immagine man mano che finisce di caricare (load o error)
 images.forEach((img) => {
     if (img.complete && img.naturalWidth > 0) {
         markLoaded();
@@ -71,11 +66,9 @@ images.forEach((img) => {
         img.addEventListener("error", markLoaded, { once: true });
     }
 });
-
-// Rete di sicurezza: quando l'intera pagina è caricata, completa comunque
 window.addEventListener("load", finish);
 
-// ---------- "See more" delle card → pagina dedicata con loading di transito reale ----------
+// ---------- Navigazione con loading di transito reale ----------
 function navigateWithLoading(url) {
     setProgress(0);
     loadingPage.style.display = "flex";
@@ -84,13 +77,12 @@ function navigateWithLoading(url) {
     setTimeout(() => { window.location.href = url; }, 60);
 }
 
-const seeMore = {
-    "see-more-mydollz": "mydollz_page.html",
-    "see-more-mytrophies": "mytrophies_empty_page.html",
-    "see-more-myfaves": "myfaves_empty_page.html",
-};
+// Back + Logo → user_page
+const backBtn = document.getElementById("faves-back-btn");
+if (backBtn) backBtn.addEventListener("click", () => navigateWithLoading("user_page.html"));
 
-Object.entries(seeMore).forEach(([id, url]) => {
-    const btn = document.getElementById(id);
-    if (btn) btn.addEventListener("click", () => navigateWithLoading(url));
-});
+const logo = document.querySelector(".user-logo");
+if (logo) {
+    logo.classList.add("is-link");
+    logo.addEventListener("click", () => navigateWithLoading("user_page.html"));
+}

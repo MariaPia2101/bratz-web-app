@@ -1522,3 +1522,182 @@ body {
         padding: 16px 24px;
     }
 }
+
+/* ===== Sotto-pagine user (mytrophies / myfaves empty_page) ===== */
+/* input_description_ : descrizione pagina (20px, description/user_page) */
+.page-description {
+    margin: 0;
+    max-width: 695px;
+    font-family: var(--font-mono);
+    font-weight: 400;
+    font-size: 20px;
+    line-height: 22px;
+    letter-spacing: -1.4px;
+    color: var(--card-stroke);
+}
+
+/* bottom_container: descrizione + contenuto (gap 20, pt 49 da Figma) */
+.bottom-container-subpage {
+    width: 1344px;
+    max-width: 100%;
+    padding-top: 49px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* container_empty a tutta pagina (myfaves/empty_page): stessa card grigia
+   degli stati empty, ma con altezza dedicata */
+.empty-state--page {
+    height: 612px;
+    min-height: 0;
+}
+
+/* container_card_trophies_user: griglia 2x2 di reward */
+.rewards-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    width: 100%;
+}
+
+/* card_trophies_user: foto (296) + lato bianco con testo e campo codice */
+.reward-card {
+    display: flex;
+    align-items: stretch;
+    width: 100%;
+}
+
+.reward-card__photo {
+    position: relative;
+    width: 296px;
+    height: 296px;
+    flex-shrink: 0;
+    box-sizing: border-box;
+    border: 1px solid var(--card-stroke);
+}
+
+.reward-card__photo img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    user-select: none;
+}
+
+/* overlay: bloccato = velo bianco 50%, sbloccato (default) = trasparente */
+.reward-card__overlay {
+    position: absolute;
+    inset: 0;
+}
+
+.reward-card--locked .reward-card__overlay {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+/* side_card_trophies_user: bianco, bordo (no left: lo dà la foto) */
+.reward-card__side {
+    flex: 1;
+    min-width: 0;
+    box-sizing: border-box;
+    height: 296px;
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background: var(--card-fill);
+    border: 1px solid var(--card-stroke);
+    border-left: none;
+}
+
+.reward-card__title {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 18px;
+    letter-spacing: -1.12px;
+    color: var(--empty-text);
+}
+
+.reward-card__desc {
+    margin: 0;
+    max-width: 326px;
+    font-family: var(--font-mono);
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 18px;
+    letter-spacing: -1.12px;
+    color: var(--empty-text);
+}
+
+/* secondary_input_field: campo "Code" (disabled) + bottone COPY (disabled) */
+.reward-card__field {
+    display: flex;
+    align-items: stretch;
+    width: 326px;
+    max-width: 100%;
+}
+
+.reward-input {
+    box-sizing: border-box;
+    width: 180px;
+    padding: 13px;
+    display: flex;
+    align-items: center;
+    font-family: var(--font-mono);
+    font-weight: 400;
+    font-size: 12px;
+    letter-spacing: -0.84px;
+    color: var(--input-text-disabled);
+    background: var(--input-fill);
+    border: 1px solid var(--input-stroke);
+    border-right: none;
+}
+
+.reward-copy {
+    width: 146px;
+    flex-shrink: 0;
+}
+
+/* ===== Responsive sotto-pagine ===== */
+@media (max-width: 980px) {
+    .bottom-container-subpage {
+        width: 100%;
+    }
+
+    .rewards-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .empty-state--page {
+        height: auto;
+        min-height: 400px;
+    }
+}
+
+@media (max-width: 620px) {
+    .reward-card {
+        flex-direction: column;
+    }
+
+    .reward-card__photo {
+        width: 100%;
+    }
+
+    .reward-card__side {
+        height: auto;
+        gap: 24px;
+        border: 1px solid var(--card-stroke);
+        border-top: none;
+    }
+
+    .reward-card__field {
+        width: 100%;
+    }
+
+    .reward-input {
+        flex: 1;
+    }
+}
