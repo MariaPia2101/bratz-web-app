@@ -1087,11 +1087,12 @@ body {
 }
 
 /* bottom_container = container_side_30% + container_side_70%.
-   Regola: il container_side_70% è allineato IN ALTO al container_side_30%. */
+   Le due colonne hanno la STESSA altezza (stretch): il container_side_70%
+   eguaglia l'altezza del container_side_30% ed è allineato in alto. */
 .bottom-personality {
     display: flex;
     gap: 20px;
-    align-items: flex-start;
+    align-items: stretch;
     width: 100%;
 }
 
@@ -1151,9 +1152,10 @@ body {
     width: 100%;
 }
 
-/* pannelli del container_side_70%: solo l'attivo è visibile */
+/* pannelli del container_side_70%: riempiono il 70% (solo l'attivo è visibile) */
 .tab-panel {
-    width: 100%;
+    position: absolute;
+    inset: 0;
 }
 
 .personality-popup__text {
@@ -1166,10 +1168,13 @@ body {
     color: var(--popup-text);
 }
 
-/* container_side_70% */
+/* container_side_70%: stessa altezza della colonna doll (via stretch);
+   contiene i pannelli tab in absolute così l'altezza non dipende dal contenuto */
 .side-70 {
     width: 890px;
     flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
 }
 
 .cards-grid {
@@ -1286,6 +1291,8 @@ body {
 
     .side-70 {
         max-width: 890px;
+        position: static;
+        overflow: visible;
     }
 
     .slider-lateral {
@@ -1300,10 +1307,13 @@ body {
         grid-template-columns: 1fr;
     }
 
-    /* trofei: niente altezza fissa/scroll su mobile, card impilate */
+    /* su mobile i pannelli tornano statici (layout in colonna, niente scroll interno) */
+    .tab-panel {
+        position: static;
+    }
+
     .tab-panel--scroll {
-        height: auto;
-        max-height: none;
+        overflow: visible;
     }
 
     .trophy-card {
@@ -1347,10 +1357,8 @@ body {
     color: var(--card-stroke);
 }
 
-/* ===== TAB TROPHIES: container 70% SCROLLABILE, il resto della pagina resta fisso ===== */
+/* ===== TAB TROPHIES: container 70% SCROLLABILE (altezza = colonna doll), resto fisso ===== */
 .tab-panel--scroll {
-    height: 717px;
-    max-height: calc(100vh - 340px);
     overflow-y: auto;
     overflow-x: hidden;
 }
@@ -1384,13 +1392,11 @@ body {
     object-fit: cover;
 }
 
-/* overlay "locked" (trofeo non ancora sbloccato) */
+/* overlay "locked" (trofeo non ancora sbloccato) — senza bordo (Figma aggiornato) */
 .trophy-card__overlay {
     position: absolute;
     inset: 0;
-    box-sizing: border-box;
     background: rgba(255, 255, 255, 0.5);
-    border: 1px solid var(--card-stroke);
 }
 
 .trophy-card__side {
@@ -1420,7 +1426,8 @@ body {
     font-weight: 500;
     font-size: 24px;
     line-height: 22px;
-    color: var(--card-stroke);
+    /* title/card_information_disabled: trofeo locked */
+    color: #bebebe;
 }
 
 .trophy-bar {
@@ -1439,7 +1446,8 @@ body {
     font-size: 16px;
     line-height: 18px;
     letter-spacing: -1.12px;
-    color: var(--card-stroke);
+    /* description/card_information_disabled: trofeo locked */
+    color: #bebebe;
 }
 
 /* Pop-up nascosto per i tab senza contenuto dedicato */
