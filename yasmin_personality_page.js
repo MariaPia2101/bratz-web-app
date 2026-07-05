@@ -120,7 +120,7 @@ function updatePopup() {
     } else if (activeTab === "magazines") {
         popup.classList.remove("is-hidden");
         popupText.textContent = "Stack up your stories to design and print ultimate magazines.";
-        popupPlay.hidden = false;
+        popupPlay.hidden = true;   // magazines/empty_page: popup senza bottone
     } else {
         popup.classList.add("is-hidden");
     }
