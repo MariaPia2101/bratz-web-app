@@ -92,6 +92,19 @@ if (dollBtn) {
     });
 }
 
+// ---------- Logo → user_page (in tutte le pagine successive a user_page) ----------
+const logo = document.querySelector(".user-logo");
+if (logo) {
+    logo.classList.add("is-link");
+    logo.addEventListener("click", () => {
+        setProgress(0);
+        loadingPage.style.display = "flex";
+        loadingPage.style.opacity = "1";
+        startDots();
+        setTimeout(() => { window.location.href = "user_page.html"; }, 60);
+    });
+}
+
 // ---------- Chiusura dei pop-up (fissi) ----------
 document.querySelectorAll(".doll-popup__close").forEach((btn) => {
     btn.addEventListener("click", () => {

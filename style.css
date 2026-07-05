@@ -1289,3 +1289,94 @@ body {
         grid-template-columns: 1fr;
     }
 }
+
+/* ===== YASMIN / GOALZ / ENTER PAGE ===== */
+.bottom-goalz {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    width: 100%;
+}
+
+.side-70-goalz {
+    width: 890px;
+    flex-shrink: 0;
+    margin-top: 32px;
+}
+
+/* box_goalz: riquadro istruzioni in alto nella colonna destra */
+.box-goalz {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 85px;
+    padding: 20px 97px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--card-fill);
+    border: 1px solid var(--card-stroke);
+}
+
+.box-goalz__text {
+    margin: 0;
+    max-width: 695px;
+    text-align: center;
+    font-family: var(--font-mono);
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 17px;
+    letter-spacing: -0.98px;
+    color: var(--card-stroke);
+}
+
+/* pop_up goalz: testo + bottone PLAY GAME */
+.goalz-popup {
+    position: absolute;
+    left: 152px;
+    top: 140px;
+    box-sizing: border-box;
+    width: 239px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    background: var(--popup-fill);
+    border: 1px solid var(--popup-stroke);
+}
+
+.goalz-popup__text {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 17px;
+    letter-spacing: -0.98px;
+    color: var(--popup-text);
+}
+
+.goalz-popup .primary-button {
+    width: 100%;
+}
+
+/* Logo cliccabile (pagine successive a user_page) */
+.user-logo.is-link {
+    cursor: pointer;
+}
+
+/* ===== GOALZ PAGE — schermi stretti ===== */
+@media (max-width: 980px) {
+    .bottom-goalz {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .side-70-goalz {
+        width: 100%;
+        max-width: 890px;
+        margin-top: 0;
+    }
+
+    .box-goalz {
+        padding: 16px 24px;
+    }
+}

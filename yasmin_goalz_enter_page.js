@@ -1,4 +1,4 @@
-// ===== YASMIN / PERSONALITY PAGE: nickname + loading reale + interazioni =====
+// ===== YASMIN / GOALZ / ENTER PAGE: nickname + loading reale + navigazione =====
 
 // ---------- Nickname nell'header ----------
 const nickname = (localStorage.getItem("bratz_nickname") || "marpi.dollz").trim();
@@ -27,7 +27,7 @@ function stopDots() {
 const loadingPage = document.getElementById("loading-page");
 const loadingBar = document.getElementById("loading-bar");
 const loadingFill = document.getElementById("loading-bar-fill");
-const content = document.getElementById("personality-content");
+const content = document.getElementById("goalz-content");
 
 const images = Array.from(document.images);
 const total = images.length || 1;
@@ -77,13 +77,9 @@ function navigateWithLoading(url) {
     setTimeout(() => { window.location.href = url; }, 60);
 }
 
-// Back → torna a mydollz_page
-const backBtn = document.getElementById("personality-back-btn");
-if (backBtn) backBtn.addEventListener("click", () => navigateWithLoading("mydollz_page.html"));
-
-// GOALZ (attivo solo dopo la scelta della personalità) → yasmin/goalz/enter_page
-const goalzBtn = document.getElementById("side-goalz");
-if (goalzBtn) goalzBtn.addEventListener("click", () => navigateWithLoading("yasmin_goalz_enter_page.html"));
+// Back → torna alla personality_page
+const backBtn = document.getElementById("goalz-back-btn");
+if (backBtn) backBtn.addEventListener("click", () => navigateWithLoading("yasmin_personality_page.html"));
 
 // Logo → user_page (in tutte le pagine successive a user_page)
 const logo = document.querySelector(".user-logo");
@@ -91,37 +87,3 @@ if (logo) {
     logo.classList.add("is-link");
     logo.addEventListener("click", () => navigateWithLoading("user_page.html"));
 }
-
-// ---------- Interazioni personalità (task 3/4/5) ----------
-const selectButtons = Array.from(document.querySelectorAll(".card-select"));
-const lockedButtons = Array.from(document.querySelectorAll(".side-locked"));
-const popupText = document.getElementById("personality-popup-text");
-
-let unlocked = false;
-
-selectButtons.forEach((btn) => {
-    btn.addEventListener("click", () => {
-        // Task 5: il bottone cliccato → tapped + "SELECTED"; gli altri tornano "SELECT"
-        selectButtons.forEach((b) => {
-            b.classList.remove("is-selected");
-            b.textContent = "select";
-        });
-        btn.classList.add("is-selected");
-        btn.textContent = "selected";
-
-        // Task 4: alla prima scelta, i bottoni laterali disabilitati diventano attivi
-        if (!unlocked) {
-            unlocked = true;
-            lockedButtons.forEach((b) => {
-                b.disabled = false;
-                b.classList.remove("side-locked");
-                b.classList.add("active");
-            });
-            // il pop_up cambia testo, come nella selected_page di Figma
-            if (popupText) {
-                popupText.textContent =
-                    "From now on, this will be the unique vibe inspiring all your upcoming stories.";
-            }
-        }
-    });
-});
