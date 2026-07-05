@@ -81,10 +81,6 @@ function navigateWithLoading(url) {
 const backBtn = document.getElementById("personality-back-btn");
 if (backBtn) backBtn.addEventListener("click", () => navigateWithLoading("mydollz_page.html"));
 
-// GOALZ (attivo solo dopo la scelta della personalità) → yasmin/goalz/enter_page
-const goalzBtn = document.getElementById("side-goalz");
-if (goalzBtn) goalzBtn.addEventListener("click", () => navigateWithLoading("yasmin_goalz_enter_page.html"));
-
 // Logo → user_page (in tutte le pagine successive a user_page)
 const logo = document.querySelector(".user-logo");
 if (logo) {
@@ -92,16 +88,57 @@ if (logo) {
     logo.addEventListener("click", () => navigateWithLoading("user_page.html"));
 }
 
-// ---------- Interazioni personalità (task 3/4/5) ----------
-const selectButtons = Array.from(document.querySelectorAll(".card-select"));
-const lockedButtons = Array.from(document.querySelectorAll(".side-locked"));
+// ---------- Tabs del container_side_30%: cambiano SOLO il container_side_70% ----------
+const tabs = Array.from(document.querySelectorAll(".side-tab"));
+const panels = Array.from(document.querySelectorAll(".tab-panel"));
+const popup = document.getElementById("personality-popup");
 const popupText = document.getElementById("personality-popup-text");
+const popupPlay = document.getElementById("popup-play-btn");
 
-let unlocked = false;
+let selected = false;   // personalità scelta?
+let activeTab = "identity";
+
+function updatePopup() {
+    if (activeTab === "identity") {
+        popup.classList.remove("is-hidden");
+        popupText.textContent = selected
+            ? "From now on, this will be the unique vibe inspiring all your upcoming stories."
+            : "It's time to bring me to life. Choose the right personality now, babe.";
+        popupPlay.hidden = true;
+    } else if (activeTab === "goalz") {
+        popup.classList.remove("is-hidden");
+        popupText.textContent = "Complete these challenges to level up your vibe and unlock the runway.";
+        popupPlay.hidden = false;
+    } else {
+        // trophies / stories / magazines: contenuto non ancora disponibile
+        popup.classList.add("is-hidden");
+    }
+}
+
+function setActiveTab(name) {
+    activeTab = name;
+    tabs.forEach((t) => {
+        const isActive = t.dataset.tab === name;
+        t.classList.toggle("is-current", isActive);           // tab attivo → tapped
+        t.classList.toggle("active", !isActive && !t.disabled); // altri sbloccati → attivi
+    });
+    panels.forEach((p) => { p.hidden = p.dataset.tab !== name; });
+    updatePopup();
+}
+
+tabs.forEach((tab) => {
+    tab.addEventListener("click", () => {
+        if (tab.disabled) return;   // le tab bloccate non rispondono
+        setActiveTab(tab.dataset.tab);
+    });
+});
+
+// ---------- Scelta della personalità (radio) + sblocco delle tab ----------
+const selectButtons = Array.from(document.querySelectorAll(".card-select"));
 
 selectButtons.forEach((btn) => {
     btn.addEventListener("click", () => {
-        // Task 5: il bottone cliccato → tapped + "SELECTED"; gli altri tornano "SELECT"
+        // il bottone cliccato → tapped + "SELECTED"; gli altri tornano "SELECT"
         selectButtons.forEach((b) => {
             b.classList.remove("is-selected");
             b.textContent = "select";
@@ -109,19 +146,17 @@ selectButtons.forEach((btn) => {
         btn.classList.add("is-selected");
         btn.textContent = "selected";
 
-        // Task 4: alla prima scelta, i bottoni laterali disabilitati diventano attivi
-        if (!unlocked) {
-            unlocked = true;
-            lockedButtons.forEach((b) => {
-                b.disabled = false;
-                b.classList.remove("side-locked");
-                b.classList.add("active");
+        // alla prima scelta le tab bloccate si attivano
+        if (!selected) {
+            selected = true;
+            tabs.forEach((t) => {
+                if (t.classList.contains("side-locked")) {
+                    t.disabled = false;
+                    t.classList.remove("side-locked");
+                    if (t.dataset.tab !== activeTab) t.classList.add("active");
+                }
             });
-            // il pop_up cambia testo, come nella selected_page di Figma
-            if (popupText) {
-                popupText.textContent =
-                    "From now on, this will be the unique vibe inspiring all your upcoming stories.";
-            }
         }
+        updatePopup();
     });
 });

@@ -63,25 +63,33 @@
                             <div class="doll-photo-small">
                                 <img src="assets/images/yasmindoll_image.png" alt="Yasmin">
                             </div>
+                            <!-- tabs: cambiano solo il container_side_70% -->
                             <div class="container-buttons">
-                                <button type="button" class="primary-button is-current">identity</button>
-                                <button type="button" class="primary-button side-locked" id="side-goalz"
+                                <button type="button" class="primary-button is-current side-tab"
+                                    data-tab="identity">identity</button>
+                                <button type="button" class="primary-button side-locked side-tab" data-tab="goalz"
                                     disabled>goalz</button>
-                                <button type="button" class="primary-button side-locked" disabled>trophies</button>
-                                <button type="button" class="primary-button side-locked" disabled>stories</button>
-                                <button type="button" class="primary-button side-locked" disabled>magazines</button>
+                                <button type="button" class="primary-button side-locked side-tab" data-tab="trophies"
+                                    disabled>trophies</button>
+                                <button type="button" class="primary-button side-locked side-tab" data-tab="stories"
+                                    disabled>stories</button>
+                                <button type="button" class="primary-button side-locked side-tab" data-tab="magazines"
+                                    disabled>magazines</button>
                             </div>
                         </div>
 
-                        <aside class="personality-popup">
+                        <aside class="personality-popup" id="personality-popup">
                             <p class="personality-popup__text" id="personality-popup-text">It's time to bring me to life.
                                 Choose the right personality now, babe.</p>
+                            <button type="button" class="primary-button active" id="popup-play-btn" hidden>play
+                                game</button>
                         </aside>
                     </div>
 
-                    <!-- container_side_70% -->
-                    <div class="side-70">
-                        <div class="cards-grid">
+                    <!-- container_side_70%: pannelli tab, cambiano al click sulle tab -->
+                    <div class="side-70" id="side-70">
+                        <div class="tab-panel" data-tab="identity">
+                            <div class="cards-grid">
 
                             <!-- The Journalist -->
                             <article class="persona-card">
@@ -159,7 +167,21 @@
                                 </div>
                             </article>
 
+                            </div>
                         </div>
+
+                        <!-- tab GOALZ -->
+                        <div class="tab-panel" data-tab="goalz" hidden>
+                            <div class="box-goalz">
+                                <p class="box-goalz__text">Explore every corner of the immersive space to unlock the
+                                    complete vibe of the environment</p>
+                            </div>
+                        </div>
+
+                        <!-- tab TROPHIES / STORIES / MAGAZINES (contenuto non ancora disponibile) -->
+                        <div class="tab-panel" data-tab="trophies" hidden></div>
+                        <div class="tab-panel" data-tab="stories" hidden></div>
+                        <div class="tab-panel" data-tab="magazines" hidden></div>
                     </div>
                 </div>
 
