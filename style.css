@@ -1159,6 +1159,7 @@ body {
 .tab-panel {
     position: absolute;
     inset: 0;
+    height: 628px;
 }
 
 .personality-popup__text {
