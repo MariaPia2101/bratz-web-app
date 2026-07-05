@@ -287,6 +287,7 @@ body {
     font-family: var(--font-title);
     font-weight: 700;
     font-size: 14px;
+    line-height: 10px;
     text-transform: uppercase;
     letter-spacing: 0;
     border: 1px solid var(--btn-stroke);
@@ -1168,10 +1169,12 @@ body {
     color: var(--popup-text);
 }
 
-/* container_side_70%: stessa altezza della colonna doll (via stretch);
+/* container_side_70%: altezza fissa da Figma (717px), margin-top 111px;
    contiene i pannelli tab in absolute così l'altezza non dipende dal contenuto */
 .side-70 {
     width: 890px;
+    height: 717px;
+    margin-top: 111px;
     flex-shrink: 0;
     position: relative;
     overflow: hidden;
@@ -1291,6 +1294,7 @@ body {
 
     .side-70 {
         max-width: 890px;
+        height: auto;
         position: static;
         overflow: visible;
     }
@@ -1361,6 +1365,24 @@ body {
 .tab-panel--scroll {
     overflow-y: auto;
     overflow-x: hidden;
+    /* scrollbar = componente "bar": track = bar vuota, thumb = bar full (#c7a9ff) */
+    scrollbar-width: thin;
+    scrollbar-color: var(--bar-fill) var(--bar-empty);
+}
+
+/* WebKit: replica dello stato "full" della bar (fill viola + bordo nero 1px) */
+.tab-panel--scroll::-webkit-scrollbar {
+    width: 8px;
+}
+
+.tab-panel--scroll::-webkit-scrollbar-track {
+    background: var(--bar-empty);
+    border: 1px solid var(--bar-stroke);
+}
+
+.tab-panel--scroll::-webkit-scrollbar-thumb {
+    background: var(--bar-fill);
+    border: 1px solid var(--bar-stroke);
 }
 
 .trophies-list {
