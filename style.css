@@ -1090,7 +1090,7 @@ body {
 .bottom-personality {
     display: flex;
     gap: 20px;
-    align-items: flex-start;
+    align-items: flex-end;
     width: 100%;
 }
 
