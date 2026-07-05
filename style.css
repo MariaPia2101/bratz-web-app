@@ -1364,6 +1364,7 @@ body {
 .tab-panel--scroll {
     overflow-y: auto;
     overflow-x: hidden;
+    height: 628px;
     /* scrollbar = componente "bar": track = bar vuota, thumb = bar full (#c7a9ff) */
     scrollbar-width: thin;
     scrollbar-color: var(--bar-fill) var(--bar-empty);
