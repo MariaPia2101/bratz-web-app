@@ -113,8 +113,15 @@ function updatePopup() {
         popup.classList.remove("is-hidden");
         popupText.textContent = "Your fashion hall of fame. Flex all the exclusive badges you've earned.";
         popupPlay.hidden = false;
+    } else if (activeTab === "stories") {
+        popup.classList.remove("is-hidden");
+        popupText.textContent = "Explore the scene to unlock new drama and write your stories.";
+        popupPlay.hidden = false;
+    } else if (activeTab === "magazines") {
+        popup.classList.remove("is-hidden");
+        popupText.textContent = "Stack up your stories to design and print ultimate magazines.";
+        popupPlay.hidden = false;
     } else {
-        // stories / magazines: contenuto non ancora disponibile
         popup.classList.add("is-hidden");
     }
 }

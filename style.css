@@ -47,6 +47,8 @@
 :root {
     --card-fill: #ffffff;
     --card-stroke: #000000;
+    /* description/instruction: testo grigio degli stati "empty" */
+    --empty-text: #bebebe;
 
     --input-fill: #ffffff;
     --input-stroke: #000000;
@@ -1333,6 +1335,32 @@ body {
         border-top: none;
         gap: 24px;
     }
+}
+
+/* container_empty: stato "empty" di STORIES / MAGAZINES — card bianca che riempie
+   il container_side_70% con testo grigio centrato (yasmin stories/magazines empty_page) */
+.empty-state {
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--card-fill);
+    border: 1px solid var(--card-stroke);
+}
+
+.empty-state__text {
+    margin: 0;
+    max-width: 695px;
+    text-align: center;
+    font-family: var(--font-mono);
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 17px;
+    letter-spacing: -0.98px;
+    color: var(--empty-text);
 }
 
 /* box_goalz: riquadro istruzioni del tab GOALZ (in alto nella colonna 70%) */
