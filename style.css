@@ -438,7 +438,7 @@ body {
     position: absolute;
     /* posizione da Figma (left 50%+48px, top 33.33%+24.67px) */
     left: calc(50% + 48px);
-    top: calc(33.33% + 24.67px);
+    top: calc(30% + 26px);
     width: 239px;
     min-height: 170px;
     box-sizing: border-box;
