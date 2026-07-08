@@ -497,6 +497,12 @@ body {
         top: auto;
         bottom: calc(50% + 40px);
     }
+
+    /* primary_button stato "small": testo 12px + padding ridotto */
+    .enter-buttons .primary-button {
+        padding: 9px;
+        font-size: 12px;
+    }
 }
 
 /* ===== Mobile stretto: rifiniture card onboarding_page ===== */
@@ -742,24 +748,77 @@ body {
     .user-page {
         padding: 24px 16px;
     }
+}
 
+/* ===== USER PAGE (+ sotto-pagine): scala tipografica mobile ridotta e
+   proporzionale. Tutto confinato qui: il desktop (>768px) resta fedele a
+   Figma e non viene mai sovrascritto da queste regole. ===== */
+@media (max-width: 768px) {
+    /* 1. Titoli card & hero (MY DOLLZ, MY TROPHIES...): compatti, niente a-capo */
+    .card-title {
+        font-size: 22px;
+    }
+
+    /* 2. Benvenuto e testi introduttivi */
+    .user-welcome {
+        font-size: 15px;
+        line-height: 1.3;
+    }
+
+    /* 3. Descrizioni e testi di servizio (monospaced/telematici) */
+    .card-description {
+        font-size: 13px;
+        line-height: 1.4;
+    }
+
+    /* 4. Bottoni della navbar superiore: stato "small" + testo interno 12px.
+       flex-shrink + ellipsis così, con nickname lunghi e font largo, l'header
+       non trabocca né va a capo (si restringono invece di rompere il layout). */
     .user-header .primary-button {
+        flex: 0 1 auto;
+        min-width: 0;
         width: auto;
-        flex: 1 1 0;
+        padding: 9px 10px;
+        font-size: 12px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
     .user-logo {
-        width: 120px;
+        width: 110px;
         height: auto;
+        flex-shrink: 0;
     }
 
-    .user-welcome {
-        font-size: 17px;
-        line-height: 20px;
+    /* 5. Card user_page: proporzioni originali bloccate via aspect-ratio (nessuna
+       distorsione verticale) + scorrimento orizzontale nativo per fare spazio,
+       senza alterare in alcun modo il layout desktop. min-width:0 sull'intera
+       catena flex così lo scroller si limita al viewport invece di espandersi. */
+    .user-page__content,
+    .container-user-page,
+    .bottom-container-user-page,
+    .cards-user-page {
+        min-width: 0;
     }
 
-    .card-title {
-        font-size: 30px;
+    .cards-user-page {
+        flex-direction: row;
+        flex-wrap: nowrap;
+        gap: 16px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 8px;
+        scroll-snap-type: x mandatory;
+    }
+
+    .card-user-page {
+        flex: 0 0 auto;
+        width: 260px;
+        height: auto;
+        aspect-ratio: 435 / 717;
+        padding: 24px;
+        scroll-snap-align: start;
     }
 }
 
@@ -1716,5 +1775,24 @@ body {
 
     .reward-input {
         flex: 1;
+    }
+}
+
+/* ===== Sotto-pagine user (mytrophies / myfaves): scala tipografica mobile.
+   Definite qui, in coda, per vincere sull'ordine sorgente rispetto alle regole
+   base delle stesse classi. Il desktop (>768px) resta invariato. ===== */
+@media (max-width: 768px) {
+    /* Testi introduttivi delle sotto-pagine */
+    .page-description {
+        font-size: 15px;
+        line-height: 1.3;
+    }
+
+    /* Descrizioni e testi di servizio (monospaced): reward card + empty state */
+    .reward-card__title,
+    .reward-card__desc,
+    .empty-state__text {
+        font-size: 13px;
+        line-height: 1.4;
     }
 }
