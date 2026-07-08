@@ -771,24 +771,29 @@ body {
         line-height: 1.4;
     }
 
-    /* 4. Bottoni della navbar superiore: stato "small" + testo interno 12px.
-       flex-shrink + ellipsis così, con nickname lunghi e font largo, l'header
-       non trabocca né va a capo (si restringono invece di rompere il layout). */
-    .user-header .primary-button {
-        flex: 0 1 auto;
-        min-width: 0;
-        width: auto;
-        padding: 9px 10px;
-        font-size: 12px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
+    /* 4. Header (Figma user_page_mobile): logo 132x67 centrato in alto, i due
+       bottoni affiancati sotto con testo 12px. Cambiano solo misure e testo:
+       gli stati (tapped/disabled) e il padding restano identici al desktop. */
+    .user-header {
+        flex-wrap: wrap;
+        height: auto;
+        row-gap: 22px;
+        column-gap: 19px;
     }
 
     .user-logo {
-        width: 110px;
-        height: auto;
-        flex-shrink: 0;
+        order: -1;
+        flex: 0 0 100%;
+        width: auto;
+        height: 67px;
+        object-fit: contain;
+    }
+
+    .user-header .primary-button {
+        flex: 1 1 0;
+        min-width: 0;
+        width: auto;
+        font-size: 12px;
     }
 
     /* 5. Card user_page: proporzioni originali bloccate via aspect-ratio (nessuna
