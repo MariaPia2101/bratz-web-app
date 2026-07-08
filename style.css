@@ -793,16 +793,50 @@ body {
     }
 
     /* 5. card_container (Figma user_page_mobile): le 3 card impilate in verticale
-       (gap 20px), ognuna a piena larghezza con proporzione 433/401. Il contenuto
-       parte dall'alto e scorre con la pagina. Solo misure: stati invariati. */
+       (gap 20px), ognuna a piena larghezza con proporzione 433/401.
+       Lo SCROLL è solo dentro card_container: header + description restano fissi
+       in alto (come nel Figma: card_container overflow-y auto, resto fermo). */
     .user-page {
-        align-items: flex-start;
+        height: 100vh;
+        height: 100dvh;
+        align-items: stretch;
         padding: 20px;
+        overflow: hidden;
+    }
+
+    .user-page__content {
+        width: 100%;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .container-user-page {
+        flex: 1 1 auto;
+        min-height: 0;
+    }
+
+    /* header + welcome: altezza naturale, fissi in cima */
+    .upper-container {
+        flex: 0 0 auto;
+    }
+
+    /* card_container: riempie lo spazio residuo e scorre internamente */
+    .bottom-container-user-page {
+        flex: 1 1 auto;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
     }
 
     .cards-user-page {
+        flex: 1 1 auto;
+        min-height: 0;
         flex-direction: column;
         gap: 20px;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding-right: 4px;
     }
 
     .card-user-page {
