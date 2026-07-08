@@ -433,12 +433,12 @@ body {
 /* I bottoni della enter_page usano lo stesso componente/stati del bottone
    START (.primary-button): disabled, active, hover, tapped. */
 
-/* ===== POP-UP (posizione fissa da Figma) ===== */
+/* ===== POP-UP (posizione fissa da Figma — solo desktop, non toccare) ===== */
 .enter-popup {
     position: absolute;
-    /* posizione da Figma (left 50%+48px, top 33.33%+24.67px) */
+    /* posizione/dimensioni da Figma: left 50%+48px, top 33.33%+24.67px, 239x170 */
     left: calc(50% + 48px);
-    top: calc(30% + 26px);
+    top: calc(33.33% + 24.67px);
     width: 239px;
     min-height: 170px;
     box-sizing: border-box;
@@ -477,8 +477,10 @@ body {
     color: var(--popup-text);
 }
 
-/* ===== Mobile ===== */
-@media (max-width: 480px) {
+/* ===== Mobile / tablet: adattamenti onboarding_page + enter_page =====
+   TUTTE le modifiche mobile di logo e pop-up vivono qui dentro: la base
+   (desktop) resta fedele a Figma e non viene mai toccata da queste regole. */
+@media (max-width: 768px) {
     /* logo: stessa posizione e stessa dimensione su onboarding_page ed enter_page */
     .logo,
     .enter-logo {
@@ -488,14 +490,17 @@ body {
 
     /* pop-up enter_page: 170px quando c'è spazio, altrimenti si aggancia al
        bordo destro mantenendo un margine (popup 239px + 16px) → sempre dentro.
-       Ancorato in basso rispetto ai bottoni (centrati): copre solo leggermente
-       il primo bottone attivo, lasciando "community" scoperto. */
+       Ancorato in basso rispetto ai bottoni (centrati verticalmente): copre
+       solo leggermente il primo bottone attivo, lasciando "community" scoperto. */
     .enter-popup {
         left: min(170px, calc(100% - 255px));
         top: auto;
         bottom: calc(50% + 40px);
     }
+}
 
+/* ===== Mobile stretto: rifiniture card onboarding_page ===== */
+@media (max-width: 480px) {
     .card {
         padding: 32px 24px;
         gap: 36px;
