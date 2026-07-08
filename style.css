@@ -744,31 +744,27 @@ body {
     }
 }
 
-@media (max-width: 480px) {
-    .user-page {
-        padding: 24px 16px;
-    }
-}
-
 /* ===== USER PAGE (+ sotto-pagine): scala tipografica mobile ridotta e
    proporzionale. Tutto confinato qui: il desktop (>768px) resta fedele a
    Figma e non viene mai sovrascritto da queste regole. ===== */
 @media (max-width: 768px) {
-    /* 1. Titoli card & hero (MY DOLLZ, MY TROPHIES...): compatti, niente a-capo */
+    /* 1. Titoli card & hero (MY DOLLZ, MY TROPHIES...): 24px come Figma mobile */
     .card-title {
-        font-size: 22px;
+        font-size: 24px;
     }
 
-    /* 2. Benvenuto e testi introduttivi */
+    /* 2. description_text (benvenuto): 15px, line-height 17px, tracking -1.05 */
     .user-welcome {
         font-size: 15px;
-        line-height: 1.3;
+        line-height: 17px;
+        letter-spacing: -1.05px;
     }
 
-    /* 3. Descrizioni e testi di servizio (monospaced/telematici) */
+    /* 3. Descrizioni delle card: 14px, line-height 17px, tracking -0.98 */
     .card-description {
-        font-size: 13px;
-        line-height: 1.4;
+        font-size: 14px;
+        line-height: 17px;
+        letter-spacing: -0.98px;
     }
 
     /* 4. Header (Figma user_page_mobile): logo 132x67 centrato in alto, i due
@@ -796,34 +792,25 @@ body {
         font-size: 12px;
     }
 
-    /* 5. Card user_page: proporzioni originali bloccate via aspect-ratio (nessuna
-       distorsione verticale) + scorrimento orizzontale nativo per fare spazio,
-       senza alterare in alcun modo il layout desktop. min-width:0 sull'intera
-       catena flex così lo scroller si limita al viewport invece di espandersi. */
-    .user-page__content,
-    .container-user-page,
-    .bottom-container-user-page,
-    .cards-user-page {
-        min-width: 0;
+    /* 5. card_container (Figma user_page_mobile): le 3 card impilate in verticale
+       (gap 20px), ognuna a piena larghezza con proporzione 433/401. Il contenuto
+       parte dall'alto e scorre con la pagina. Solo misure: stati invariati. */
+    .user-page {
+        align-items: flex-start;
+        padding: 20px;
     }
 
     .cards-user-page {
-        flex-direction: row;
-        flex-wrap: nowrap;
-        gap: 16px;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        padding-bottom: 8px;
-        scroll-snap-type: x mandatory;
+        flex-direction: column;
+        gap: 20px;
     }
 
     .card-user-page {
         flex: 0 0 auto;
-        width: 260px;
+        width: 100%;
         height: auto;
-        aspect-ratio: 435 / 717;
-        padding: 24px;
-        scroll-snap-align: start;
+        aspect-ratio: 433 / 401;
+        padding: 19px;
     }
 }
 
