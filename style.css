@@ -487,10 +487,13 @@ body {
     }
 
     /* pop-up enter_page: 170px quando c'è spazio, altrimenti si aggancia al
-       bordo destro mantenendo un margine (popup 239px + 16px) → sempre dentro */
+       bordo destro mantenendo un margine (popup 239px + 16px) → sempre dentro.
+       Ancorato in basso rispetto ai bottoni (centrati): copre solo leggermente
+       il primo bottone attivo, lasciando "community" scoperto. */
     .enter-popup {
         left: min(170px, calc(100% - 255px));
-        top: 250px;
+        top: auto;
+        bottom: calc(50% + 40px);
     }
 
     .card {
