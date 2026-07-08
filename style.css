@@ -486,9 +486,10 @@ body {
         height: auto;
     }
 
-    /* pop-up enter_page: posizione fissa richiesta su mobile */
+    /* pop-up enter_page: 170px quando c'è spazio, altrimenti si aggancia al
+       bordo destro mantenendo un margine (popup 239px + 16px) → sempre dentro */
     .enter-popup {
-        left: 170px;
+        left: min(170px, calc(100% - 255px));
         top: 250px;
     }
 
