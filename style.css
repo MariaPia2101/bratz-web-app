@@ -479,9 +479,17 @@ body {
 
 /* ===== Mobile ===== */
 @media (max-width: 480px) {
-    .logo {
+    /* logo: stessa posizione e stessa dimensione su onboarding_page ed enter_page */
+    .logo,
+    .enter-logo {
         width: 132px;
         height: auto;
+    }
+
+    /* pop-up enter_page: posizione fissa richiesta su mobile */
+    .enter-popup {
+        left: 170px;
+        top: 250px;
     }
 
     .card {
