@@ -1821,4 +1821,14 @@ body {
         font-size: 13px;
         line-height: 1.4;
     }
+
+    .card-user-page{
+        position: relative;
+        height: auto;
+    }
+
+    [src="assets/images/mydollz_image.png"]{
+        position:absolute;
+        top: -320px;
+    }
 }
