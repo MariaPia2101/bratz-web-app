@@ -1334,6 +1334,29 @@ body {
     width: 100%;
 }
 
+/* title_text "Close" del popup (stessa resa degli altri pop-up) */
+.personality-popup__close {
+    align-self: flex-start;
+    margin: 0;
+    padding: 0;
+    background: none;
+    border: none;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 14px;
+    line-height: 16px;
+    letter-spacing: -0.98px;
+    color: var(--popup-text);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    cursor: pointer;
+}
+
+/* button_bar mobile: nascosta su desktop, barra fissa su mobile */
+.mobile-bottombar {
+    display: none;
+}
+
 /* pannelli del container_side_70%: riempiono il 70% (solo l'attivo è visibile) */
 .tab-panel {
     position: absolute;
@@ -1527,7 +1550,7 @@ body {
    fisso in basso; doll nascosta. Solo misure/layout: stati e desktop invariati. ===== */
 @media (max-width: 768px) {
     .personality-page {
-        padding: 20px;
+        padding: 20px 20px 95px;
     }
 
     /* il contenuto si limita al viewport */
@@ -1625,7 +1648,8 @@ body {
         grid-template-columns: 1fr;
     }
 
-    /* popup mostrato nel flusso; il bottone play game diventa barra fissa in basso */
+    /* popup mostrato nel flusso (con "Close"); il play interno è sostituito
+       dalla button_bar fissa, quindi qui va nascosto */
     .personality-popup {
         position: static;
         width: 100%;
@@ -1634,12 +1658,28 @@ body {
     }
 
     .personality-popup .primary-button {
+        display: none;
+    }
+
+    /* button_bar: sempre presente, barra fissa in basso (under_bar Figma) */
+    .mobile-bottombar {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
         position: fixed;
-        left: 50%;
-        bottom: 20px;
-        transform: translateX(-50%);
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 75px;
+        padding-top: 20px;
+        background: var(--bg-color);
+        border-top: 1px solid var(--btn-stroke);
+        z-index: 30;
+    }
+
+    .mobile-bottombar .primary-button {
         width: 207px;
-        z-index: 20;
+        font-size: 12px;
     }
 }
 

@@ -94,6 +94,8 @@ const panels = Array.from(document.querySelectorAll(".tab-panel"));
 const popup = document.getElementById("personality-popup");
 const popupText = document.getElementById("personality-popup-text");
 const popupPlay = document.getElementById("popup-play-btn");
+const popupClose = document.getElementById("personality-popup-close");
+const mobilePlay = document.getElementById("mobile-play-btn");   // button_bar mobile
 
 let selected = false;   // personalità scelta?
 let activeTab = "identity";
@@ -124,6 +126,18 @@ function updatePopup() {
     } else {
         popup.classList.add("is-hidden");
     }
+    // button_bar mobile: sempre presente; attiva quando lo è il play del popup,
+    // altrimenti disattiva (es. identity senza personalità scelta)
+    if (mobilePlay) {
+        const active = !popupPlay.hidden;
+        mobilePlay.classList.toggle("active", active);
+        mobilePlay.disabled = !active;
+    }
+}
+
+// Chiusura del popup (title_text "Close")
+if (popupClose) {
+    popupClose.addEventListener("click", () => popup.classList.add("is-hidden"));
 }
 
 function setActiveTab(name) {
