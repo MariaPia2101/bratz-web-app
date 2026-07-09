@@ -1197,20 +1197,23 @@ body {
         line-height: 17.6px;
     }
 
-    /* pop_up: 150px, mostrati e ancorati (profilo alto-sx sulla doll, add basso-dx) */
+    /* pop_up: 150px, posizioni esatte da Figma (profile x31 sulla doll,
+       add x246 accanto al plus). Ancoro add a destra per non sforare su mobile. */
     .doll-popup {
         display: flex;
         width: 150px;
     }
 
     .doll-popup--profile {
-        left: 0;
-        top: 40px;
+        left: 11px;
+        top: 36px;
+        right: auto;
+        bottom: auto;
     }
 
     .doll-popup--add {
         left: auto;
-        right: 0;
+        right: 57px;
         top: auto;
         bottom: 0;
     }
@@ -1559,13 +1562,15 @@ body {
         min-width: 0;
     }
 
-    /* reflow a colonna: promuovo i contenitori annidati e riordino i blocchi */
+    /* reflow a colonna: promuovo i contenitori annidati e riordino i blocchi.
+       position:relative = riferimento per il popup fluttuante */
     .container-personality {
         display: flex;
         flex-direction: column;
         gap: 20px;
         width: 100%;
         min-width: 0;
+        position: relative;
     }
 
     .upper-personality,
@@ -1648,13 +1653,17 @@ body {
         grid-template-columns: 1fr;
     }
 
-    /* popup mostrato nel flusso (con "Close"); il play interno è sostituito
-       dalla button_bar fissa, quindi qui va nascosto */
+    /* popup FLUTTUANTE come Figma (sovrapposto a tab-bar/titolo, 165px);
+       il play interno è sostituito dalla button_bar fissa e va nascosto */
     .personality-popup {
-        position: static;
-        width: 100%;
-        max-width: 239px;
+        position: absolute;
+        top: 155px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 165px;
+        max-width: none;
         margin: 0;
+        z-index: 15;
     }
 
     .personality-popup .primary-button {
