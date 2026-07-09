@@ -1522,6 +1522,127 @@ body {
     }
 }
 
+/* ===== PERSONALITY PAGE mobile (Figma personality_page_mobile): colonna unica
+   header → tab_bar (scroll orizzontale) → back/title → popup → cards; play game
+   fisso in basso; doll nascosta. Solo misure/layout: stati e desktop invariati. ===== */
+@media (max-width: 768px) {
+    .personality-page {
+        padding: 20px;
+    }
+
+    /* il contenuto si limita al viewport */
+    .personality-page__content {
+        width: 100%;
+        min-width: 0;
+    }
+
+    /* reflow a colonna: promuovo i contenitori annidati e riordino i blocchi */
+    .container-personality {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        width: 100%;
+        min-width: 0;
+    }
+
+    .upper-personality,
+    .bottom-personality,
+    .side-30,
+    .slider-lateral {
+        display: contents;
+    }
+
+    .user-header {
+        order: 0;
+    }
+
+    .container-buttons {
+        order: 1;
+    }
+
+    .container-text-and-button {
+        order: 2;
+    }
+
+    .personality-popup {
+        order: 3;
+    }
+
+    .side-70 {
+        order: 4;
+    }
+
+    /* doll nascosta su mobile */
+    .doll-photo-small {
+        display: none;
+    }
+
+    /* tab_bar: fila orizzontale con scroll nativo (tab 146px, testo 12px) */
+    .container-buttons {
+        flex-direction: row;
+        gap: 20px;
+        width: 100%;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 4px;
+    }
+
+    .side-tab {
+        flex: 0 0 auto;
+        width: 146px;
+        font-size: 12px;
+    }
+
+    /* back + yasmin + Always Bratz sulla stessa riga */
+    .container-text-and-button {
+        flex-direction: row;
+        align-items: flex-end;
+        gap: 12px;
+    }
+
+    .personality-subtitle {
+        font-size: 16px;
+    }
+
+    /* container_side_70%: colonna a piena larghezza, in flusso */
+    .side-70 {
+        width: 100%;
+        max-width: none;
+        height: auto;
+        margin-top: 0;
+        position: static;
+        overflow: visible;
+        min-width: 0;
+    }
+
+    .tab-panel {
+        position: static;
+        height: auto;
+    }
+
+    .cards-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* popup mostrato nel flusso; il bottone play game diventa barra fissa in basso */
+    .personality-popup {
+        position: static;
+        width: 100%;
+        max-width: 239px;
+        margin: 0;
+    }
+
+    .personality-popup .primary-button {
+        position: fixed;
+        left: 50%;
+        bottom: 20px;
+        transform: translateX(-50%);
+        width: 207px;
+        z-index: 20;
+    }
+}
+
 /* container_empty: stato "empty" di STORIES / MAGAZINES — card bianca che riempie
    il container_side_70% con testo grigio centrato (yasmin stories/magazines empty_page) */
 .empty-state {
