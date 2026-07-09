@@ -1139,6 +1139,83 @@ body {
     }
 }
 
+/* ===== MY DOLLZ PAGE mobile (Figma mydollz_page_mobile): solo misure e testi,
+   stati invariati, desktop non toccato. ===== */
+@media (max-width: 768px) {
+    .mydollz-page {
+        padding: 20px;
+    }
+
+    /* il contenuto si limita al viewport invece di espandersi a 1344px */
+    .mydollz-page__content,
+    .container-mydollz-page,
+    .bottom-container-mydollz {
+        min-width: 0;
+    }
+
+    .mydollz-page__content,
+    .container-mydollz-page {
+        width: 100%;
+    }
+
+    /* doll + nome centrati in colonna, plus sotto; container relativo per i pop-up */
+    .bottom-container-mydollz {
+        position: relative;
+        height: auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding-top: 24px;
+    }
+
+    .container-doll-button {
+        position: static;
+        flex-direction: column;
+        align-items: center;
+        gap: 24px;
+    }
+
+    /* doll_photo 260x516 (stesso crop del desktop, scalato) */
+    .doll-photo {
+        width: 260px;
+        height: 516px;
+    }
+
+    .doll-photo img {
+        width: 100%;
+        height: 100%;
+    }
+
+    /* nome doll 19.2px / collezione 12.8px (Figma mobile) */
+    .doll-name {
+        font-size: 19.2px;
+        line-height: 19.2px;
+    }
+
+    .doll-collection {
+        font-size: 12.8px;
+        line-height: 17.6px;
+    }
+
+    /* pop_up: 150px, mostrati e ancorati (profilo alto-sx sulla doll, add basso-dx) */
+    .doll-popup {
+        display: flex;
+        width: 150px;
+    }
+
+    .doll-popup--profile {
+        left: 0;
+        top: 40px;
+    }
+
+    .doll-popup--add {
+        left: auto;
+        right: 0;
+        top: auto;
+        bottom: 0;
+    }
+}
+
 /* ===== YASMIN / PERSONALITY PAGE ===== */
 .personality-page {
     min-height: 100vh;
