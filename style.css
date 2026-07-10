@@ -1907,7 +1907,8 @@ body {
 
     .empty-state--page {
         height: auto;
-        min-height: 400px;
+        aspect-ratio: 433 / 681;
+        min-height: 0;
     }
 
     .reward-card {
