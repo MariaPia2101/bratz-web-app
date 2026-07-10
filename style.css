@@ -1677,7 +1677,7 @@ body {
     .mydollz-page__content,
     .container-mydollz-page {
         width: 100%;
-        gap: 40px;
+        gap: 20px;
     }
 
     .bottom-container-mydollz {
@@ -1686,7 +1686,6 @@ body {
         display: flex;
         flex-direction: column;
         align-items: center;
-        padding-top: 24px;
     }
 
     .container-doll-button {
