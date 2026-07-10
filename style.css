@@ -1466,7 +1466,7 @@ body {
     padding: 16px 20px;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: flex-start;
     background: var(--card-fill);
     border: 1px solid var(--card-stroke);
     border-left: none;
@@ -1480,6 +1480,7 @@ body {
     line-height: 18px;
     letter-spacing: -1.12px;
     color: var(--empty-text);
+    padding-bottom: 128px;
 }
 
 .reward-card__desc {
@@ -1491,6 +1492,7 @@ body {
     line-height: 18px;
     letter-spacing: -1.12px;
     color: var(--empty-text);
+    padding-bottom: 20px;
 }
 
 /* secondary_input_field: campo "Code" (disabled) + bottone COPY (disabled) */
@@ -1675,6 +1677,7 @@ body {
     .mydollz-page__content,
     .container-mydollz-page {
         width: 100%;
+        gap: 40px;
     }
 
     .bottom-container-mydollz {
@@ -1895,6 +1898,7 @@ body {
     /* ===== sotto-pagine mytrophies/myfaves ===== */
     .bottom-container-subpage {
         width: 100%;
+        padding-top: 0px;
     }
 
     .rewards-grid {
@@ -1924,17 +1928,19 @@ body {
 
     .reward-card__side {
         height: auto;
-        gap: 24px;
+        gap: 0px;
         border: 1px solid var(--card-stroke);
         border-top: none;
     }
 
     .reward-card__field {
         width: 100%;
+        align-items: center;
     }
 
     .reward-input {
         flex: 1;
+        height: 35px;
     }
 
     .page-description {
@@ -1956,5 +1962,13 @@ body {
 
     .secondary-button {
         height: 35px;
+    }
+
+    p.reward-card__title {
+        padding-bottom: 70px;
+    }
+
+    p.reward-card__desc {
+        padding-bottom: 20px;
     }
 }
