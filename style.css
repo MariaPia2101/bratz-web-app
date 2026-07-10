@@ -211,6 +211,7 @@ body {
     border: 1px solid var(--input-stroke);
     border-radius: 0;
     outline: none;
+    height: 35px;
 }
 
 .input::placeholder {
