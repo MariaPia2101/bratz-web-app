@@ -1536,6 +1536,12 @@ body {
    a Figma.
    =================================================================== */
 @media (max-width: 768px) {
+    /* ===== loading_page: logo sempre 132x68px su mobile ===== */
+    .loading-logo {
+        width: 132px;
+        height: 68px;
+    }
+
     /* ===== onboarding_page ===== */
     .card {
         padding: 32px 24px;
@@ -1623,45 +1629,21 @@ body {
     }
 
     /* ===== user_page: header+welcome fissi, card_container con scroll interno ===== */
+    /* card impilate, top-aligned: scorre TUTTA la pagina (niente scroll interno) */
     .user-page {
-        height: 100vh;
-        height: 100dvh;
-        align-items: stretch;
+        align-items: flex-start;
         padding: 20px;
-        overflow: hidden;
     }
 
-    .user-page__content {
-        width: 100%;
-        min-height: 0;
-        display: flex;
-        flex-direction: column;
-    }
-
+    .user-page__content,
     .container-user-page {
-        flex: 1 1 auto;
-        min-height: 0;
-    }
-
-    .upper-container {
-        flex: 0 0 auto;
-    }
-
-    .bottom-container-user-page {
-        flex: 1 1 auto;
-        min-height: 0;
-        display: flex;
-        flex-direction: column;
+        width: 100%;
+        min-width: 0;
     }
 
     .cards-user-page {
-        flex: 1 1 auto;
-        min-height: 0;
         flex-direction: column;
         gap: 20px;
-        overflow-y: auto;
-        overflow-x: hidden;
-        padding-right: 4px;
     }
 
     .card-user-page {
