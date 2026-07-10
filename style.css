@@ -445,7 +445,7 @@ body {
     padding: 16px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 16px;
     background: var(--popup-fill);
     border: 1px solid var(--popup-stroke);
 }
@@ -843,7 +843,6 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 32px;
 }
 
 .doll-photo {
@@ -1543,6 +1542,21 @@ body {
         gap: 36px;
     }
 
+    .card-select{
+        height: 35px;
+        width: 146px;
+    }
+
+    .persona-card{
+        width: 370px;
+    }
+
+    .container-below-button{
+        justify-content: space-between;
+        gap: 0px;
+        align-items: center;
+    }
+
     .title {
         font-size: 30px;
     }
@@ -1557,7 +1571,7 @@ body {
     .enter-popup {
         left: min(170px, calc(100% - 255px));
         top: auto;
-        bottom: calc(50% + 40px);
+        bottom: calc(50% + 30px);
     }
 
     .enter-buttons .primary-button {
@@ -1660,7 +1674,8 @@ body {
 
     [src="assets/images/mydollz_image.png"] {
         position: absolute;
-        top: -320px;
+        top: -248px;
+        height: auto;
     }
 
     /* ===== mydollz_page ===== */
@@ -1692,7 +1707,7 @@ body {
         position: static;
         flex-direction: column;
         align-items: center;
-        gap: 24px;
+        gap: 70px;
     }
 
     .doll-photo {
@@ -1729,9 +1744,9 @@ body {
 
     .doll-popup--add {
         left: auto;
-        right: 57px;
+        right: 30px;
         top: auto;
-        bottom: 0;
+        bottom: 30px;
     }
 
     /* ===== personality_page: reflow a colonna + tab_bar scroll orizzontale ===== */
@@ -1769,6 +1784,7 @@ body {
         overflow-y: hidden;
         -webkit-overflow-scrolling: touch;
         padding-bottom: 4px;
+        margin-bottom: 66px;
     }
 
     .side-tab {
@@ -1798,6 +1814,7 @@ body {
         max-width: none;
         margin: 0;
         z-index: 15;
+        gap: 8px;
     }
 
     .personality-popup .primary-button {
@@ -1860,13 +1877,31 @@ body {
 
     .trophy-card__photo {
         width: 100%;
+        height: 225px;
+    }
+
+    .trophy-card__photo img{
+        height: 100%;
     }
 
     .trophy-card__side {
         height: auto;
         border-left: 1px solid var(--card-stroke);
         border-top: none;
-        gap: 24px;
+        gap: 70px;
+    }
+
+    .trophy-card__title {
+        font-size: 16px;
+    }
+
+    .trophy-card__desc{
+        font-size: 14px;
+    }
+
+    p.empty-state__text {
+        font-size: 14px;
+        width: 17px;
     }
 
     /* box goalz */
@@ -1921,5 +1956,10 @@ body {
     .empty-state__text {
         font-size: 13px;
         line-height: 1.4;
+    }
+
+    .primary-button {
+        font-size: 12px;
+        height: 35px;
     }
 }
