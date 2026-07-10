@@ -480,42 +480,8 @@ body {
 /* ===== Mobile / tablet: adattamenti onboarding_page + enter_page =====
    TUTTE le modifiche mobile di logo e pop-up vivono qui dentro: la base
    (desktop) resta fedele a Figma e non viene mai toccata da queste regole. */
-@media (max-width: 768px) {
-    /* logo: stessa posizione e stessa dimensione su onboarding_page ed enter_page */
-    .logo,
-    .enter-logo {
-        width: 132px;
-        height: auto;
-    }
-
-    /* pop-up enter_page: 170px quando c'è spazio, altrimenti si aggancia al
-       bordo destro mantenendo un margine (popup 239px + 16px) → sempre dentro.
-       Ancorato in basso rispetto ai bottoni (centrati verticalmente): copre
-       solo leggermente il primo bottone attivo, lasciando "community" scoperto. */
-    .enter-popup {
-        left: min(170px, calc(100% - 255px));
-        top: auto;
-        bottom: calc(50% + 40px);
-    }
-
-    /* primary_button stato "small": testo 12px + padding ridotto */
-    .enter-buttons .primary-button {
-        padding: 9px;
-        font-size: 12px;
-    }
-}
 
 /* ===== Mobile stretto: rifiniture card onboarding_page ===== */
-@media (max-width: 480px) {
-    .card {
-        padding: 32px 24px;
-        gap: 36px;
-    }
-
-    .title {
-        font-size: 30px;
-    }
-}
 
 /* ===== Token user_page e secondary_button (Figma) ===== */
 :root {
@@ -724,129 +690,10 @@ body {
 }
 
 /* ===== USER PAGE mobile / schermi stretti ===== */
-@media (max-width: 1440px) {
-    .container-user-page {
-        width: 100%;
-    }
-}
-
-@media (max-width: 980px) {
-    .cards-user-page {
-        flex-direction: column;
-    }
-
-    .card-user-page {
-        height: 560px;
-    }
-
-    .user-header {
-        gap: 16px;
-    }
-}
 
 /* ===== USER PAGE (+ sotto-pagine): scala tipografica mobile ridotta e
    proporzionale. Tutto confinato qui: il desktop (>768px) resta fedele a
    Figma e non viene mai sovrascritto da queste regole. ===== */
-@media (max-width: 768px) {
-    /* 1. Titoli card & hero (MY DOLLZ, MY TROPHIES...): 24px come Figma mobile */
-    .card-title {
-        font-size: 24px;
-    }
-
-    /* 2. description_text (benvenuto): 15px, line-height 17px, tracking -1.05 */
-    .user-welcome {
-        font-size: 15px;
-        line-height: 17px;
-        letter-spacing: -1.05px;
-    }
-
-    /* 3. Descrizioni delle card: 14px, line-height 17px, tracking -0.98 */
-    .card-description {
-        font-size: 14px;
-        line-height: 17px;
-        letter-spacing: -0.98px;
-    }
-
-    /* 4. Header (Figma user_page_mobile): logo 132x67 centrato in alto, i due
-       bottoni affiancati sotto con testo 12px. Cambiano solo misure e testo:
-       gli stati (tapped/disabled) e il padding restano identici al desktop. */
-    .user-header {
-        flex-wrap: wrap;
-        height: auto;
-        row-gap: 22px;
-        column-gap: 19px;
-    }
-
-    .user-logo {
-        order: -1;
-        flex: 0 0 100%;
-        width: auto;
-        height: 67px;
-        object-fit: contain;
-    }
-
-    .user-header .primary-button {
-        flex: 1 1 0;
-        min-width: 0;
-        width: auto;
-        font-size: 12px;
-    }
-
-    /* 5. card_container (Figma user_page_mobile): le 3 card impilate in verticale
-       (gap 20px), ognuna a piena larghezza con proporzione 433/401.
-       Lo SCROLL è solo dentro card_container: header + description restano fissi
-       in alto (come nel Figma: card_container overflow-y auto, resto fermo). */
-    .user-page {
-        height: 100vh;
-        height: 100dvh;
-        align-items: stretch;
-        padding: 20px;
-        overflow: hidden;
-    }
-
-    .user-page__content {
-        width: 100%;
-        min-height: 0;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .container-user-page {
-        flex: 1 1 auto;
-        min-height: 0;
-    }
-
-    /* header + welcome: altezza naturale, fissi in cima */
-    .upper-container {
-        flex: 0 0 auto;
-    }
-
-    /* card_container: riempie lo spazio residuo e scorre internamente */
-    .bottom-container-user-page {
-        flex: 1 1 auto;
-        min-height: 0;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .cards-user-page {
-        flex: 1 1 auto;
-        min-height: 0;
-        flex-direction: column;
-        gap: 20px;
-        overflow-y: auto;
-        overflow-x: hidden;
-        padding-right: 4px;
-    }
-
-    .card-user-page {
-        flex: 0 0 auto;
-        width: 100%;
-        height: auto;
-        aspect-ratio: 433 / 401;
-        padding: 19px;
-    }
-}
 
 /* ===== Token mydollz_page (Figma) ===== */
 :root {
@@ -864,7 +711,7 @@ body {
 .mydollz-page {
     min-height: 100vh;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
     padding: 48px;
     overflow: auto;
@@ -1098,132 +945,15 @@ body {
 }
 
 /* ===== MY DOLLZ PAGE — schermi stretti ===== */
-@media (max-width: 1440px) {
-    .mydollz-page {
-        align-items: flex-start;
-    }
-
-    .container-mydollz-page {
-        width: 1344px;
-    }
-}
-
-@media (max-width: 900px) {
-
-    /* su schermi piccoli: layout in colonna, niente canvas assoluto */
-    .bottom-container-mydollz {
-        height: auto;
-        display: flex;
-        justify-content: center;
-        padding-top: 24px;
-    }
-
-    .container-doll-button {
-        position: static;
-        flex-direction: column;
-        gap: 24px;
-    }
-
-    .doll-popup {
-        display: none;
-    }
-
-    .doll-photo {
-        width: 240px;
-        height: auto;
-    }
-
-    .doll-photo img {
-        width: 100%;
-        height: auto;
-    }
-}
 
 /* ===== MY DOLLZ PAGE mobile (Figma mydollz_page_mobile): solo misure e testi,
    stati invariati, desktop non toccato. ===== */
-@media (max-width: 768px) {
-    .mydollz-page {
-        padding: 20px;
-    }
-
-    /* il contenuto si limita al viewport invece di espandersi a 1344px */
-    .mydollz-page__content,
-    .container-mydollz-page,
-    .bottom-container-mydollz {
-        min-width: 0;
-    }
-
-    .mydollz-page__content,
-    .container-mydollz-page {
-        width: 100%;
-    }
-
-    /* doll + nome centrati in colonna, plus sotto; container relativo per i pop-up */
-    .bottom-container-mydollz {
-        position: relative;
-        height: auto;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding-top: 24px;
-    }
-
-    .container-doll-button {
-        position: static;
-        flex-direction: column;
-        align-items: center;
-        gap: 24px;
-    }
-
-    /* doll_photo 260x516 (stesso crop del desktop, scalato) */
-    .doll-photo {
-        width: 260px;
-        height: 516px;
-    }
-
-    .doll-photo img {
-        width: 100%;
-        height: 100%;
-    }
-
-    /* nome doll 19.2px / collezione 12.8px (Figma mobile) */
-    .doll-name {
-        font-size: 19.2px;
-        line-height: 19.2px;
-    }
-
-    .doll-collection {
-        font-size: 12.8px;
-        line-height: 17.6px;
-    }
-
-    /* pop_up: 150px, posizioni esatte da Figma (profile x31 sulla doll,
-       add x246 accanto al plus). Ancoro add a destra per non sforare su mobile. */
-    .doll-popup {
-        display: flex;
-        width: 150px;
-    }
-
-    .doll-popup--profile {
-        left: 11px;
-        top: 36px;
-        right: auto;
-        bottom: auto;
-    }
-
-    .doll-popup--add {
-        left: auto;
-        right: 57px;
-        top: auto;
-        bottom: 0;
-    }
-}
 
 /* ===== YASMIN / PERSONALITY PAGE ===== */
 .personality-page {
     min-height: 100vh;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
     padding: 48px;
     overflow: auto;
@@ -1476,221 +1206,10 @@ body {
 }
 
 /* ===== PERSONALITY PAGE — schermi stretti ===== */
-@media (max-width: 1440px) {
-    .personality-page {
-        align-items: flex-start;
-    }
-
-    .container-personality {
-        width: 1345px;
-    }
-}
-
-@media (max-width: 980px) {
-    .bottom-personality {
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .side-30,
-    .side-70 {
-        width: 100%;
-        max-width: 435px;
-        margin-top: 0;
-    }
-
-    .side-70 {
-        max-width: 890px;
-        height: auto;
-        position: static;
-        overflow: visible;
-    }
-
-    .slider-lateral {
-        margin: 0 auto;
-    }
-
-    /* il popup contiene istruzioni + PLAY GAME: su schermi stretti torna nel
-       flusso (statico, centrato) invece di sparire */
-    .personality-popup {
-        position: static;
-        width: 100%;
-        max-width: 239px;
-        margin: 22px auto 0;
-    }
-
-    .cards-grid {
-        grid-template-columns: 1fr;
-    }
-
-    /* su mobile i pannelli tornano statici (layout in colonna, niente scroll interno) */
-    .tab-panel {
-        position: static;
-    }
-
-    .tab-panel--scroll {
-        overflow: visible;
-    }
-
-    .trophy-card {
-        flex-direction: column;
-    }
-
-    .trophy-card__photo {
-        width: 100%;
-    }
-
-    .trophy-card__side {
-        height: auto;
-        border-left: 1px solid var(--card-stroke);
-        border-top: none;
-        gap: 24px;
-    }
-}
 
 /* ===== PERSONALITY PAGE mobile (Figma personality_page_mobile): colonna unica
    header → tab_bar (scroll orizzontale) → back/title → popup → cards; play game
    fisso in basso; doll nascosta. Solo misure/layout: stati e desktop invariati. ===== */
-@media (max-width: 768px) {
-    .personality-page {
-        padding: 20px 20px 95px;
-    }
-
-    /* il contenuto si limita al viewport */
-    .personality-page__content {
-        width: 100%;
-        min-width: 0;
-    }
-
-    /* reflow a colonna: promuovo i contenitori annidati e riordino i blocchi.
-       position:relative = riferimento per il popup fluttuante */
-    .container-personality {
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-        width: 100%;
-        min-width: 0;
-        position: relative;
-    }
-
-    .upper-personality,
-    .bottom-personality,
-    .side-30,
-    .slider-lateral {
-        display: contents;
-    }
-
-    .user-header {
-        order: 0;
-    }
-
-    .container-buttons {
-        order: 1;
-    }
-
-    .container-text-and-button {
-        order: 2;
-    }
-
-    .personality-popup {
-        order: 3;
-    }
-
-    .side-70 {
-        order: 4;
-    }
-
-    /* doll nascosta su mobile */
-    .doll-photo-small {
-        display: none;
-    }
-
-    /* tab_bar: fila orizzontale con scroll nativo (tab 146px, testo 12px) */
-    .container-buttons {
-        flex-direction: row;
-        gap: 20px;
-        width: 100%;
-        overflow-x: auto;
-        overflow-y: hidden;
-        -webkit-overflow-scrolling: touch;
-        padding-bottom: 4px;
-    }
-
-    .side-tab {
-        flex: 0 0 auto;
-        width: 146px;
-        font-size: 12px;
-    }
-
-    /* back + yasmin + Always Bratz sulla stessa riga */
-    .container-text-and-button {
-        flex-direction: row;
-        align-items: flex-end;
-        gap: 12px;
-    }
-
-    .personality-subtitle {
-        font-size: 16px;
-    }
-
-    /* container_side_70%: colonna a piena larghezza, in flusso */
-    .side-70 {
-        width: 100%;
-        max-width: none;
-        height: auto;
-        margin-top: 0;
-        position: static;
-        overflow: visible;
-        min-width: 0;
-    }
-
-    .tab-panel {
-        position: static;
-        height: auto;
-    }
-
-    .cards-grid {
-        grid-template-columns: 1fr;
-    }
-
-    /* popup FLUTTUANTE come Figma (sovrapposto a tab-bar/titolo, 165px);
-       il play interno è sostituito dalla button_bar fissa e va nascosto */
-    .personality-popup {
-        position: absolute;
-        top: 155px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 165px;
-        max-width: none;
-        margin: 0;
-        z-index: 15;
-    }
-
-    .personality-popup .primary-button {
-        display: none;
-    }
-
-    /* button_bar: sempre presente, barra fissa in basso (under_bar Figma) */
-    .mobile-bottombar {
-        display: flex;
-        justify-content: center;
-        align-items: flex-start;
-        position: fixed;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        height: 75px;
-        padding-top: 20px;
-        background: var(--bg-color);
-        border-top: 1px solid var(--btn-stroke);
-        z-index: 30;
-    }
-
-    .mobile-bottombar .primary-button {
-        width: 207px;
-        font-size: 12px;
-    }
-}
 
 /* container_empty: stato "empty" di STORIES / MAGAZINES — card bianca che riempie
    il container_side_70% con testo grigio centrato (yasmin stories/magazines empty_page) */
@@ -1866,12 +1385,6 @@ body {
     cursor: pointer;
 }
 
-@media (max-width: 980px) {
-    .box-goalz {
-        padding: 16px 24px;
-    }
-}
-
 /* ===== Sotto-pagine user (mytrophies / myfaves empty_page) ===== */
 /* input_description_ : descrizione pagina (20px, description/user_page) */
 .page-description {
@@ -2011,7 +1524,357 @@ body {
 }
 
 /* ===== Responsive sotto-pagine ===== */
-@media (max-width: 980px) {
+
+/* ===== Sotto-pagine user (mytrophies / myfaves): scala tipografica mobile.
+   Definite qui, in coda, per vincere sull'ordine sorgente rispetto alle regole
+   base delle stesse classi. Il desktop (>768px) resta invariato. ===== */
+
+
+/* ===================================================================
+   UNICA MEDIA QUERY MOBILE (max-width: 768px) — tutte le regole
+   responsive di tutte le pagine. In coda al file: vince sull'ordine
+   sorgente rispetto alle regole base. Il desktop (>768px) resta fedele
+   a Figma.
+   =================================================================== */
+@media (max-width: 768px) {
+    /* ===== onboarding_page ===== */
+    .card {
+        padding: 32px 24px;
+        gap: 36px;
+    }
+
+    .title {
+        font-size: 30px;
+    }
+
+    /* ===== enter_page ===== */
+    .logo,
+    .enter-logo {
+        width: 132px;
+        height: auto;
+    }
+
+    .enter-popup {
+        left: min(170px, calc(100% - 255px));
+        top: auto;
+        bottom: calc(50% + 40px);
+    }
+
+    .enter-buttons .primary-button {
+        padding: 9px;
+        font-size: 12px;
+    }
+
+    /* ===== testi condivisi (user_page + sotto-pagine) ===== */
+    .card-title {
+        font-size: 24px;
+    }
+
+    .user-welcome {
+        font-size: 15px;
+        line-height: 17px;
+        letter-spacing: -1.05px;
+    }
+
+    .card-description {
+        font-size: 14px;
+        line-height: 17px;
+        letter-spacing: -0.98px;
+    }
+
+    /* ===== header condiviso (user_page/mydollz/personality): logo in alto,
+       due bottoni affiancati sotto; order:0 per il reflow della personality ===== */
+    .user-header {
+        flex-wrap: wrap;
+        height: auto;
+        row-gap: 22px;
+        column-gap: 19px;
+        order: 0;
+    }
+
+    .user-logo {
+        order: -1;
+        flex: 0 0 100%;
+        width: auto;
+        height: 67px;
+        object-fit: contain;
+    }
+
+    .user-header .primary-button {
+        flex: 1 1 0;
+        min-width: 0;
+        width: auto;
+        font-size: 12px;
+    }
+
+    /* ===== user_page: header+welcome fissi, card_container con scroll interno ===== */
+    .user-page {
+        height: 100vh;
+        height: 100dvh;
+        align-items: stretch;
+        padding: 20px;
+        overflow: hidden;
+    }
+
+    .user-page__content {
+        width: 100%;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .container-user-page {
+        flex: 1 1 auto;
+        min-height: 0;
+    }
+
+    .upper-container {
+        flex: 0 0 auto;
+    }
+
+    .bottom-container-user-page {
+        flex: 1 1 auto;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .cards-user-page {
+        flex: 1 1 auto;
+        min-height: 0;
+        flex-direction: column;
+        gap: 20px;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding-right: 4px;
+    }
+
+    .card-user-page {
+        flex: 0 0 auto;
+        width: 100%;
+        height: auto;
+        aspect-ratio: 433 / 401;
+        padding: 19px;
+        position: relative;
+    }
+
+    [src="assets/images/mydollz_image.png"] {
+        position: absolute;
+        top: -320px;
+    }
+
+    /* ===== mydollz_page ===== */
+    .mydollz-page {
+        padding: 20px;
+    }
+
+    .mydollz-page__content,
+    .container-mydollz-page,
+    .bottom-container-mydollz {
+        min-width: 0;
+    }
+
+    .mydollz-page__content,
+    .container-mydollz-page {
+        width: 100%;
+    }
+
+    .bottom-container-mydollz {
+        position: relative;
+        height: auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding-top: 24px;
+    }
+
+    .container-doll-button {
+        position: static;
+        flex-direction: column;
+        align-items: center;
+        gap: 24px;
+    }
+
+    .doll-photo {
+        width: 260px;
+        height: 516px;
+    }
+
+    .doll-photo img {
+        width: 100%;
+        height: 100%;
+    }
+
+    .doll-name {
+        font-size: 19.2px;
+        line-height: 19.2px;
+    }
+
+    .doll-collection {
+        font-size: 12.8px;
+        line-height: 17.6px;
+    }
+
+    .doll-popup {
+        display: flex;
+        width: 150px;
+    }
+
+    .doll-popup--profile {
+        left: 11px;
+        top: 36px;
+        right: auto;
+        bottom: auto;
+    }
+
+    .doll-popup--add {
+        left: auto;
+        right: 57px;
+        top: auto;
+        bottom: 0;
+    }
+
+    /* ===== personality_page: reflow a colonna + tab_bar scroll orizzontale ===== */
+    .personality-page {
+        padding: 20px 20px 95px;
+    }
+
+    .personality-page__content {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .container-personality {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        width: 100%;
+        min-width: 0;
+        position: relative;
+    }
+
+    .upper-personality,
+    .bottom-personality,
+    .side-30,
+    .slider-lateral {
+        display: contents;
+    }
+
+    .container-buttons {
+        order: 1;
+        flex-direction: row;
+        gap: 20px;
+        width: 100%;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 4px;
+    }
+
+    .side-tab {
+        flex: 0 0 auto;
+        width: 146px;
+        font-size: 12px;
+    }
+
+    .container-text-and-button {
+        order: 2;
+        flex-direction: row;
+        align-items: flex-end;
+        gap: 12px;
+    }
+
+    .personality-subtitle {
+        font-size: 16px;
+    }
+
+    .personality-popup {
+        order: 3;
+        position: absolute;
+        top: 155px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 165px;
+        max-width: none;
+        margin: 0;
+        z-index: 15;
+    }
+
+    .personality-popup .primary-button {
+        display: none;
+    }
+
+    .side-70 {
+        order: 4;
+        width: 100%;
+        max-width: none;
+        height: auto;
+        margin-top: 0;
+        position: static;
+        overflow: visible;
+        min-width: 0;
+    }
+
+    .doll-photo-small {
+        display: none;
+    }
+
+    .tab-panel {
+        position: static;
+        height: auto;
+    }
+
+    .tab-panel--scroll {
+        overflow: visible;
+    }
+
+    .cards-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* button_bar fissa in basso (personality) */
+    .mobile-bottombar {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 75px;
+        padding-top: 20px;
+        background: var(--bg-color);
+        border-top: 1px solid var(--btn-stroke);
+        z-index: 30;
+    }
+
+    .mobile-bottombar .primary-button {
+        width: 207px;
+        font-size: 12px;
+    }
+
+    /* trophy card (tab trophies) impilate */
+    .trophy-card {
+        flex-direction: column;
+    }
+
+    .trophy-card__photo {
+        width: 100%;
+    }
+
+    .trophy-card__side {
+        height: auto;
+        border-left: 1px solid var(--card-stroke);
+        border-top: none;
+        gap: 24px;
+    }
+
+    /* box goalz */
+    .box-goalz {
+        padding: 16px 24px;
+    }
+
+    /* ===== sotto-pagine mytrophies/myfaves ===== */
     .bottom-container-subpage {
         width: 100%;
     }
@@ -2024,9 +1887,7 @@ body {
         height: auto;
         min-height: 400px;
     }
-}
 
-@media (max-width: 620px) {
     .reward-card {
         flex-direction: column;
     }
@@ -2049,33 +1910,16 @@ body {
     .reward-input {
         flex: 1;
     }
-}
 
-/* ===== Sotto-pagine user (mytrophies / myfaves): scala tipografica mobile.
-   Definite qui, in coda, per vincere sull'ordine sorgente rispetto alle regole
-   base delle stesse classi. Il desktop (>768px) resta invariato. ===== */
-@media (max-width: 768px) {
-    /* Testi introduttivi delle sotto-pagine */
     .page-description {
         font-size: 15px;
         line-height: 1.3;
     }
 
-    /* Descrizioni e testi di servizio (monospaced): reward card + empty state */
     .reward-card__title,
     .reward-card__desc,
     .empty-state__text {
         font-size: 13px;
         line-height: 1.4;
-    }
-
-    .card-user-page{
-        position: relative;
-        height: auto;
-    }
-
-    [src="assets/images/mydollz_image.png"]{
-        position:absolute;
-        top: -320px;
     }
 }
