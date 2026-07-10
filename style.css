@@ -1770,8 +1770,27 @@ body {
         overflow-x: auto;
         overflow-y: hidden;
         -webkit-overflow-scrolling: touch;
-        padding-bottom: 4px;
+        padding-bottom: 8px;
         margin-bottom: 66px;
+        /* scrollbar = componente "bar" come in .tab-panel--scroll (trophies desktop):
+           track = bar vuota, thumb = bar full (#c7a9ff) */
+        scrollbar-width: thin;
+        scrollbar-color: var(--bar-fill) var(--bar-empty);
+    }
+
+    /* WebKit: barra orizzontale = stato "full" della bar (fill viola + bordo nero 1px) */
+    .container-buttons::-webkit-scrollbar {
+        height: 8px;
+    }
+
+    .container-buttons::-webkit-scrollbar-track {
+        background: var(--bar-empty);
+        border: 1px solid var(--bar-stroke);
+    }
+
+    .container-buttons::-webkit-scrollbar-thumb {
+        background: var(--bar-fill);
+        border: 1px solid var(--bar-stroke);
     }
 
     .side-tab {
