@@ -1945,4 +1945,8 @@ body {
         font-size: 12px;
         height: 35px;
     }
+
+    .secondary-button {
+        height: 35px;
+    }
 }
