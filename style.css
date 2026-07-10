@@ -1912,6 +1912,14 @@ body {
 
     .reward-card__photo {
         width: 100%;
+        height: auto;
+        aspect-ratio: 433 / 225;
+    }
+
+    /* img fuori dal flusso: la scatola aspect-ratio detta l'altezza (crop cover) */
+    .reward-card__photo img {
+        position: absolute;
+        inset: 0;
     }
 
     .reward-card__side {
