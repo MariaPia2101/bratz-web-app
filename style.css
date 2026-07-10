@@ -1578,7 +1578,6 @@ body {
         left: min(170px, calc(100% - 255px));
         top: auto;
         bottom: calc(50% + 30px);
-        gap: 8px;
     }
 
     .enter-buttons .primary-button {
@@ -1716,6 +1715,7 @@ body {
     .doll-popup {
         display: flex;
         width: 150px;
+        gap: 8px;
     }
 
     .doll-popup--profile {
