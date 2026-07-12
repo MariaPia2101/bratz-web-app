@@ -32,8 +32,14 @@ const GROUND_LERP  = 12;       // morbidezza dei dislivelli (più alto = più re
 const MODEL_FACING_YAW_OFFSET = Math.PI;
 const INITIAL_YAW = 0;
 
-// Camera in terza persona: offset FISSO (ancoraggio rigido)
-const CAM = { back: 3.2, height: 1.9, look: 1.2 };
+// Camera in terza persona: offset dietro le spalle. La camera si AVVICINA se
+// c'è un muro/vetro tra lei e il personaggio (niente "vedo attraverso").
+const CAM = { back: 3.2, height: 1.9, look: 1.2, min: 0.5, pad: 0.18 };
+
+// Riposizionamento della mesh decorativa "Lines_Floor_Mesh_".
+// I valori arrivano da Blender (Z-up): convertiti in three (Y-up) -> (X, Zb, -Yb).
+const LINES_FLOOR_NAME = "Lines_Floor_Mesh_";
+const LINES_FLOOR_POS  = { x: 1.90923, y: 0.367931, z: -1.18059 };
 
 // Confini: margine dal bordo del terreno.
 const ROOM_MARGIN = 0.30;
@@ -121,7 +127,8 @@ let groundRayStartY = 8;   // da quanto in alto sparo il raggio verso il basso
 let floorRefY = 0;         // livello nominale del pavimento (per il filtro ostacoli)
 
 const floorMeshes = [];    // mesh su cui appoggiare i piedi (Foundament_Home_)
-const colliders = [];      // ostacoli: { minX, maxX, minZ, maxZ }
+const colliders = [];      // ostacoli movimento: { minX, maxX, minZ, maxZ }
+const occluders = [];      // TUTTE le mesh: la camera non ci passa attraverso
 
 // Input tastiera
 const keys = new Set();
@@ -170,6 +177,8 @@ function classifyEnvironment(environment) {
         b.setFromObject(o);
         if (!isFinite(b.min.x)) return;
 
+        occluders.push(o); // ogni mesh può occludere la camera
+
         if (hasName(o, FLOOR_MESH_NAME)) {
             floorMeshes.push(o);
             floorBox = floorBox ? floorBox.union(b) : b.clone(); // unione di tutte le parti
@@ -209,6 +218,19 @@ function classifyEnvironment(environment) {
     }
 
     console.info(`[scene] Stanza X[${room.minX.toFixed(2)},${room.maxX.toFixed(2)}] Z[${room.minZ.toFixed(2)},${room.maxZ.toFixed(2)}] — ostacoli: ${colliders.length}, pavimenti: ${floorMeshes.length}`);
+}
+
+// Sposta la mesh decorativa "Lines_Floor_Mesh_" alla posizione richiesta.
+// worldToLocal: così la posizione MONDO risulta corretta anche se la mesh è
+// figlia di un Group con una sua trasformazione.
+function repositionLinesFloor(environment) {
+    const o = environment.getObjectByName(LINES_FLOOR_NAME);
+    if (!o) { console.warn(`[scene] "${LINES_FLOOR_NAME}" non trovata: niente riposizionamento.`); return; }
+    const target = new THREE.Vector3(LINES_FLOOR_POS.x, LINES_FLOOR_POS.y, LINES_FLOOR_POS.z);
+    if (o.parent) { o.parent.updateWorldMatrix(true, false); o.parent.worldToLocal(target); }
+    o.position.copy(target);
+    o.updateMatrixWorld(true);
+    console.info(`[scene] "${LINES_FLOOR_NAME}" riposizionata a world (${LINES_FLOOR_POS.x}, ${LINES_FLOOR_POS.y}, ${LINES_FLOOR_POS.z}).`);
 }
 
 // ---------- Collisioni (bounding box, asse per asse) ----------
@@ -254,18 +276,36 @@ function groundY() {
     return y === null ? character.y : y; // se buco, mantieni l'ultima quota valida
 }
 
-// ---------- Camera rigida in terza persona ----------
-const _forward = new THREE.Vector3();
-const _lookAt  = new THREE.Vector3();
+// ---------- Camera in terza persona con anti-occlusione ----------
+const _forward   = new THREE.Vector3();
+const _lookAt    = new THREE.Vector3();
+const _camOrigin = new THREE.Vector3();
+const _camDesired = new THREE.Vector3();
+const _camDir    = new THREE.Vector3();
 function headingForward(yaw) { return _forward.set(-Math.sin(yaw), 0, -Math.cos(yaw)); }
 
 function updateCamera() {
     const fwd = headingForward(character.yaw);
-    camera.position.set(
+
+    // Punto "occhio" (spalle) e posizione ideale dietro le spalle.
+    _camOrigin.set(character.x, character.y + CAM.look, character.z);
+    _camDesired.set(
         character.x - fwd.x * CAM.back,
-        character.y + CAM.height,   // segue salite/discese del terreno
+        character.y + CAM.height,
         character.z - fwd.z * CAM.back
     );
+
+    // Se c'è geometria tra l'occhio e la posizione ideale, avvicina la camera
+    // fin davanti all'ostacolo -> non attraversa muri/vetri e resta nell'interno.
+    _camDir.copy(_camDesired).sub(_camOrigin);
+    let dist = _camDir.length();
+    _camDir.normalize();
+    _rc.set(_camOrigin, _camDir);
+    _rc.far = dist;
+    const hits = _rc.intersectObjects(occluders, false);
+    if (hits.length) dist = Math.max(CAM.min, hits[0].distance - CAM.pad);
+
+    camera.position.copy(_camOrigin).addScaledVector(_camDir, dist);
     _lookAt.set(character.x + fwd.x * 2, character.y + CAM.look, character.z + fwd.z * 2);
     camera.lookAt(_lookAt);
 }
@@ -286,6 +326,7 @@ async function init() {
         enableShadows(environment);
         scene.add(environment);
         classifyEnvironment(environment);
+        repositionLinesFloor(environment);
 
         const charModel = await loadModel(MODELS.character);
         enableShadows(charModel);
