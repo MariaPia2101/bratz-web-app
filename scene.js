@@ -26,9 +26,9 @@ const FLOOR_MESH_NAME = "foundament";
 // Specchio: Reflector sulla FORMA REALE del materiale "Mirror" di Mirror_Mesh_.
 const MIRROR = {
     matName: "mirror",
-    res: 512,        // risoluzione della texture di riflessione (più bassa = più leggera)
+    res: 768,        // risoluzione della texture di riflessione (nitidezza vs prestazioni)
     offset: 0.012,   // micro-spostamento verso la stanza (anti z-fighting)
-    color: 0xc2c9cd, // leggera tinta dei riflessi
+    color: 0xe6eaec, // riflessi più chiari/nitidi (vicino al bianco)
 };
 
 // Mesh CALPESTABILI (non ostacoli): ci si cammina sopra senza fermarsi.
@@ -78,7 +78,7 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 0.8; // più basso = alte luci meno bruciate (look più soffuso)
+renderer.toneMappingExposure = 0.9; // resa morbida, luminosa ma non bruciata
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
@@ -100,15 +100,17 @@ RectAreaLightUniformsLib.init(); // necessario per le RectAreaLight (strisce LED
 const LED_PINK   = 0xff5abb;
 const LED_MAGENTA = 0xff2f9e;
 
-// Ambiente + emisferica: fill quasi bianco/appena rosato (evita l'effetto fucsia).
-scene.add(new THREE.AmbientLight(0xffeaf5, 0.55 * LIGHT_TUNE));
-scene.add(new THREE.HemisphereLight(0xfff3fb, 0xffd0ec, 0.35 * LIGHT_TUNE));
+// Ambiente + emisferica: fill NEUTRO (bianco) e luminoso -> resa morbida ed
+// even, come nel render originale. Il rosa arriva solo dagli accenti LED.
+scene.add(new THREE.AmbientLight(0xffffff, 0.95 * LIGHT_TUNE));
+scene.add(new THREE.HemisphereLight(0xffffff, 0xffe6dd, 0.55 * LIGHT_TUNE));
 
-// Key light direzionale: definizione + ombra morbida, praticamente bianca.
-const keyLight = new THREE.DirectionalLight(0xfff4f8, 0.85 * LIGHT_TUNE);
+// Key light direzionale: bassa e con ombra molto morbida (poco contrasto).
+const keyLight = new THREE.DirectionalLight(0xffffff, 0.6 * LIGHT_TUNE);
 keyLight.position.set(5, 8, 5);
 keyLight.castShadow = true;
 keyLight.shadow.mapSize.set(2048, 2048);
+keyLight.shadow.radius = 5;        // bordi ombra soffusi
 keyLight.shadow.camera.near = 0.5;
 keyLight.shadow.camera.far = 50;
 keyLight.shadow.bias = -0.0001;
@@ -121,7 +123,7 @@ const LAMP_POINTS = [
     [0.41, 3.15, -1.28], [-0.08, 3.15, -0.91], [2.45, 3.15, -0.27],
 ];
 for (const [x, y, z] of LAMP_POINTS) {
-    const l = new THREE.PointLight(0xffbfe4, 7 * LIGHT_TUNE, 5, 2);
+    const l = new THREE.PointLight(0xffe0f0, 6 * LIGHT_TUNE, 5, 2); // rosa molto tenue
     l.position.set(x, y, z);
     scene.add(l);
 }
@@ -184,7 +186,7 @@ function enableShadows(root) {
 const EMISSIVE_MAX = 3.0;
 // Influenza dell'environment map neutro (RoomEnvironment): più bassa = meno
 // "bianco piatto" che slava la stanza. Alza per riflessi/ambient più forti.
-const ENV_INTENSITY = 0.35;
+const ENV_INTENSITY = 0.5;
 
 // Passata sui materiali: (1) riduce il wash bianco dell'IBL, (2) tiene vividi
 // gli emissivi (LED/neon/lampade) indipendenti dal tone mapping e con un tetto.
