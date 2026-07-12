@@ -351,6 +351,7 @@ function setupMirror(environment) {
     // normale +Z e azzero lo spessore -> piano perfetto pronto per il Reflector.
     const geo = mirrorMesh.geometry.clone();
     geo.applyMatrix4(mirrorMesh.matrixWorld);
+    geo.clearGroups();                       // via i gruppi multi-materiale
     geo.computeBoundingBox();
     const center = geo.boundingBox.getCenter(new THREE.Vector3());
     geo.translate(-center.x, -center.y, -center.z);
@@ -364,6 +365,7 @@ function setupMirror(environment) {
         color: MIRROR.color,
         clipBias: 0.003,
     });
+    reflector.material.side = THREE.DoubleSide; // il quad si vede a prescindere dal winding
     reflector.position.copy(center);
     reflector.rotation.y = Math.PI;         // faccia riflettente verso la stanza (-Z), verticale preservata
     reflector.position.z -= MIRROR.offset;  // micro-offset anti z-fighting
