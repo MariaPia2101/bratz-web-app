@@ -1,16 +1,16 @@
 // ===== BRATZ — Scena 3D =====
 // Stanza (environment.glb) + doll (character.glb) con three.js.
-// Camera in TERZA PERSONA ancorata rigidamente ALLE SPALLE del personaggio.
-// Il personaggio è incollato al pavimento (raycast verso il basso) e si muove
-// su quel piano; le collisioni con muri e oggetti sono gestite a raycast nel
-// loop di aggiornamento. I modelli usano Draco + WebP.
+// Camera in TERZA PERSONA rigidamente alle spalle del personaggio.
+// Il personaggio cammina sul terreno "Foundament_Home_" (raycast verso il basso,
+// quindi segue salite e discese) e NON attraversa nessuna mesh: ogni oggetto della
+// stanza ha una bounding box che lo blocca. I modelli usano Draco + WebP.
 
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 
-// ---------- Configurazione (tutto ritoccabile passo dopo passo) ----------
+// ---------- Configurazione ----------
 const MODELS = {
     environment: "assets/3d/models/environment.glb",
     character:   "assets/3d/models/character.glb",
@@ -18,30 +18,30 @@ const MODELS = {
 
 const DRACO_DECODER_PATH = "https://unpkg.com/three@0.160.0/examples/jsm/libs/draco/";
 
-// Movimento del personaggio
-const MOVE_SPEED   = 2.2;   // unità/secondo (avanti/indietro)
-const RUN_MULT     = 1.8;   // moltiplicatore con Shift
-const TURN_SPEED   = 2.4;   // radianti/secondo (rotazione sinistra/destra)
-const CHARACTER_RADIUS = 0.30; // "cuscinetto" del personaggio per le collisioni
+// Nome della mesh che fa da PAVIMENTO calpestabile (con dislivelli).
+const FLOOR_MESH_NAME = "foundament";
 
-// Il fronte del modello guarda verso +Z: lo ruotiamo di 180° così la doll dà
-// le spalle alla telecamera e cammina nella direzione in cui guarda.
+// Movimento
+const MOVE_SPEED   = 2.2;
+const RUN_MULT     = 1.8;
+const TURN_SPEED   = 2.4;
+const CHARACTER_RADIUS = 0.30; // cuscinetto orizzontale per le collisioni
+
+// Il fronte del modello guarda verso +Z: ruotato di 180° -> spalle alla camera.
 const MODEL_FACING_YAW_OFFSET = Math.PI;
-const INITIAL_YAW = 0;      // direzione iniziale in cui guarda il personaggio
+const INITIAL_YAW = 0;
 
-// Camera in terza persona: offset FISSO rispetto al personaggio (ancoraggio rigido)
-const CAM = {
-    back:   3.2,   // quanto è arretrata dietro le spalle
-    height: 1.9,   // quanto è rialzata
-    look:   1.2,   // altezza del punto guardato (spalle/testa)
-};
+// Camera in terza persona: offset FISSO (ancoraggio rigido)
+const CAM = { back: 3.2, height: 1.9, look: 1.2 };
 
-// Margine dai bordi del pavimento (rete di sicurezza per non uscire dalla stanza)
+// Confini: margine dal bordo del terreno.
 const ROOM_MARGIN = 0.30;
 
-// Altezze (dal pavimento) a cui sparo i raggi di collisione orizzontali:
-// caviglia / bacino / spalle → blocca sia mobili bassi sia muri alti.
-const PROBE_HEIGHTS = [0.20, 0.70, 1.05];
+// Filtro per decidere cosa è un OSTACOLO (rispetto al livello del pavimento):
+// deve sporgere almeno OBSTACLE_MIN_RISE dal suolo (esclude tappeti/decori piatti)
+// e partire sotto la testa (esclude oggetti appesi/soffitti sopra di lei).
+const OBSTACLE_MIN_RISE = 0.20;
+const OBSTACLE_MAX_BASE = 2.20;
 
 // ---------- Riferimenti DOM ----------
 const canvas      = document.getElementById("scene-canvas");
@@ -51,11 +51,7 @@ const loadingFill = document.getElementById("scene-loading-fill");
 const loadingText = document.getElementById("scene-loading-text");
 
 // ---------- Renderer ----------
-const renderer = new THREE.WebGLRenderer({
-    canvas,
-    antialias: true,
-    powerPreference: "high-performance",
-});
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: "high-performance" });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -69,14 +65,11 @@ const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.05, 1000);
 camera.position.set(0, CAM.height, CAM.back);
 
-// Environment map neutra: serve ai materiali transmission/specular/sheen.
 const pmrem = new THREE.PMREMGenerator(renderer);
 scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
 
 // ---------- Luci ----------
-const hemiLight = new THREE.HemisphereLight(0xffffff, 0x8899aa, 0.6);
-scene.add(hemiLight);
-
+scene.add(new THREE.HemisphereLight(0xffffff, 0x8899aa, 0.6));
 const keyLight = new THREE.DirectionalLight(0xffffff, 2.0);
 keyLight.position.set(5, 8, 5);
 keyLight.castShadow = true;
@@ -113,27 +106,25 @@ const gltfLoader = new GLTFLoader(manager);
 gltfLoader.setDRACOLoader(dracoLoader);
 
 function loadModel(url) {
-    return new Promise((resolve, reject) => {
-        gltfLoader.load(url, (gltf) => resolve(gltf.scene), undefined, reject);
-    });
+    return new Promise((resolve, reject) => gltfLoader.load(url, (g) => resolve(g.scene), undefined, reject));
 }
 function enableShadows(root) {
     root.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
 }
 
 // ---------- Stato ----------
-const character = { obj: null, yaw: INITIAL_YAW, x: 0, z: 0, footOffset: 0 };
-let floorTopY = 0;
+const character = { obj: null, yaw: INITIAL_YAW, x: 0, z: 0, y: 0, footOffset: 0 };
 
 const room = { minX: -Infinity, maxX: Infinity, minZ: -Infinity, maxZ: Infinity };
+let groundRayStartY = 8;   // da quanto in alto sparo il raggio verso il basso
+let floorRefY = 0;         // livello nominale del pavimento (per il filtro ostacoli)
 
-// Mesh su cui appoggiare i piedi (pavimento) e mesh contro cui sbattere (muri+oggetti).
-const floorMeshes = [];
-const collidables = [];
+const floorMeshes = [];    // mesh su cui appoggiare i piedi (Foundament_Home_)
+const colliders = [];      // ostacoli: { minX, maxX, minZ, maxZ }
 
 // Input tastiera
 const keys = new Set();
-const isDown = (...codes) => codes.some((c) => keys.has(c));
+const isDown = (...c) => c.some((k) => keys.has(k));
 window.addEventListener("keydown", (e) => {
     keys.add(e.code);
     if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Space"].includes(e.code)) e.preventDefault();
@@ -151,116 +142,113 @@ function fadeHint() {
 }
 setTimeout(fadeHint, 6000);
 
-// ---------- Classificazione della geometria ----------
-// Pavimento -> per l'ancoraggio e i confini. Soffitto/luci -> ignorati come collider.
-// Tutto il resto (muri, mobili, scale...) -> collidibile.
+// ---------- Classificazione geometria ----------
+// Foundament_Home_ -> pavimento (grounding + confini). Tutte le altre mesh solide
+// che sporgono dal suolo -> ostacoli (bounding box). Soffitti/decori piatti esclusi.
 function classifyEnvironment(environment) {
     environment.updateMatrixWorld(true);
 
+    const candidates = []; // { box } di possibili ostacoli, filtrati dopo
     let floorBox = null;
-    const tmp = new THREE.Box3();
-    const areaXZ = (b) => (b.max.x - b.min.x) * (b.max.z - b.min.z);
+    const b = new THREE.Box3();
+    const areaXZ = (x) => (x.max.x - x.min.x) * (x.max.z - x.min.z);
 
     environment.traverse((o) => {
         if (!o.isMesh) return;
         const name = (o.name || "").toLowerCase();
+        b.setFromObject(o);
+        if (!isFinite(b.min.x)) return;
 
-        if (name.includes("floor")) {
+        if (name.includes(FLOOR_MESH_NAME)) {
             floorMeshes.push(o);
-            tmp.setFromObject(o);
-            if (isFinite(tmp.min.x) && (!floorBox || areaXZ(tmp) > areaXZ(floorBox))) {
-                floorBox = tmp.clone();
-            }
-            return; // il pavimento non blocca il movimento orizzontale
+            if (!floorBox || areaXZ(b) > areaXZ(floorBox)) floorBox = b.clone();
+            return; // il pavimento non è un ostacolo
         }
-        // Il soffitto e le mesh luminose non fermano il personaggio.
         if (name.includes("ceiling") || name.includes("soffitt")) return;
+        if (name.includes("floor")) return; // decoro piatto calpestabile
 
-        collidables.push(o); // muri, mobili, scale, ecc.
+        candidates.push(b.clone());
     });
 
+    // Confini della stanza = footprint del pavimento, ristretto dal margine.
     if (floorBox) {
         room.minX = floorBox.min.x + ROOM_MARGIN;
         room.maxX = floorBox.max.x - ROOM_MARGIN;
         room.minZ = floorBox.min.z + ROOM_MARGIN;
         room.maxZ = floorBox.max.z - ROOM_MARGIN;
-        floorTopY = floorBox.max.y;
+        floorRefY = floorBox.min.y;
+        groundRayStartY = floorBox.max.y + 2;
     } else {
         const g = new THREE.Box3().setFromObject(environment);
         room.minX = g.min.x + ROOM_MARGIN; room.maxX = g.max.x - ROOM_MARGIN;
         room.minZ = g.min.z + ROOM_MARGIN; room.maxZ = g.max.z - ROOM_MARGIN;
-        floorTopY = g.min.y;
-        console.warn("[scene] Pavimento non trovato: uso la bbox globale come confine.");
+        floorRefY = g.min.y; groundRayStartY = g.max.y + 2;
+        console.warn(`[scene] Mesh pavimento "${FLOOR_MESH_NAME}" non trovata: uso la bbox globale.`);
     }
-    console.info(`[scene] Stanza X[${room.minX.toFixed(2)},${room.maxX.toFixed(2)}] Z[${room.minZ.toFixed(2)},${room.maxZ.toFixed(2)}] floorY=${floorTopY.toFixed(2)} — collidibili: ${collidables.length}, pavimenti: ${floorMeshes.length}`);
+
+    // Filtra i candidati: tieni solo ciò che è davvero un ostacolo dentro la stanza.
+    for (const box of candidates) {
+        // Deve intersecare l'area della stanza (scarta mesh esterne/lontane).
+        if (box.max.x < room.minX || box.min.x > room.maxX ||
+            box.max.z < room.minZ || box.min.z > room.maxZ) continue;
+        // Deve sporgere dal suolo ma non essere solo roba appesa in alto.
+        if (box.max.y < floorRefY + OBSTACLE_MIN_RISE) continue;
+        if (box.min.y > floorRefY + OBSTACLE_MAX_BASE) continue;
+        colliders.push({ minX: box.min.x, maxX: box.max.x, minZ: box.min.z, maxZ: box.max.z });
+    }
+
+    console.info(`[scene] Stanza X[${room.minX.toFixed(2)},${room.maxX.toFixed(2)}] Z[${room.minZ.toFixed(2)},${room.maxZ.toFixed(2)}] — ostacoli: ${colliders.length}, pavimenti: ${floorMeshes.length}`);
 }
 
-// ---------- Collisioni a raycast ----------
-const _rc  = new THREE.Raycaster();
-const _dir = new THREE.Vector3();
+// ---------- Collisioni (bounding box, asse per asse) ----------
+// Il personaggio (cerchio di raggio R) è dentro un ostacolo?
+function blocked(x, z) {
+    const r = CHARACTER_RADIUS;
+    for (let i = 0; i < colliders.length; i++) {
+        const c = colliders[i];
+        if (x > c.minX - r && x < c.maxX + r && z > c.minZ - r && z < c.maxZ + r) return true;
+    }
+    return false;
+}
+
+// Muove un asse alla volta -> scivola lungo gli oggetti invece di incastrarsi;
+// clamp finale ai confini del pavimento (non esce dalla stanza).
+function resolveMove(dx, dz) {
+    let nx = THREE.MathUtils.clamp(character.x + dx, room.minX, room.maxX);
+    if (blocked(nx, character.z)) nx = character.x;
+    let nz = THREE.MathUtils.clamp(character.z + dz, room.minZ, room.maxZ);
+    if (blocked(nx, nz)) nz = character.z;
+    character.x = nx;
+    character.z = nz;
+}
+
+// ---------- Ancoraggio al pavimento (raycast verso il basso) ----------
+const _rc = new THREE.Raycaster();
 const _org = new THREE.Vector3();
 const _down = new THREE.Vector3(0, -1, 0);
 
-// Quanto può avanzare il personaggio lungo un asse prima di sbattere (raycast).
-function sweepAxis(axis, amount) {
-    if (amount === 0) return 0;
-    const sign = Math.sign(amount);
-    const dist = Math.abs(amount);
-    _dir.set(axis === "x" ? sign : 0, 0, axis === "z" ? sign : 0);
-
-    let allowed = dist;
-    for (let i = 0; i < PROBE_HEIGHTS.length; i++) {
-        _org.set(character.x, floorTopY + PROBE_HEIGHTS[i], character.z);
-        _rc.set(_org, _dir);
-        _rc.far = dist + CHARACTER_RADIUS;
-        const hits = _rc.intersectObjects(collidables, false);
-        if (hits.length) {
-            allowed = Math.min(allowed, Math.max(0, hits[0].distance - CHARACTER_RADIUS));
-        }
-    }
-    return sign * allowed;
-}
-
-// Muove il personaggio un asse alla volta: così scivola lungo muri e oggetti
-// invece di incastrarsi. In coda, clamp ai confini della stanza (rete di sicurezza).
-function resolveMove(dx, dz) {
-    character.x += sweepAxis("x", dx);
-    character.z += sweepAxis("z", dz);
-    character.x = THREE.MathUtils.clamp(character.x, room.minX, room.maxX);
-    character.z = THREE.MathUtils.clamp(character.z, room.minZ, room.maxZ);
-}
-
-// Altezza del pavimento sotto il personaggio (raycast verso il basso) -> ancoraggio.
 function groundY() {
-    if (!floorMeshes.length) return floorTopY;
-    _org.set(character.x, floorTopY + 2.0, character.z);
+    if (!floorMeshes.length) return floorRefY;
+    _org.set(character.x, groundRayStartY, character.z);
     _rc.set(_org, _down);
-    _rc.far = 6.0;
+    _rc.far = groundRayStartY - floorRefY + 4;
     const hits = _rc.intersectObjects(floorMeshes, false);
-    return hits.length ? hits[0].point.y : floorTopY;
+    return hits.length ? hits[0].point.y : character.y; // se buco, mantieni l'ultima quota
 }
 
 // ---------- Camera rigida in terza persona ----------
 const _forward = new THREE.Vector3();
-const _camPos  = new THREE.Vector3();
 const _lookAt  = new THREE.Vector3();
-
-// Direzione (world) verso cui guarda il personaggio, dato lo yaw logico.
-function headingForward(yaw) {
-    return _forward.set(-Math.sin(yaw), 0, -Math.cos(yaw));
-}
+function headingForward(yaw) { return _forward.set(-Math.sin(yaw), 0, -Math.cos(yaw)); }
 
 function updateCamera() {
     const fwd = headingForward(character.yaw);
-    // Dietro le spalle (-fwd) e rialzata (+y): offset FISSO = ancoraggio rigido.
-    _camPos.set(
+    camera.position.set(
         character.x - fwd.x * CAM.back,
-        floorTopY + CAM.height,
+        character.y + CAM.height,   // segue salite/discese del terreno
         character.z - fwd.z * CAM.back
     );
-    camera.position.copy(_camPos);
-    // Guarda sempre nella stessa direzione del personaggio.
-    _lookAt.set(character.x + fwd.x * 2, floorTopY + CAM.look, character.z + fwd.z * 2);
+    _lookAt.set(character.x + fwd.x * 2, character.y + CAM.look, character.z + fwd.z * 2);
     camera.lookAt(_lookAt);
 }
 
@@ -268,7 +256,8 @@ function updateCamera() {
 function placeCharacter() {
     const o = character.obj;
     if (!o) return;
-    o.position.set(character.x, groundY() - character.footOffset, character.z);
+    character.y = groundY();                 // quota del terreno sotto di lei
+    o.position.set(character.x, character.y - character.footOffset, character.z);
     o.rotation.y = character.yaw + MODEL_FACING_YAW_OFFSET;
 }
 
@@ -283,25 +272,37 @@ async function init() {
         const charModel = await loadModel(MODELS.character);
         enableShadows(charModel);
         charModel.updateMatrixWorld(true);
+        character.footOffset = new THREE.Box3().setFromObject(charModel).min.y; // origine ai piedi (~0)
 
-        // Origine del modello ai piedi (footOffset ~0): serve ad appoggiarla al suolo.
-        const box = new THREE.Box3().setFromObject(charModel);
-        character.footOffset = box.min.y;
-
-        // Spawn al centro della stanza.
-        character.x = (room.minX + room.maxX) / 2;
-        character.z = (room.minZ + room.maxZ) / 2;
+        const spawn = findSpawn();
+        character.x = spawn.x;
+        character.z = spawn.z;
         character.obj = charModel;
 
         placeCharacter();
         scene.add(charModel);
         updateCamera();
 
-        window.__bratz = { scene, camera, renderer, character, room, collidables, floorMeshes, CAM };
+        window.__bratz = { scene, camera, renderer, character, room, colliders, floorMeshes, CAM };
     } catch (err) {
         console.error("[scene] Init fallita:", err);
         loadingText.textContent = "Load error";
     }
+}
+
+// Spawn valido: centro stanza, altrimenti a spirale finché non è libero da ostacoli.
+function findSpawn() {
+    const cx = (room.minX + room.maxX) / 2;
+    const cz = (room.minZ + room.maxZ) / 2;
+    if (!blocked(cx, cz)) return { x: cx, z: cz };
+    for (let r = 0.5; r < 8; r += 0.4) {
+        for (let a = 0; a < Math.PI * 2; a += Math.PI / 8) {
+            const x = THREE.MathUtils.clamp(cx + Math.cos(a) * r, room.minX, room.maxX);
+            const z = THREE.MathUtils.clamp(cz + Math.sin(a) * r, room.minZ, room.maxZ);
+            if (!blocked(x, z)) return { x, z };
+        }
+    }
+    return { x: cx, z: cz };
 }
 
 // ---------- Resize ----------
@@ -313,10 +314,9 @@ window.addEventListener("resize", () => {
 
 // ---------- Loop ----------
 const clock = new THREE.Clock();
-
 function animate() {
     requestAnimationFrame(animate);
-    const dt = Math.min(clock.getDelta(), 0.05); // clamp anti-tunneling nei cali di frame
+    const dt = Math.min(clock.getDelta(), 0.05);
 
     if (character.obj) {
         const turn = (isDown("ArrowLeft", "KeyA") ? 1 : 0) - (isDown("ArrowRight", "KeyD") ? 1 : 0);
