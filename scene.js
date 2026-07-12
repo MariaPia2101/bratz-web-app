@@ -9,6 +9,7 @@ import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
+import { RectAreaLightUniformsLib } from "three/addons/lights/RectAreaLightUniformsLib.js";
 import { Reflector } from "three/addons/objects/Reflector.js";
 
 // ---------- Configurazione ----------
@@ -25,9 +26,9 @@ const FLOOR_MESH_NAME = "foundament";
 // Specchio: Reflector sulla FORMA REALE del materiale "Mirror" di Mirror_Mesh_.
 const MIRROR = {
     matName: "mirror",
-    res: 768,        // risoluzione della texture di riflessione (nitidezza vs prestazioni)
+    res: 512,        // risoluzione della texture di riflessione (più bassa = più leggera)
     offset: 0.012,   // micro-spostamento verso la stanza (anti z-fighting)
-    color: 0xe6eaec, // riflessi più chiari/nitidi (vicino al bianco)
+    color: 0xc2c9cd, // leggera tinta dei riflessi
 };
 
 // Mesh CALPESTABILI (non ostacoli): ci si cammina sopra senza fermarsi.
@@ -90,17 +91,21 @@ const pmrem = new THREE.PMREMGenerator(renderer);
 scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
 
 // ---------- Illuminazione (simula il light bake di Blender) ----------
-// I materiali emissivi (Blender bake) su WebGL non illuminano davvero la stanza,
-// quindi qui: (1) fill morbido di ambiente, (2) luci reali su lampade/soffitto/insegna.
 // LIGHT_TUNE alza/abbassa TUTTA l'intensità in un colpo solo.
 const LIGHT_TUNE = 1.0;
+RectAreaLightUniformsLib.init(); // necessario per le RectAreaLight (strisce LED)
 
-// Ambiente + emisferica: fill ROSA e morbido (non bianco), tiene vivi i colori.
-scene.add(new THREE.AmbientLight(0xffc4e8, 0.6 * LIGHT_TUNE));
-scene.add(new THREE.HemisphereLight(0xffd6f2, 0xff6ec8, 0.4 * LIGHT_TUNE));
+// Colori dei LED: ROSA (non bianchi). Il fill di ambiente è quasi neutro, così
+// il rosa arriva come ACCENTO dalle strisce e non "bagna" tutta la stanza.
+const LED_PINK   = 0xff5abb;
+const LED_MAGENTA = 0xff2f9e;
 
-// Key light direzionale: definizione + ombra morbida, appena rosata.
-const keyLight = new THREE.DirectionalLight(0xffe7f4, 0.75 * LIGHT_TUNE);
+// Ambiente + emisferica: fill quasi bianco/appena rosato (evita l'effetto fucsia).
+scene.add(new THREE.AmbientLight(0xffeaf5, 0.55 * LIGHT_TUNE));
+scene.add(new THREE.HemisphereLight(0xfff3fb, 0xffd0ec, 0.35 * LIGHT_TUNE));
+
+// Key light direzionale: definizione + ombra morbida, praticamente bianca.
+const keyLight = new THREE.DirectionalLight(0xfff4f8, 0.85 * LIGHT_TUNE);
 keyLight.position.set(5, 8, 5);
 keyLight.castShadow = true;
 keyLight.shadow.mapSize.set(2048, 2048);
@@ -109,27 +114,35 @@ keyLight.shadow.camera.far = 50;
 keyLight.shadow.bias = -0.0001;
 scene.add(keyLight);
 
-// Luci reali in corrispondenza delle lampade/LED (colori presi dagli emissivi).
-// { color, intensità, distanza, [x,y,z] }
-const FIXTURE_LIGHTS = [
-    // Lampade a sospensione (rosa caldo) sopra la zona salotto — più tenui
-    { c: 0xffbfe4, i: 16, d: 6, p: [0.1, 3.15, -0.5] },
-    { c: 0xffbfe4, i: 16, d: 6, p: [1.2, 3.15, -1.1] },
-    { c: 0xffbfe4, i: 14, d: 6, p: [2.1, 3.15, -1.9] },
-    // LED perimetrali del soffitto (rosa)
-    { c: 0xff33b0, i: 14, d: 9, p: [-0.46, 3.95, -4.1] },
-    { c: 0xff33b0, i: 14, d: 9, p: [-3.9,  3.95, -1.2] },
-    { c: 0xff33b0, i: 14, d: 9, p: [0.6,   3.95,  3.4] },
-    { c: 0xff33b0, i: 14, d: 9, p: [3.0,   3.95, -0.35] },
-    // Insegna neon "BRATZ" (magenta) sulla parete di fondo
-    { c: 0xff1f9f, i: 10, d: 5,  p: [0.1, 1.6, 3.2] },
-    // LED degli scaffali manichini (rosa)
-    { c: 0xff57bf, i: 9, d: 5,  p: [-2.5, 2.2, -4.0] },
-    { c: 0xff57bf, i: 9, d: 5,  p: [3.1,  1.9,  2.3] },
+// --- Le 9 lampade a sospensione (Lamp_Mesh_) = PointLight (rosa tenue) ---
+const LAMP_POINTS = [
+    [2.09, 3.15, -2.68], [1.23, 3.15, -2.11], [2.14, 3.15, -1.39],
+    [1.18, 3.15, -0.85], [1.10, 3.15,  0.01], [0.13, 3.15,  0.13],
+    [0.41, 3.15, -1.28], [-0.08, 3.15, -0.91], [2.45, 3.15, -0.27],
 ];
-for (const f of FIXTURE_LIGHTS) {
-    const l = new THREE.PointLight(f.c, f.i * LIGHT_TUNE, f.d, 2);
-    l.position.set(f.p[0], f.p[1], f.p[2]);
+for (const [x, y, z] of LAMP_POINTS) {
+    const l = new THREE.PointLight(0xffbfe4, 7 * LIGHT_TUNE, 5, 2);
+    l.position.set(x, y, z);
+    scene.add(l);
+}
+
+// --- I LED = RectAreaLight (strisce luminose), tutte ROSA ---
+// { colore, intensità, larghezza, altezza, posizione, punto verso cui illumina }
+// NB: le RectAreaLight sono costose -> ne teniamo poche (perimetro soffitto +
+// insegna). Gli altri LED restano visibili grazie al loro glow emissivo rosa.
+const AREA_LIGHTS = [
+    // LED perimetrali del soffitto: illuminano verso il basso
+    { c: LED_PINK, i: 5, w: 5, h: 0.6, p: [-0.46, 4.25, -4.3], look: [-0.46, 0, -4.3] },
+    { c: LED_PINK, i: 5, w: 5, h: 0.6, p: [-4.05, 4.25, -1.2], look: [-4.05, 0, -1.2] },
+    { c: LED_PINK, i: 5, w: 5, h: 0.6, p: [0.60,  4.25,  3.5], look: [0.60, 0,  3.5] },
+    { c: LED_PINK, i: 5, w: 5, h: 0.6, p: [3.05,  4.25, -0.35], look: [3.05, 0, -0.35] },
+    // Insegna neon "BRATZ": illumina verso l'interno stanza
+    { c: LED_MAGENTA, i: 6, w: 1.4, h: 2.0, p: [0.10, 1.40, 3.55], look: [0.10, 1.40, 0] },
+];
+for (const a of AREA_LIGHTS) {
+    const l = new THREE.RectAreaLight(a.c, a.i * LIGHT_TUNE, a.w, a.h);
+    l.position.set(a.p[0], a.p[1], a.p[2]);
+    l.lookAt(a.look[0], a.look[1], a.look[2]);
     scene.add(l);
 }
 
@@ -189,6 +202,10 @@ function tuneMaterials(root) {
                 if (glows) {
                     m.emissiveIntensity = Math.min(m.emissiveIntensity, EMISSIVE_MAX);
                     m.toneMapped = false; // il glow resta vivido a prescindere dall'esposizione
+                    // Se il LED è biancastro/poco saturo -> tingilo di rosa (i LED devono essere rosa).
+                    const c = m.emissive, mx = Math.max(c.r, c.g, c.b), mn = Math.min(c.r, c.g, c.b);
+                    const sat = mx > 0 ? (mx - mn) / mx : 0;
+                    if (sat < 0.35) m.emissive.set(LED_PINK);
                     emissiveCount++;
                 }
             }
