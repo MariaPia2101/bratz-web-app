@@ -23,14 +23,12 @@ const DRACO_DECODER_PATH = "https://unpkg.com/three@0.160.0/examples/jsm/libs/dr
 // Nome della mesh che fa da PAVIMENTO calpestabile (con dislivelli).
 const FLOOR_MESH_NAME = "foundament";
 
-// Specchio: piano riflettente reale (Reflector) sopra il materiale "Mirror" di
-// Mirror_Mesh_ (piano piatto a Z=3.72, ~0.91x1.41, rivolto verso la stanza).
+// Specchio: Reflector sulla FORMA REALE del materiale "Mirror" di Mirror_Mesh_.
 const MIRROR = {
     matName: "mirror",
-    w: 0.91, h: 1.41,
-    pos: [-1.195, 1.145, 3.71], // leggermente davanti al vetro originale
-    rotY: Math.PI,              // faccia riflettente verso l'interno (-Z)
-    color: 0xc2c9cd,           // leggera tinta dei riflessi
+    res: 512,        // risoluzione della texture di riflessione (più bassa = più leggera)
+    offset: 0.012,   // micro-spostamento verso la stanza (anti z-fighting)
+    color: 0xc2c9cd, // leggera tinta dei riflessi
 };
 
 // Mesh CALPESTABILI (non ostacoli): ci si cammina sopra senza fermarsi.
@@ -130,19 +128,16 @@ for (const [x, y, z] of LAMP_POINTS) {
 
 // --- I LED = RectAreaLight (strisce luminose), tutte ROSA ---
 // { colore, intensità, larghezza, altezza, posizione, punto verso cui illumina }
+// NB: le RectAreaLight sono costose -> ne teniamo poche (perimetro soffitto +
+// insegna). Gli altri LED restano visibili grazie al loro glow emissivo rosa.
 const AREA_LIGHTS = [
     // LED perimetrali del soffitto: illuminano verso il basso
-    { c: LED_PINK, i: 4, w: 5, h: 0.6, p: [-0.46, 4.25, -4.3], look: [-0.46, 0, -4.3] },
-    { c: LED_PINK, i: 4, w: 5, h: 0.6, p: [-4.05, 4.25, -1.2], look: [-4.05, 0, -1.2] },
-    { c: LED_PINK, i: 4, w: 5, h: 0.6, p: [0.60,  4.25,  3.5], look: [0.60, 0,  3.5] },
-    { c: LED_PINK, i: 4, w: 5, h: 0.6, p: [3.05,  4.25, -0.35], look: [3.05, 0, -0.35] },
+    { c: LED_PINK, i: 5, w: 5, h: 0.6, p: [-0.46, 4.25, -4.3], look: [-0.46, 0, -4.3] },
+    { c: LED_PINK, i: 5, w: 5, h: 0.6, p: [-4.05, 4.25, -1.2], look: [-4.05, 0, -1.2] },
+    { c: LED_PINK, i: 5, w: 5, h: 0.6, p: [0.60,  4.25,  3.5], look: [0.60, 0,  3.5] },
+    { c: LED_PINK, i: 5, w: 5, h: 0.6, p: [3.05,  4.25, -0.35], look: [3.05, 0, -0.35] },
     // Insegna neon "BRATZ": illumina verso l'interno stanza
     { c: LED_MAGENTA, i: 6, w: 1.4, h: 2.0, p: [0.10, 1.40, 3.55], look: [0.10, 1.40, 0] },
-    // LED scaffali manichini (sinistra e destra): verso il centro
-    { c: LED_PINK, i: 4, w: 2.6, h: 2.4, p: [-3.7, 1.90, -3.7], look: [0, 1.5, 0] },
-    { c: LED_PINK, i: 4, w: 1.6, h: 2.2, p: [3.20, 1.70,  2.4], look: [0, 1.5, 0] },
-    // LED lungo la scala
-    { c: LED_PINK, i: 3, w: 1.6, h: 0.5, p: [2.40, 2.60,  3.6], look: [0, 1.5, 0] },
 ];
 for (const a of AREA_LIGHTS) {
     const l = new THREE.RectAreaLight(a.c, a.i * LIGHT_TUNE, a.w, a.h);
@@ -340,30 +335,42 @@ function repositionLinesFloor(environment) {
 // Aggiunge uno specchio realmente riflettente sul piano "Mirror" e nasconde
 // il materiale originale (opaco), lasciando visibile solo il Reflector.
 function setupMirror(environment) {
-    const geo = new THREE.PlaneGeometry(MIRROR.w, MIRROR.h);
-    const reflector = new Reflector(geo, {
-        textureWidth: 1024,
-        textureHeight: 1024,
-        color: MIRROR.color,
-        clipBias: 0.003,
-    });
-    reflector.position.set(MIRROR.pos[0], MIRROR.pos[1], MIRROR.pos[2]);
-    reflector.rotation.y = MIRROR.rotY;
-    scene.add(reflector);
+    environment.updateMatrixWorld(true);
 
-    // Nascondi il materiale "Mirror" originale (resta il Reflector davanti).
-    let hidden = 0;
+    // Trova la mesh (primitive) che usa il materiale "Mirror".
+    let mirrorMesh = null;
     environment.traverse((o) => {
         if (!o.isMesh || !o.material) return;
         const mats = Array.isArray(o.material) ? o.material : [o.material];
-        for (const m of mats) {
-            if (m && (m.name || "").toLowerCase() === MIRROR.matName) {
-                m.transparent = true; m.opacity = 0; m.depthWrite = false; m.needsUpdate = true;
-                hidden++;
-            }
-        }
+        if (mats.some((m) => m && (m.name || "").toLowerCase() === MIRROR.matName)) mirrorMesh = o;
     });
-    console.info(`[scene] Specchio: Reflector aggiunto, materiale originale nascosto (${hidden}).`);
+    if (!mirrorMesh) { console.warn('[scene] Mesh "Mirror" non trovata: niente specchio.'); return; }
+
+    // Usa la GEOMETRIA REALE dello specchio (silhouette esatta, niente rettangolo
+    // che sborda). La porto in coordinate mondo, la ricentro su un piano XY con
+    // normale +Z e azzero lo spessore -> piano perfetto pronto per il Reflector.
+    const geo = mirrorMesh.geometry.clone();
+    geo.applyMatrix4(mirrorMesh.matrixWorld);
+    geo.computeBoundingBox();
+    const center = geo.boundingBox.getCenter(new THREE.Vector3());
+    geo.translate(-center.x, -center.y, -center.z);
+    const posAttr = geo.attributes.position;
+    for (let i = 0; i < posAttr.count; i++) posAttr.setZ(i, 0);
+    posAttr.needsUpdate = true;
+
+    const reflector = new Reflector(geo, {
+        textureWidth: MIRROR.res,
+        textureHeight: MIRROR.res,
+        color: MIRROR.color,
+        clipBias: 0.003,
+    });
+    reflector.position.copy(center);
+    reflector.rotation.y = Math.PI;         // faccia riflettente verso la stanza (-Z), verticale preservata
+    reflector.position.z -= MIRROR.offset;  // micro-offset anti z-fighting
+
+    scene.add(reflector);
+    mirrorMesh.visible = false;             // nascondi il vetro originale
+    console.info("[scene] Specchio: Reflector sulla forma reale della mesh.");
 }
 
 // ---------- Collisioni (bounding box, asse per asse) ----------
