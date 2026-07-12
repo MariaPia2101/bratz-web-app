@@ -26,6 +26,7 @@ const MOVE_SPEED   = 2.2;
 const RUN_MULT     = 1.8;
 const TURN_SPEED   = 2.4;
 const CHARACTER_RADIUS = 0.16; // cuscinetto orizzontale per le collisioni (più piccolo = si avvicina di più)
+const STAIRS_PAD       = 0.0;  // padding ridotto per le scale (0 = ci si può avvicinare fino al bordo)
 const GROUND_LERP  = 12;       // morbidezza dei dislivelli (più alto = più reattivo, più basso = più morbido)
 
 // Il fronte del modello guarda verso +Z: ruotato di 180° -> spalle alla camera.
@@ -187,7 +188,10 @@ function classifyEnvironment(environment) {
         if (hasName(o, "ceiling") || hasName(o, "soffitt")) return;
         if (hasName(o, "floor")) return; // decoro piatto calpestabile
 
-        candidates.push(b.clone());
+        // Le scale hanno un padding ridotto: il character può avvicinarsi molto
+        // (ma resta comunque bloccato, non ci sale).
+        const pad = hasName(o, "stair") ? STAIRS_PAD : CHARACTER_RADIUS;
+        candidates.push({ box: b.clone(), pad });
     });
 
     // Confini della stanza = footprint del pavimento, ristretto dal margine.
@@ -207,14 +211,14 @@ function classifyEnvironment(environment) {
     }
 
     // Filtra i candidati: tieni solo ciò che è davvero un ostacolo dentro la stanza.
-    for (const box of candidates) {
+    for (const { box, pad } of candidates) {
         // Deve intersecare l'area della stanza (scarta mesh esterne/lontane).
         if (box.max.x < room.minX || box.min.x > room.maxX ||
             box.max.z < room.minZ || box.min.z > room.maxZ) continue;
         // Deve sporgere dal suolo ma non essere solo roba appesa in alto.
         if (box.max.y < floorRefY + OBSTACLE_MIN_RISE) continue;
         if (box.min.y > floorRefY + OBSTACLE_MAX_BASE) continue;
-        colliders.push({ minX: box.min.x, maxX: box.max.x, minZ: box.min.z, maxZ: box.max.z });
+        colliders.push({ minX: box.min.x, maxX: box.max.x, minZ: box.min.z, maxZ: box.max.z, pad });
     }
 
     console.info(`[scene] Stanza X[${room.minX.toFixed(2)},${room.maxX.toFixed(2)}] Z[${room.minZ.toFixed(2)},${room.maxZ.toFixed(2)}] — ostacoli: ${colliders.length}, pavimenti: ${floorMeshes.length}`);
@@ -234,11 +238,12 @@ function repositionLinesFloor(environment) {
 }
 
 // ---------- Collisioni (bounding box, asse per asse) ----------
-// Il personaggio (cerchio di raggio R) è dentro un ostacolo?
+// Il personaggio è dentro un ostacolo? Ogni ostacolo usa il proprio padding
+// (le scale ne hanno uno ridotto, così ci si può avvicinare di più).
 function blocked(x, z) {
-    const r = CHARACTER_RADIUS;
     for (let i = 0; i < colliders.length; i++) {
         const c = colliders[i];
+        const r = c.pad;
         if (x > c.minX - r && x < c.maxX + r && z > c.minZ - r && z < c.maxZ + r) return true;
     }
     return false;
