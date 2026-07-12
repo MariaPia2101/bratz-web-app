@@ -151,21 +151,31 @@ function classifyEnvironment(environment) {
     const candidates = []; // { box } di possibili ostacoli, filtrati dopo
     let floorBox = null;
     const b = new THREE.Box3();
-    const areaXZ = (x) => (x.max.x - x.min.x) * (x.max.z - x.min.z);
+
+    // Il nome utile può stare sulla mesh O su un suo antenato: GLTFLoader avvolge
+    // le mesh multi-materiale in un Group che porta il nome (es. "Foundament_Home_").
+    // Quindi cerchiamo la parola chiave lungo tutta la catena mesh -> ... -> root.
+    const hasName = (o, kw) => {
+        let p = o;
+        while (p && p !== environment.parent) {
+            if (p.name && p.name.toLowerCase().includes(kw)) return true;
+            p = p.parent;
+        }
+        return false;
+    };
 
     environment.traverse((o) => {
         if (!o.isMesh) return;
-        const name = (o.name || "").toLowerCase();
         b.setFromObject(o);
         if (!isFinite(b.min.x)) return;
 
-        if (name.includes(FLOOR_MESH_NAME)) {
+        if (hasName(o, FLOOR_MESH_NAME)) {
             floorMeshes.push(o);
-            if (!floorBox || areaXZ(b) > areaXZ(floorBox)) floorBox = b.clone();
+            floorBox = floorBox ? floorBox.union(b) : b.clone(); // unione di tutte le parti
             return; // il pavimento non è un ostacolo
         }
-        if (name.includes("ceiling") || name.includes("soffitt")) return;
-        if (name.includes("floor")) return; // decoro piatto calpestabile
+        if (hasName(o, "ceiling") || hasName(o, "soffitt")) return;
+        if (hasName(o, "floor")) return; // decoro piatto calpestabile
 
         candidates.push(b.clone());
     });
@@ -183,7 +193,7 @@ function classifyEnvironment(environment) {
         room.minX = g.min.x + ROOM_MARGIN; room.maxX = g.max.x - ROOM_MARGIN;
         room.minZ = g.min.z + ROOM_MARGIN; room.maxZ = g.max.z - ROOM_MARGIN;
         floorRefY = g.min.y; groundRayStartY = g.max.y + 2;
-        console.warn(`[scene] Mesh pavimento "${FLOOR_MESH_NAME}" non trovata: uso la bbox globale.`);
+        console.warn(`[scene] Mesh pavimento "${FLOOR_MESH_NAME}" NON trovata: uso la bbox globale (fallback).`);
     }
 
     // Filtra i candidati: tieni solo ciò che è davvero un ostacolo dentro la stanza.
