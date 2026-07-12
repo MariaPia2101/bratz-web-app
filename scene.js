@@ -10,6 +10,7 @@ import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import { RectAreaLightUniformsLib } from "three/addons/lights/RectAreaLightUniformsLib.js";
+import { Reflector } from "three/addons/objects/Reflector.js";
 
 // ---------- Configurazione ----------
 const MODELS = {
@@ -21,6 +22,16 @@ const DRACO_DECODER_PATH = "https://unpkg.com/three@0.160.0/examples/jsm/libs/dr
 
 // Nome della mesh che fa da PAVIMENTO calpestabile (con dislivelli).
 const FLOOR_MESH_NAME = "foundament";
+
+// Specchio: piano riflettente reale (Reflector) sopra il materiale "Mirror" di
+// Mirror_Mesh_ (piano piatto a Z=3.72, ~0.91x1.41, rivolto verso la stanza).
+const MIRROR = {
+    matName: "mirror",
+    w: 0.91, h: 1.41,
+    pos: [-1.195, 1.145, 3.71], // leggermente davanti al vetro originale
+    rotY: Math.PI,              // faccia riflettente verso l'interno (-Z)
+    color: 0xc2c9cd,           // leggera tinta dei riflessi
+};
 
 // Mesh CALPESTABILI (non ostacoli): ci si cammina sopra senza fermarsi.
 // Es. decori piatti del pavimento e il tappeto "Rug_Mesh_".
@@ -326,6 +337,35 @@ function repositionLinesFloor(environment) {
     console.info(`[scene] "${LINES_FLOOR_NAME}" riposizionata a world (${LINES_FLOOR_POS.x}, ${LINES_FLOOR_POS.y}, ${LINES_FLOOR_POS.z}).`);
 }
 
+// Aggiunge uno specchio realmente riflettente sul piano "Mirror" e nasconde
+// il materiale originale (opaco), lasciando visibile solo il Reflector.
+function setupMirror(environment) {
+    const geo = new THREE.PlaneGeometry(MIRROR.w, MIRROR.h);
+    const reflector = new Reflector(geo, {
+        textureWidth: 1024,
+        textureHeight: 1024,
+        color: MIRROR.color,
+        clipBias: 0.003,
+    });
+    reflector.position.set(MIRROR.pos[0], MIRROR.pos[1], MIRROR.pos[2]);
+    reflector.rotation.y = MIRROR.rotY;
+    scene.add(reflector);
+
+    // Nascondi il materiale "Mirror" originale (resta il Reflector davanti).
+    let hidden = 0;
+    environment.traverse((o) => {
+        if (!o.isMesh || !o.material) return;
+        const mats = Array.isArray(o.material) ? o.material : [o.material];
+        for (const m of mats) {
+            if (m && (m.name || "").toLowerCase() === MIRROR.matName) {
+                m.transparent = true; m.opacity = 0; m.depthWrite = false; m.needsUpdate = true;
+                hidden++;
+            }
+        }
+    });
+    console.info(`[scene] Specchio: Reflector aggiunto, materiale originale nascosto (${hidden}).`);
+}
+
 // ---------- Collisioni (bounding box, asse per asse) ----------
 // Il personaggio è dentro un ostacolo? Ogni ostacolo usa il proprio padding
 // (le scale ne hanno uno ridotto, così ci si può avvicinare di più).
@@ -422,6 +462,7 @@ async function init() {
         scene.add(environment);
         classifyEnvironment(environment);
         repositionLinesFloor(environment);
+        setupMirror(environment);
 
         const charModel = await loadModel(MODELS.character);
         enableShadows(charModel);
