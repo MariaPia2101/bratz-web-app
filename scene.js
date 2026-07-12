@@ -227,13 +227,20 @@ const _rc = new THREE.Raycaster();
 const _org = new THREE.Vector3();
 const _down = new THREE.Vector3(0, -1, 0);
 
-function groundY() {
+// Raycast verso il basso su un punto (x,z): restituisce la quota del pavimento
+// oppure null se lì sotto NON c'è terreno (buco / fuori dal Foundament).
+function probeFloor(x, z) {
     if (!floorMeshes.length) return floorRefY;
-    _org.set(character.x, groundRayStartY, character.z);
+    _org.set(x, groundRayStartY, z);
     _rc.set(_org, _down);
     _rc.far = groundRayStartY - floorRefY + 4;
     const hits = _rc.intersectObjects(floorMeshes, false);
-    return hits.length ? hits[0].point.y : character.y; // se buco, mantieni l'ultima quota
+    return hits.length ? hits[0].point.y : null;
+}
+
+function groundY() {
+    const y = probeFloor(character.x, character.z);
+    return y === null ? character.y : y; // se buco, mantieni l'ultima quota valida
 }
 
 // ---------- Camera rigida in terza persona ----------
@@ -277,12 +284,14 @@ async function init() {
         const spawn = findSpawn();
         character.x = spawn.x;
         character.z = spawn.z;
+        character.y = spawn.y;
         character.obj = charModel;
 
         placeCharacter();
         scene.add(charModel);
         updateCamera();
 
+        console.info(`[scene] Spawn (${spawn.x.toFixed(2)}, ${spawn.y.toFixed(2)}, ${spawn.z.toFixed(2)}) — pavimento trovato: ${spawn.grounded}`);
         window.__bratz = { scene, camera, renderer, character, room, colliders, floorMeshes, CAM };
     } catch (err) {
         console.error("[scene] Init fallita:", err);
@@ -290,19 +299,35 @@ async function init() {
     }
 }
 
-// Spawn valido: centro stanza, altrimenti a spirale finché non è libero da ostacoli.
+// Spawn valido: dal centro verso l'esterno a spirale, il primo punto che è
+// (a) libero da ostacoli E (b) con VERO pavimento sotto (raggio che colpisce il
+// Foundament a quota sensata). Così non finisce mai in un buco/fuori dalla stanza.
 function findSpawn() {
     const cx = (room.minX + room.maxX) / 2;
     const cz = (room.minZ + room.maxZ) / 2;
-    if (!blocked(cx, cz)) return { x: cx, z: cz };
-    for (let r = 0.5; r < 8; r += 0.4) {
-        for (let a = 0; a < Math.PI * 2; a += Math.PI / 8) {
+
+    const test = (x, z) => {
+        if (blocked(x, z)) return null;
+        const y = probeFloor(x, z);
+        if (y === null) return null;                       // nessun pavimento -> scarta
+        if (y > floorRefY + OBSTACLE_MAX_BASE) return null; // troppo alto (tetto/muro) -> scarta
+        return { x, z, y, grounded: true };
+    };
+
+    const center = test(cx, cz);
+    if (center) return center;
+
+    for (let r = 0.4; r < 9; r += 0.4) {
+        for (let a = 0; a < Math.PI * 2; a += Math.PI / 10) {
             const x = THREE.MathUtils.clamp(cx + Math.cos(a) * r, room.minX, room.maxX);
             const z = THREE.MathUtils.clamp(cz + Math.sin(a) * r, room.minZ, room.maxZ);
-            if (!blocked(x, z)) return { x, z };
+            const spot = test(x, z);
+            if (spot) return spot;
         }
     }
-    return { x: cx, z: cz };
+    // Fallback estremo: centro con quota di riferimento.
+    console.warn("[scene] Nessuno spawn con pavimento valido: uso il centro.");
+    return { x: cx, z: cz, y: floorRefY, grounded: false };
 }
 
 // ---------- Resize ----------
@@ -331,9 +356,21 @@ function animate() {
 
         placeCharacter();
         updateCamera();
+        updateDebug();
     }
 
     renderer.render(scene, camera);
+}
+
+// HUD di debug: posizione + confini + se ha pavimento sotto.
+const debugEl = document.getElementById("scene-debug");
+function updateDebug() {
+    if (!debugEl) return;
+    const grounded = probeFloor(character.x, character.z) !== null;
+    debugEl.textContent =
+        `pos ${character.x.toFixed(2)}, ${character.y.toFixed(2)}, ${character.z.toFixed(2)} | ` +
+        `room X[${room.minX.toFixed(1)},${room.maxX.toFixed(1)}] Z[${room.minZ.toFixed(1)},${room.maxZ.toFixed(1)}] | ` +
+        `floor:${grounded ? "OK" : "NO"} | obst:${colliders.length}`;
 }
 
 init();
