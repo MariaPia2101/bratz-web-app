@@ -78,7 +78,7 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 0.9; // resa morbida, luminosa ma non bruciata
+renderer.toneMappingExposure = 0.85; // resa morbida, senza alte luci bruciate
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
@@ -123,7 +123,9 @@ const LAMP_POINTS = [
     [0.41, 3.15, -1.28], [-0.08, 3.15, -0.91], [2.45, 3.15, -0.27],
 ];
 for (const [x, y, z] of LAMP_POINTS) {
-    const l = new THREE.PointLight(0xffe0f0, 6 * LIGHT_TUNE, 5, 2); // rosa molto tenue
+    // Rosa molto tenue e LOCALE: bassa intensità + poca distanza -> niente
+    // macchie bianche bruciate sulla parete, glow morbido come nell'originale.
+    const l = new THREE.PointLight(0xffe0f0, 2.6 * LIGHT_TUNE, 3.2, 2);
     l.position.set(x, y, z);
     scene.add(l);
 }
@@ -133,13 +135,13 @@ for (const [x, y, z] of LAMP_POINTS) {
 // NB: le RectAreaLight sono costose -> ne teniamo poche (perimetro soffitto +
 // insegna). Gli altri LED restano visibili grazie al loro glow emissivo rosa.
 const AREA_LIGHTS = [
-    // LED perimetrali del soffitto: illuminano verso il basso
-    { c: LED_PINK, i: 5, w: 5, h: 0.6, p: [-0.46, 4.25, -4.3], look: [-0.46, 0, -4.3] },
-    { c: LED_PINK, i: 5, w: 5, h: 0.6, p: [-4.05, 4.25, -1.2], look: [-4.05, 0, -1.2] },
-    { c: LED_PINK, i: 5, w: 5, h: 0.6, p: [0.60,  4.25,  3.5], look: [0.60, 0,  3.5] },
-    { c: LED_PINK, i: 5, w: 5, h: 0.6, p: [3.05,  4.25, -0.35], look: [3.05, 0, -0.35] },
+    // LED perimetrali del soffitto: glow rosa MORBIDO verso il basso
+    { c: LED_PINK, i: 2.6, w: 5, h: 0.6, p: [-0.46, 4.25, -4.3], look: [-0.46, 0, -4.3] },
+    { c: LED_PINK, i: 2.6, w: 5, h: 0.6, p: [-4.05, 4.25, -1.2], look: [-4.05, 0, -1.2] },
+    { c: LED_PINK, i: 2.6, w: 5, h: 0.6, p: [0.60,  4.25,  3.5], look: [0.60, 0,  3.5] },
+    { c: LED_PINK, i: 2.6, w: 5, h: 0.6, p: [3.05,  4.25, -0.35], look: [3.05, 0, -0.35] },
     // Insegna neon "BRATZ": illumina verso l'interno stanza
-    { c: LED_MAGENTA, i: 6, w: 1.4, h: 2.0, p: [0.10, 1.40, 3.55], look: [0.10, 1.40, 0] },
+    { c: LED_MAGENTA, i: 4, w: 1.4, h: 2.0, p: [0.10, 1.40, 3.55], look: [0.10, 1.40, 0] },
 ];
 for (const a of AREA_LIGHTS) {
     const l = new THREE.RectAreaLight(a.c, a.i * LIGHT_TUNE, a.w, a.h);
