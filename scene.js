@@ -102,10 +102,10 @@ RectAreaLightUniformsLib.init(); // necessario per le RectAreaLight (strisce LED
 const LED_PINK   = 0xff5abb;
 const LED_MAGENTA = 0xff2f9e;
 
-// Ambiente + emisferica: fill NEUTRO (bianco) e luminoso -> resa morbida ed
-// even, come nel render originale. Il rosa arriva solo dagli accenti LED.
-scene.add(new THREE.AmbientLight(0xffffff, 0.95 * LIGHT_TUNE));
-scene.add(new THREE.HemisphereLight(0xffffff, 0xffe6dd, 0.55 * LIGHT_TUNE));
+// Ambiente + emisferica: fill con un velo di ROSA TENUE (non fucsia) e luminoso
+// -> atmosfera rosata ma morbida ed even, come nel render originale.
+scene.add(new THREE.AmbientLight(0xffdcee, 0.95 * LIGHT_TUNE));
+scene.add(new THREE.HemisphereLight(0xffedf6, 0xffd8e6, 0.55 * LIGHT_TUNE));
 
 // Key light direzionale: bassa e con ombra molto morbida (poco contrasto).
 const keyLight = new THREE.DirectionalLight(0xffffff, 0.6 * LIGHT_TUNE);
