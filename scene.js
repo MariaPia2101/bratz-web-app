@@ -25,7 +25,8 @@ const FLOOR_MESH_NAME = "foundament";
 const MOVE_SPEED   = 2.2;
 const RUN_MULT     = 1.8;
 const TURN_SPEED   = 2.4;
-const CHARACTER_RADIUS = 0.30; // cuscinetto orizzontale per le collisioni
+const CHARACTER_RADIUS = 0.16; // cuscinetto orizzontale per le collisioni (più piccolo = si avvicina di più)
+const GROUND_LERP  = 12;       // morbidezza dei dislivelli (più alto = più reattivo, più basso = più morbido)
 
 // Il fronte del modello guarda verso +Z: ruotato di 180° -> spalle alla camera.
 const MODEL_FACING_YAW_OFFSET = Math.PI;
@@ -270,10 +271,10 @@ function updateCamera() {
 }
 
 // ---------- Posizionamento personaggio ----------
-function placeCharacter() {
+// Applica la trasformazione corrente (x/y/z + rotazione) al modello.
+function applyCharacterTransform() {
     const o = character.obj;
     if (!o) return;
-    character.y = groundY();                 // quota del terreno sotto di lei
     o.position.set(character.x, character.y - character.footOffset, character.z);
     o.rotation.y = character.yaw + MODEL_FACING_YAW_OFFSET;
 }
@@ -297,7 +298,8 @@ async function init() {
         character.y = spawn.y;
         character.obj = charModel;
 
-        placeCharacter();
+        character.y = groundY();       // aggancio esatto alla partenza (senza smoothing)
+        applyCharacterTransform();
         scene.add(charModel);
         updateCamera();
 
@@ -364,23 +366,14 @@ function animate() {
             resolveMove(fwd.x * move * speed * dt, fwd.z * move * speed * dt);
         }
 
-        placeCharacter();
+        // Quota del terreno interpolata -> salite/discese morbide, niente scatti.
+        character.y = THREE.MathUtils.damp(character.y, groundY(), GROUND_LERP, dt);
+
+        applyCharacterTransform();
         updateCamera();
-        updateDebug();
     }
 
     renderer.render(scene, camera);
-}
-
-// HUD di debug: posizione + confini + se ha pavimento sotto.
-const debugEl = document.getElementById("scene-debug");
-function updateDebug() {
-    if (!debugEl) return;
-    const grounded = probeFloor(character.x, character.z) !== null;
-    debugEl.textContent =
-        `pos ${character.x.toFixed(2)}, ${character.y.toFixed(2)}, ${character.z.toFixed(2)} | ` +
-        `room X[${room.minX.toFixed(1)},${room.maxX.toFixed(1)}] Z[${room.minZ.toFixed(1)},${room.maxZ.toFixed(1)}] | ` +
-        `floor:${grounded ? "OK" : "NO"} | obst:${colliders.length}`;
 }
 
 init();
