@@ -88,6 +88,18 @@ if (logo) {
     logo.addEventListener("click", () => navigateWithLoading("user_page.html"));
 }
 
+// ---------- "play game" → scena 3D ----------
+// Ogni primary-button il cui testo è "play game" apre la scena 3D (scene.html),
+// passando per la loading-page di transito. Selettore generico: vale per il play
+// del popup, per la barra mobile e per eventuali futuri bottoni uguali.
+// I button disabilitati/nascosti non emettono click, quindi non serve altra guardia.
+document.querySelectorAll(".primary-button").forEach((btn) => {
+    const label = btn.textContent.trim().replace(/\s+/g, " ").toLowerCase();
+    if (label === "play game") {
+        btn.addEventListener("click", () => navigateWithLoading("scene.html"));
+    }
+});
+
 // ---------- Tabs del container_side_30%: cambiano SOLO il container_side_70% ----------
 const tabs = Array.from(document.querySelectorAll(".side-tab"));
 const panels = Array.from(document.querySelectorAll(".tab-panel"));
