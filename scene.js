@@ -77,8 +77,10 @@ const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPrefere
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
-renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 0.85; // resa morbida, senza alte luci bruciate
+// AgX: resa filmica NEUTRA e desaturata (soft/pastello), come il render originale.
+// (ACESFilmic risultava troppo "punchy" e saturo.)
+renderer.toneMapping = THREE.AgXToneMapping;
+renderer.toneMappingExposure = 1.05; // AgX è più scuro: compenso per tenerla luminosa
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
