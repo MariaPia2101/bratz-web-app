@@ -21,6 +21,10 @@ const DRACO_DECODER_PATH = "https://unpkg.com/three@0.160.0/examples/jsm/libs/dr
 // Nome della mesh che fa da PAVIMENTO calpestabile (con dislivelli).
 const FLOOR_MESH_NAME = "foundament";
 
+// Mesh CALPESTABILI (non ostacoli): ci si cammina sopra senza fermarsi.
+// Es. decori piatti del pavimento e il tappeto "Rug_Mesh_".
+const WALKABLE_NAMES = ["floor", "rug"];
+
 // Movimento
 const MOVE_SPEED   = 2.2;
 const RUN_MULT     = 1.8;
@@ -186,7 +190,7 @@ function classifyEnvironment(environment) {
             return; // il pavimento non è un ostacolo
         }
         if (hasName(o, "ceiling") || hasName(o, "soffitt")) return;
-        if (hasName(o, "floor")) return; // decoro piatto calpestabile
+        if (WALKABLE_NAMES.some((kw) => hasName(o, kw))) return; // calpestabile (pavimento, tappeto)
 
         // Le scale hanno un padding ridotto: il character può avvicinarsi molto
         // (ma resta comunque bloccato, non ci sale).
