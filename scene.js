@@ -80,9 +80,18 @@ camera.position.set(0, CAM.height, CAM.back);
 const pmrem = new THREE.PMREMGenerator(renderer);
 scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
 
-// ---------- Luci ----------
-scene.add(new THREE.HemisphereLight(0xffffff, 0x8899aa, 0.6));
-const keyLight = new THREE.DirectionalLight(0xffffff, 2.0);
+// ---------- Illuminazione (simula il light bake di Blender) ----------
+// I materiali emissivi (Blender bake) su WebGL non illuminano davvero la stanza,
+// quindi qui: (1) fill morbido di ambiente, (2) luci reali su lampade/soffitto/insegna.
+// LIGHT_TUNE alza/abbassa TUTTA l'intensità in un colpo solo.
+const LIGHT_TUNE = 1.0;
+
+// Ambiente + emisferica: tolgono il buio e tengono vivi i colori.
+scene.add(new THREE.AmbientLight(0xfff2fb, 1.2 * LIGHT_TUNE));
+scene.add(new THREE.HemisphereLight(0xffffff, 0xffb3e6, 0.7 * LIGHT_TUNE));
+
+// Key light direzionale: definizione + ombra morbida.
+const keyLight = new THREE.DirectionalLight(0xffffff, 1.4 * LIGHT_TUNE);
 keyLight.position.set(5, 8, 5);
 keyLight.castShadow = true;
 keyLight.shadow.mapSize.set(2048, 2048);
@@ -90,6 +99,30 @@ keyLight.shadow.camera.near = 0.5;
 keyLight.shadow.camera.far = 50;
 keyLight.shadow.bias = -0.0001;
 scene.add(keyLight);
+
+// Luci reali in corrispondenza delle lampade/LED (colori presi dagli emissivi).
+// { color, intensità, distanza, [x,y,z] }
+const FIXTURE_LIGHTS = [
+    // Lampade a sospensione (bianco caldo-rosa) sopra la zona salotto
+    { c: 0xffe6dd, i: 30, d: 7, p: [0.1, 3.15, -0.5] },
+    { c: 0xffe6dd, i: 30, d: 7, p: [1.2, 3.15, -1.1] },
+    { c: 0xffe6dd, i: 26, d: 7, p: [2.1, 3.15, -1.9] },
+    // LED perimetrali del soffitto (rosa)
+    { c: 0xff2fae, i: 22, d: 10, p: [-0.46, 3.95, -4.1] },
+    { c: 0xff2fae, i: 22, d: 10, p: [-3.9,  3.95, -1.2] },
+    { c: 0xff2fae, i: 22, d: 10, p: [0.6,   3.95,  3.4] },
+    { c: 0xff2fae, i: 22, d: 10, p: [3.0,   3.95, -0.35] },
+    // Insegna neon "BRATZ" (magenta) sulla parete di fondo
+    { c: 0xff1f9f, i: 14, d: 5,  p: [0.1, 1.6, 3.2] },
+    // LED degli scaffali manichini (rosa)
+    { c: 0xff57bf, i: 12, d: 5,  p: [-2.5, 2.2, -4.0] },
+    { c: 0xff57bf, i: 12, d: 5,  p: [3.1,  1.9,  2.3] },
+];
+for (const f of FIXTURE_LIGHTS) {
+    const l = new THREE.PointLight(f.c, f.i * LIGHT_TUNE, f.d, 2);
+    l.position.set(f.p[0], f.p[1], f.p[2]);
+    scene.add(l);
+}
 
 // ---------- Loading manager ----------
 const manager = new THREE.LoadingManager();
@@ -122,6 +155,32 @@ function loadModel(url) {
 }
 function enableShadows(root) {
     root.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+}
+
+// Tetto d'intensità per i materiali emissivi (evita blob bianchi slavati,
+// mantiene il colore saturo del LED/neon). Alza per glow più forte.
+const EMISSIVE_MAX = 3.0;
+
+// I materiali emissivi del bake (LED/luci/lampade) devono restare vividi anche
+// dopo aver aggiunto le luci reali: li rendiamo indipendenti dal tone mapping e
+// limitiamo l'intensità così tengono il loro colore invece di sbiancare.
+function tuneEmissiveMaterials(root) {
+    let count = 0;
+    root.traverse((o) => {
+        if (!o.isMesh || !o.material) return;
+        const mats = Array.isArray(o.material) ? o.material : [o.material];
+        for (const m of mats) {
+            if (!m || !m.emissive) continue;
+            const glows = (m.emissiveIntensity > 0) &&
+                (m.emissive.r + m.emissive.g + m.emissive.b > 0.001);
+            if (!glows) continue;
+            m.emissiveIntensity = Math.min(m.emissiveIntensity, EMISSIVE_MAX);
+            m.toneMapped = false;   // il glow resta vivido a prescindere dall'esposizione
+            m.needsUpdate = true;
+            count++;
+        }
+    });
+    console.info(`[scene] Materiali emissivi sistemati: ${count}`);
 }
 
 // ---------- Stato ----------
@@ -333,6 +392,7 @@ async function init() {
     try {
         const environment = await loadModel(MODELS.environment);
         enableShadows(environment);
+        tuneEmissiveMaterials(environment);
         scene.add(environment);
         classifyEnvironment(environment);
         repositionLinesFloor(environment);
