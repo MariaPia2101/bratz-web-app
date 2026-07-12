@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BRATZ — 3D Worldz</title>
+    <link rel="stylesheet" href="style.css">
+
+    <!--
+      Import map: three.js viene caricato da CDN (nessun build system).
+      "three"          -> il core del motore
+      "three/addons/"  -> loader e utility (GLTFLoader, DRACOLoader, OrbitControls, RoomEnvironment)
+      Nota: gira nel browser dell'utente, non serve rete lato repo.
+    -->
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
+
+    <style>
+        /* La scena occupa tutto lo schermo; il canvas sta sotto all'overlay di caricamento. */
+        html, body {
+            margin: 0;
+            height: 100%;
+            overflow: hidden;
+            background: #000;
+        }
+
+        #scene-canvas {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+            touch-action: none; /* i gesti (pinch/drag) vanno agli OrbitControls, non allo scroll */
+        }
+
+        /* Overlay di caricamento: riusa lo stile del sito, resta finché la scena non è pronta. */
+        #scene-loading {
+            position: fixed;
+            inset: 0;
+            z-index: 10;
+            display: flex;
+            transition: opacity 0.6s ease;
+        }
+
+        #scene-loading.is-hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="scene-canvas"></canvas>
+
+    <!-- ===== Overlay di caricamento (barra di avanzamento reale del download dei modelli) ===== -->
+    <section class="loading-page" id="scene-loading" aria-hidden="false">
+        <div class="loading-input">
+            <img class="loading-logo" src="assets/images/logo_image.gif" alt="Bratz">
+
+            <div class="container-bar-and-text">
+                <div class="loading-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"
+                    id="scene-loading-bar">
+                    <div class="loading-bar-fill" id="scene-loading-fill"></div>
+                </div>
+                <p class="loading-text" id="scene-loading-text">Loading...</p>
+            </div>
+        </div>
+    </section>
+
+    <script type="module" src="scene.js"></script>
+</body>
+
+</html>
