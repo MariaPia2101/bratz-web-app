@@ -11,6 +11,10 @@ import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import { RectAreaLightUniformsLib } from "three/addons/lights/RectAreaLightUniformsLib.js";
 import { Reflector } from "three/addons/objects/Reflector.js";
+import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
+import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
+import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
 
 // ---------- Configurazione ----------
 const MODELS = {
@@ -41,6 +45,7 @@ const RUN_MULT     = 1.8;
 const TURN_SPEED   = 2.4;
 const CHARACTER_RADIUS = 0.16; // cuscinetto orizzontale per le collisioni (più piccolo = si avvicina di più)
 const STAIRS_PAD       = 0.0;  // padding ridotto per le scale (0 = ci si può avvicinare fino al bordo)
+const SOFA_PAD         = -0.08; // padding ridotto per i divani (negativo = ci si avvicina di più)
 const GROUND_LERP  = 12;       // morbidezza dei dislivelli (più alto = più reattivo, più basso = più morbido)
 
 // Il fronte del modello guarda verso +Z: ruotato di 180° -> spalle alla camera.
@@ -90,19 +95,33 @@ camera.position.set(0, CAM.height, CAM.back);
 const pmrem = new THREE.PMREMGenerator(renderer);
 scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
 
+// ---------- Post-processing: bloom per il "soft glow" morbido ----------
+// Solo le zone luminose (LED, neon, lampade) fioriscono -> alone soffuso.
+const composer = new EffectComposer(renderer);
+composer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+composer.addPass(new RenderPass(scene, camera));
+const bloomPass = new UnrealBloomPass(
+    new THREE.Vector2(window.innerWidth, window.innerHeight),
+    0.35,  // strength (quanto è forte il glow)
+    0.6,   // radius (quanto si allarga)
+    0.85   // threshold (solo ciò che è più luminoso di così fiorisce)
+);
+composer.addPass(bloomPass);
+composer.addPass(new OutputPass());
+
 // ---------- Illuminazione (simula il light bake di Blender) ----------
 // LIGHT_TUNE alza/abbassa TUTTA l'intensità in un colpo solo.
 const LIGHT_TUNE = 1.0;
 RectAreaLightUniformsLib.init(); // necessario per le RectAreaLight (strisce LED)
 
-// Colori dei LED: ROSA (non bianchi). Il fill di ambiente è quasi neutro, così
-// il rosa arriva come ACCENTO dalle strisce e non "bagna" tutta la stanza.
-const LED_PINK   = 0xff5abb;
-const LED_MAGENTA = 0xff2f9e;
+// Colori dei LED: ROSA PASTELLO (non fucsia). Più chiari/desaturati -> atmosfera
+// morbida; il glow soffuso lo aggiunge il bloom in post-processing.
+const LED_PINK    = 0xff9ed6; // rosa pastello
+const LED_MAGENTA = 0xff77c4; // insegna: rosa acceso ma non fucsia
 
-// Ambiente + emisferica: fill quasi bianco/appena rosato (evita l'effetto fucsia).
-scene.add(new THREE.AmbientLight(0xffeaf5, 0.55 * LIGHT_TUNE));
-scene.add(new THREE.HemisphereLight(0xfff3fb, 0xffd0ec, 0.35 * LIGHT_TUNE));
+// Ambiente + emisferica: fill rosa pastello chiarissimo (niente fucsia).
+scene.add(new THREE.AmbientLight(0xfdeaf4, 0.55 * LIGHT_TUNE));
+scene.add(new THREE.HemisphereLight(0xfff2fa, 0xffe2f2, 0.35 * LIGHT_TUNE));
 
 // Key light direzionale: definizione + ombra morbida, praticamente bianca.
 const keyLight = new THREE.DirectionalLight(0xfff4f8, 0.85 * LIGHT_TUNE);
@@ -114,30 +133,22 @@ keyLight.shadow.camera.far = 50;
 keyLight.shadow.bias = -0.0001;
 scene.add(keyLight);
 
-// --- Le 9 lampade a sospensione (Lamp_Mesh_) = PointLight (rosa tenue) ---
-const LAMP_POINTS = [
-    [2.09, 3.15, -2.68], [1.23, 3.15, -2.11], [2.14, 3.15, -1.39],
-    [1.18, 3.15, -0.85], [1.10, 3.15,  0.01], [0.13, 3.15,  0.13],
-    [0.41, 3.15, -1.28], [-0.08, 3.15, -0.91], [2.45, 3.15, -0.27],
-];
-for (const [x, y, z] of LAMP_POINTS) {
-    const l = new THREE.PointLight(0xffbfe4, 7 * LIGHT_TUNE, 5, 2);
-    l.position.set(x, y, z);
-    scene.add(l);
-}
+// --- Le 9 lampade a sospensione: la luce esce dal "Bulb_" DENTRO la lampada ---
+// (le posizioni sono ricavate a runtime dalle mesh "Bulb_" -> addBulbLights)
+const BULB = { color: 0xffd6ea, intensity: 6, distance: 5 };
 
-// --- I LED = RectAreaLight (strisce luminose), tutte ROSA ---
+// --- I LED = RectAreaLight (strisce luminose), rosa PASTELLO ---
 // { colore, intensità, larghezza, altezza, posizione, punto verso cui illumina }
 // NB: le RectAreaLight sono costose -> ne teniamo poche (perimetro soffitto +
 // insegna). Gli altri LED restano visibili grazie al loro glow emissivo rosa.
 const AREA_LIGHTS = [
     // LED perimetrali del soffitto: illuminano verso il basso
-    { c: LED_PINK, i: 5, w: 5, h: 0.6, p: [-0.46, 4.25, -4.3], look: [-0.46, 0, -4.3] },
-    { c: LED_PINK, i: 5, w: 5, h: 0.6, p: [-4.05, 4.25, -1.2], look: [-4.05, 0, -1.2] },
-    { c: LED_PINK, i: 5, w: 5, h: 0.6, p: [0.60,  4.25,  3.5], look: [0.60, 0,  3.5] },
-    { c: LED_PINK, i: 5, w: 5, h: 0.6, p: [3.05,  4.25, -0.35], look: [3.05, 0, -0.35] },
+    { c: LED_PINK, i: 4, w: 5, h: 0.6, p: [-0.46, 4.25, -4.3], look: [-0.46, 0, -4.3] },
+    { c: LED_PINK, i: 4, w: 5, h: 0.6, p: [-4.05, 4.25, -1.2], look: [-4.05, 0, -1.2] },
+    { c: LED_PINK, i: 4, w: 5, h: 0.6, p: [0.60,  4.25,  3.5], look: [0.60, 0,  3.5] },
+    { c: LED_PINK, i: 4, w: 5, h: 0.6, p: [3.05,  4.25, -0.35], look: [3.05, 0, -0.35] },
     // Insegna neon "BRATZ": illumina verso l'interno stanza
-    { c: LED_MAGENTA, i: 6, w: 1.4, h: 2.0, p: [0.10, 1.40, 3.55], look: [0.10, 1.40, 0] },
+    { c: LED_MAGENTA, i: 4.5, w: 1.4, h: 2.0, p: [0.10, 1.40, 3.55], look: [0.10, 1.40, 0] },
 ];
 for (const a of AREA_LIGHTS) {
     const l = new THREE.RectAreaLight(a.c, a.i * LIGHT_TUNE, a.w, a.h);
@@ -284,8 +295,11 @@ function classifyEnvironment(environment) {
         if (WALKABLE_NAMES.some((kw) => hasName(o, kw))) return; // calpestabile (pavimento, tappeto)
 
         // Le scale hanno un padding ridotto: il character può avvicinarsi molto
-        // (ma resta comunque bloccato, non ci sale).
-        const pad = hasName(o, "stair") ? STAIRS_PAD : CHARACTER_RADIUS;
+        // (ma resta comunque bloccato, non ci sale). I divani hanno padding ancora
+        // più ridotto, così ci si può avvicinare/appoggiare.
+        let pad = CHARACTER_RADIUS;
+        if (hasName(o, "stair")) pad = STAIRS_PAD;
+        else if (hasName(o, "sofa")) pad = SOFA_PAD;
         candidates.push({ box: b.clone(), pad });
     });
 
@@ -330,6 +344,38 @@ function repositionLinesFloor(environment) {
     o.position.copy(target);
     o.updateMatrixWorld(true);
     console.info(`[scene] "${LINES_FLOOR_NAME}" riposizionata a world (${LINES_FLOOR_POS.x}, ${LINES_FLOOR_POS.y}, ${LINES_FLOOR_POS.z}).`);
+}
+
+// Mette una PointLight su ogni "Bulb_" (la lampadina dentro le lampade a
+// sospensione): la luce esce dal bulbo reale, non dal Lamp_Mesh. Le posizioni
+// sono lette dalla geometria, così restano corrette anche con nuovi export.
+function addBulbLights(environment) {
+    environment.updateMatrixWorld(true);
+    const box = new THREE.Box3();
+    const c = new THREE.Vector3();
+    const seen = new Set();
+    let count = 0;
+    environment.traverse((o) => {
+        if (!o.isMesh) return;
+        // il nome "Bulb_" può stare sulla mesh o su un antenato
+        let p = o, isBulb = false;
+        while (p && p !== environment.parent) {
+            if ((p.name || "").toLowerCase().includes("bulb_")) { isBulb = true; break; }
+            p = p.parent;
+        }
+        if (!isBulb) return;
+        box.setFromObject(o);
+        if (!isFinite(box.min.x)) return;
+        box.getCenter(c);
+        const key = `${c.x.toFixed(1)},${c.y.toFixed(1)},${c.z.toFixed(1)}`;
+        if (seen.has(key)) return; // un solo lume per bulbo
+        seen.add(key);
+        const l = new THREE.PointLight(BULB.color, BULB.intensity * LIGHT_TUNE, BULB.distance, 2);
+        l.position.copy(c);
+        scene.add(l);
+        count++;
+    });
+    console.info(`[scene] Luci sui bulbi (Bulb_): ${count}`);
 }
 
 // Aggiunge uno specchio realmente riflettente sul piano "Mirror" e nasconde
@@ -472,6 +518,7 @@ async function init() {
         classifyEnvironment(environment);
         repositionLinesFloor(environment);
         setupMirror(environment);
+        addBulbLights(environment);
 
         const charModel = await loadModel(MODELS.character);
         enableShadows(charModel);
@@ -533,6 +580,7 @@ window.addEventListener("resize", () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
+    composer.setSize(window.innerWidth, window.innerHeight);
 });
 
 // ---------- Loop ----------
@@ -559,7 +607,7 @@ function animate() {
         updateCamera();
     }
 
-    renderer.render(scene, camera);
+    composer.render(); // render con bloom (soft glow)
 }
 
 init();
