@@ -175,32 +175,45 @@ tabs.forEach((tab) => {
 });
 
 // ---------- Scelta della personalità (radio) + sblocco delle tab ----------
+// La selezione è PERSISTENTE: una volta scelta, la pagina mostra sempre e solo
+// la yasmin/personality/selected_page (anche dopo reload o rientro).
+const SELECTED_KEY = "yasmin_selected_personality";
 const selectButtons = Array.from(document.querySelectorAll(".card-select"));
 
-selectButtons.forEach((btn) => {
-    btn.addEventListener("click", () => {
-        // il bottone cliccato → tapped + "SELECTED"; gli altri tornano "SELECT"
-        selectButtons.forEach((b) => {
-            b.classList.remove("is-selected");
-            b.textContent = "select";
-        });
-        btn.classList.add("is-selected");
-        btn.textContent = "selected";
-
-        // alla prima scelta le tab bloccate si attivano
-        if (!selected) {
-            selected = true;
-            tabs.forEach((t) => {
-                if (t.classList.contains("side-locked")) {
-                    t.disabled = false;
-                    t.classList.remove("side-locked");
-                    if (t.dataset.tab !== activeTab) t.classList.add("active");
-                }
-            });
-        }
-        updatePopup();
+function applySelection(btn, persist) {
+    // il bottone scelto → tapped + "SELECTED"; gli altri tornano "SELECT"
+    selectButtons.forEach((b) => {
+        b.classList.remove("is-selected");
+        b.textContent = "select";
     });
+    btn.classList.add("is-selected");
+    btn.textContent = "selected";
+
+    // alla prima scelta le tab bloccate si attivano (e restano tali)
+    if (!selected) {
+        selected = true;
+        tabs.forEach((t) => {
+            if (t.classList.contains("side-locked")) {
+                t.disabled = false;
+                t.classList.remove("side-locked");
+                if (t.dataset.tab !== activeTab) t.classList.add("active");
+            }
+        });
+    }
+    if (persist) localStorage.setItem(SELECTED_KEY, String(selectButtons.indexOf(btn)));
+    updatePopup();
+}
+
+selectButtons.forEach((btn) => {
+    btn.addEventListener("click", () => applySelection(btn, true));
 });
+
+// Ripristina la selezione salvata all'ingresso -> mai più la personality_page
+// "da scegliere", ma direttamente la selected_page.
+const savedIdx = parseInt(localStorage.getItem(SELECTED_KEY), 10);
+if (!Number.isNaN(savedIdx) && selectButtons[savedIdx]) {
+    applySelection(selectButtons[savedIdx], false);
+}
 
 // Stato iniziale del popup (tab identity): impostato via JS ora che il bottone
 // non ha più l'attributo HTML "hidden"
