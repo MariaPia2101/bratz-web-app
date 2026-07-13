@@ -95,6 +95,55 @@ camera.position.set(0, CAM.height, CAM.back);
 const pmrem = new THREE.PMREMGenerator(renderer);
 scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
 
+// ---------- Sfondo: skyline urbano notturno (procedurale, niente asset) ----------
+// Fuori dal modello, al posto del nero, si vede una città al tramonto (stile Bratz):
+// cielo rosa/viola + palazzi con finestre illuminate, come panorama a 360°.
+function makeCityBackground() {
+    const w = 2048, h = 1024, horizon = 520;
+    const cv = document.createElement("canvas");
+    cv.width = w; cv.height = h;
+    const ctx = cv.getContext("2d");
+
+    // Cielo dusk (su -> giù)
+    const sky = ctx.createLinearGradient(0, 0, 0, h);
+    sky.addColorStop(0.00, "#241043"); // zenit viola scuro
+    sky.addColorStop(0.42, "#7c2e73"); // magenta
+    sky.addColorStop(0.51, "#ff96c0"); // bagliore all'orizzonte
+    sky.addColorStop(0.60, "#3a1a49");
+    sky.addColorStop(1.00, "#140a20"); // giù, scuro
+    ctx.fillStyle = sky;
+    ctx.fillRect(0, 0, w, h);
+
+    // Palazzi lungo l'orizzonte, con finestre accese
+    const winCols = ["#ffd36e", "#ff9ad8", "#8fe0ff", "#fff4c2"];
+    let x = 0;
+    while (x < w) {
+        const bw = 22 + Math.random() * 72;
+        const bh = 60 + Math.random() * 240;
+        const top = horizon - bh;
+        const bot = horizon + 24 + Math.random() * 40;
+        ctx.fillStyle = "#160e2b"; // silhouette
+        ctx.fillRect(x, top, bw, bot - top);
+        for (let wy = top + 8; wy < bot - 6; wy += 11) {
+            for (let wx = x + 5; wx < x + bw - 5; wx += 10) {
+                if (Math.random() < 0.32) {
+                    ctx.globalAlpha = 0.45 + Math.random() * 0.55;
+                    ctx.fillStyle = winCols[(Math.random() * winCols.length) | 0];
+                    ctx.fillRect(wx, wy, 4, 5);
+                }
+            }
+        }
+        ctx.globalAlpha = 1;
+        x += bw + 3 + Math.random() * 10;
+    }
+
+    const tex = new THREE.CanvasTexture(cv);
+    tex.mapping = THREE.EquirectangularReflectionMapping;
+    tex.colorSpace = THREE.SRGBColorSpace;
+    return tex;
+}
+scene.background = makeCityBackground();
+
 // ---------- Post-processing: bloom per il "soft glow" morbido ----------
 // Solo le zone luminose (LED, neon, lampade) fioriscono -> alone soffuso.
 const composer = new EffectComposer(renderer);
@@ -163,7 +212,7 @@ for (const a of AREA_LIGHTS) {
 // ---------- Loading manager ----------
 const manager = new THREE.LoadingManager();
 manager.onProgress = (url, loaded, total) => setProgress(total ? Math.round((loaded / total) * 100) : 0);
-manager.onLoad = () => { setProgress(100); hideLoading(); };
+manager.onLoad = () => { setProgress(100); }; // il loading si chiude dopo il PRIMO render (init)
 manager.onError = (url) => { console.error("[scene] Errore caricamento:", url); loadingText.textContent = "Load error"; };
 
 function setProgress(pct) {
@@ -538,6 +587,12 @@ async function init() {
         applyCharacterTransform();
         scene.add(charModel);
         updateCamera();
+
+        // Precompila gli shader e disegna il PRIMO frame con l'ambiente PRIMA di
+        // togliere la loading page -> niente schermo nero durante il caricamento.
+        renderer.compile(scene, camera);
+        composer.render();
+        hideLoading();
 
         console.info(`[scene] Spawn (${spawn.x.toFixed(2)}, ${spawn.y.toFixed(2)}, ${spawn.z.toFixed(2)}) — pavimento trovato: ${spawn.grounded}`);
         window.__bratz = { scene, camera, renderer, character, room, colliders, floorMeshes, CAM };
