@@ -312,6 +312,44 @@ if (goDollzBtn) {
     });
 }
 
+// ---------- Click sull'oggetto camera -> pop-up "story" con bottone "write" ----------
+// NB: contenuto placeholder in attesa del design Figma "3dgame/story_page".
+const _clickRay = new THREE.Raycaster();
+const _clickNdc = new THREE.Vector2();
+let cameraClicked = false;
+
+function setStoryPopup() {
+    if (!gamePopup) return;
+    gamePopup.innerHTML = "";
+    const close = document.createElement("button");
+    close.type = "button";
+    close.className = "enter-popup-close";
+    close.textContent = "Close";
+    close.addEventListener("click", hideGamePopup);
+    const text = document.createElement("p");
+    text.className = "enter-popup-text";
+    text.innerHTML = "You found the camera.<br>Snap the moment and<br>write its story.";
+    const write = document.createElement("button");
+    write.type = "button";
+    write.className = "primary-button active go-write-btn";
+    write.textContent = "write";
+    write.addEventListener("click", () => { window.location.href = "stories_page.html"; });
+    gamePopup.append(close, text, write);
+}
+
+renderer.domElement.addEventListener("pointerdown", (e) => {
+    if (!cameraProp || !cameraProp.model.visible || cameraClicked) return;
+    _clickNdc.x = (e.clientX / window.innerWidth) * 2 - 1;
+    _clickNdc.y = -(e.clientY / window.innerHeight) * 2 + 1;
+    _clickRay.setFromCamera(_clickNdc, camera);
+    if (_clickRay.intersectObject(cameraProp.model, true).length) {
+        cameraClicked = true;
+        if (cameraProp.glow) cameraProp.glow.visible = false; // oggetto "raccolto"
+        setStoryPopup();
+        showGamePopup();
+    }
+});
+
 // ---------- Classificazione geometria ----------
 // Foundament_Home_ -> pavimento (grounding + confini). Tutte le altre mesh solide
 // che sporgono dal suolo -> ostacoli (bounding box). Soffitti/decori piatti esclusi.
