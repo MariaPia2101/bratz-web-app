@@ -102,10 +102,13 @@ composer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 composer.addPass(new RenderPass(scene, camera));
 const bloomPass = new UnrealBloomPass(
     new THREE.Vector2(window.innerWidth, window.innerHeight),
-    0.3,   // strength (quanto è forte il glow)
+    0.16,  // strength (glow soft, non lattiginoso)
     0.85,  // radius (quanto si allarga)
     0.0    // threshold 0 = TUTTA la scena fiorisce -> glow morbido e uniforme
 );
+// Tinta ROSA del glow (solo il bloom, non l'immagine intera): riduce verde/blu.
+const _bloomTint = new THREE.Vector3(1.0, 0.78, 0.9);
+bloomPass.bloomTintColors = bloomPass.bloomTintColors.map(() => _bloomTint.clone());
 composer.addPass(bloomPass);
 composer.addPass(new OutputPass());
 
