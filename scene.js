@@ -102,9 +102,9 @@ composer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 composer.addPass(new RenderPass(scene, camera));
 const bloomPass = new UnrealBloomPass(
     new THREE.Vector2(window.innerWidth, window.innerHeight),
-    0.35,  // strength (quanto è forte il glow)
-    0.6,   // radius (quanto si allarga)
-    0.85   // threshold (solo ciò che è più luminoso di così fiorisce)
+    0.3,   // strength (quanto è forte il glow)
+    0.85,  // radius (quanto si allarga)
+    0.0    // threshold 0 = TUTTA la scena fiorisce -> glow morbido e uniforme
 );
 composer.addPass(bloomPass);
 composer.addPass(new OutputPass());
@@ -135,7 +135,7 @@ scene.add(keyLight);
 
 // --- Le 9 lampade a sospensione: la luce esce dal "Bulb_" DENTRO la lampada ---
 // (le posizioni sono ricavate a runtime dalle mesh "Bulb_" -> addBulbLights)
-const BULB = { color: 0xffd6ea, intensity: 6, distance: 5 };
+const BULB = { color: 0xffd6ea, intensity: 3, distance: 4.5 };
 
 // --- I LED = RectAreaLight (strisce luminose), rosa PASTELLO ---
 // { colore, intensità, larghezza, altezza, posizione, punto verso cui illumina }
