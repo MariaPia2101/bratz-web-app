@@ -105,54 +105,10 @@ camera.position.set(0, CAM.height, CAM.back);
 const pmrem = new THREE.PMREMGenerator(renderer);
 scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
 
-// ---------- Sfondo: skyline urbano notturno (procedurale, niente asset) ----------
-// Fuori dal modello, al posto del nero, si vede una città al tramonto (stile Bratz):
-// cielo rosa/viola + palazzi con finestre illuminate, come panorama a 360°.
-function makeCityBackground() {
-    const w = 2048, h = 1024, horizon = 520;
-    const cv = document.createElement("canvas");
-    cv.width = w; cv.height = h;
-    const ctx = cv.getContext("2d");
-
-    // Cielo dusk (su -> giù)
-    const sky = ctx.createLinearGradient(0, 0, 0, h);
-    sky.addColorStop(0.00, "#241043"); // zenit viola scuro
-    sky.addColorStop(0.42, "#7c2e73"); // magenta
-    sky.addColorStop(0.51, "#ff96c0"); // bagliore all'orizzonte
-    sky.addColorStop(0.60, "#3a1a49");
-    sky.addColorStop(1.00, "#140a20"); // giù, scuro
-    ctx.fillStyle = sky;
-    ctx.fillRect(0, 0, w, h);
-
-    // Palazzi lungo l'orizzonte, con finestre accese
-    const winCols = ["#ffd36e", "#ff9ad8", "#8fe0ff", "#fff4c2"];
-    let x = 0;
-    while (x < w) {
-        const bw = 22 + Math.random() * 72;
-        const bh = 60 + Math.random() * 240;
-        const top = horizon - bh;
-        const bot = horizon + 24 + Math.random() * 40;
-        ctx.fillStyle = "#160e2b"; // silhouette
-        ctx.fillRect(x, top, bw, bot - top);
-        for (let wy = top + 8; wy < bot - 6; wy += 11) {
-            for (let wx = x + 5; wx < x + bw - 5; wx += 10) {
-                if (Math.random() < 0.32) {
-                    ctx.globalAlpha = 0.45 + Math.random() * 0.55;
-                    ctx.fillStyle = winCols[(Math.random() * winCols.length) | 0];
-                    ctx.fillRect(wx, wy, 4, 5);
-                }
-            }
-        }
-        ctx.globalAlpha = 1;
-        x += bw + 3 + Math.random() * 10;
-    }
-
-    const tex = new THREE.CanvasTexture(cv);
-    tex.mapping = THREE.EquirectangularReflectionMapping;
-    tex.colorSpace = THREE.SRGBColorSpace;
-    return tex;
-}
-scene.background = makeCityBackground();
+// ---------- Sfondo: paesaggio urbano (foto fornita) ----------
+// Fuori dal modello, al posto del nero, la foto "Foto_Background_3D_.jpeg"
+// come panorama a 360° (caricata in init -> loadCityBackground).
+const CITY_BG_URL = "assets/3d/textures/Foto_Background_3D_.jpeg";
 
 // ---------- Post-processing: bloom per il "soft glow" morbido ----------
 // Solo le zone luminose (LED, neon, lampade) fioriscono -> alone soffuso.
@@ -294,6 +250,11 @@ const character = { obj: null, yaw: INITIAL_YAW, x: 0, z: 0, y: 0, footOffset: 0
 // Oggetto camera + alone (popolato in init, rivelato dopo il ritardo)
 let cameraProp = null; // { model, glow }
 
+// Gestione ingresso: la loading page si chiude solo dopo alcuni frame realmente
+// renderizzati (mai schermo nero tra "modelli caricati" e "primo render").
+let sceneReady = false;
+let warmFrames = 0;
+
 const room = { minX: -Infinity, maxX: Infinity, minZ: -Infinity, maxZ: Infinity };
 let groundRayStartY = 8;   // da quanto in alto sparo il raggio verso il basso
 let floorRefY = 0;         // livello nominale del pavimento (per il filtro ostacoli)
@@ -411,6 +372,19 @@ function repositionLinesFloor(environment) {
     console.info(`[scene] "${LINES_FLOOR_NAME}" riposizionata a world (${LINES_FLOOR_POS.x}, ${LINES_FLOOR_POS.y}, ${LINES_FLOOR_POS.z}).`);
 }
 
+// Carica la foto di sfondo come panorama equirettangolare (paesaggio urbano).
+async function loadCityBackground() {
+    try {
+        const tex = await new THREE.TextureLoader(manager).loadAsync(CITY_BG_URL);
+        tex.mapping = THREE.EquirectangularReflectionMapping;
+        tex.colorSpace = THREE.SRGBColorSpace;
+        scene.background = tex;
+        console.info("[scene] Sfondo urbano caricato.");
+    } catch (e) {
+        console.warn("[scene] Sfondo non caricato:", e);
+    }
+}
+
 // Texture radiale bianca (centro pieno -> bordo trasparente) per l'alone glow.
 function makeGlowTexture() {
     const s = 256;
@@ -442,10 +416,12 @@ async function loadCameraProp() {
         transparent: true,
         blending: THREE.AdditiveBlending,
         depthWrite: false,
+        depthTest: false, // disegnato SOPRA: copre l'oggetto e il ripiano, niente compenetrazione
         opacity: 0,
     }));
     glow.position.set(CAMERA_PROP.center[0], CAMERA_PROP.center[1], CAMERA_PROP.center[2]);
     glow.scale.set(CAMERA_PROP.glowSize, CAMERA_PROP.glowSize, 1);
+    glow.renderOrder = 999;
     glow.visible = false;
     scene.add(glow);
 
@@ -651,15 +627,12 @@ async function init() {
         updateCamera();
 
         await loadCameraProp();        // caricato ma nascosto: comparirà dopo il ritardo
+        await loadCityBackground();    // sfondo urbano pronto prima del primo frame
 
-        // Precompila gli shader e disegna il PRIMO frame con l'ambiente PRIMA di
-        // togliere la loading page -> niente schermo nero durante il caricamento.
+        // Precompila gli shader: la loading page resta finché non ho renderizzato
+        // per davvero (vedi warmFrames nel loop) -> mai schermo nero.
         renderer.compile(scene, camera);
-        composer.render();
-        hideLoading();
-
-        // L'utente è "entrato": avvia il timer di comparsa dell'oggetto camera.
-        setTimeout(revealCameraProp, CAMERA_PROP.delayMs);
+        sceneReady = true;
 
         console.info(`[scene] Spawn (${spawn.x.toFixed(2)}, ${spawn.y.toFixed(2)}, ${spawn.z.toFixed(2)}) — pavimento trovato: ${spawn.grounded}`);
         window.__bratz = { scene, camera, renderer, character, room, colliders, floorMeshes, CAM };
@@ -742,6 +715,15 @@ function animate() {
     }
 
     composer.render(); // render con bloom (soft glow)
+
+    // Chiudi la loading page SOLO dopo qualche frame davvero disegnato.
+    if (sceneReady && !loadingHidden) {
+        if (++warmFrames >= 3) {
+            hideLoading();
+            // L'utente è "entrato": avvia il timer di comparsa dell'oggetto camera.
+            setTimeout(revealCameraProp, CAMERA_PROP.delayMs);
+        }
+    }
 }
 
 init();
