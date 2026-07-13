@@ -45,7 +45,7 @@ const CAMERA_PROP = {
     url: "assets/3d/models/camera.glb",
     delayMs: 20000,                  // compare 20'' dopo l'ingresso
     center: [-3.90, 0.76, 1.48],     // centro oggetto (per l'alone)
-    glowSize: 0.55,                  // dimensione dell'alone
+    glowSize: 0.32,                  // dimensione dell'alone
     pulseSpeed: 2.2,                 // velocità della pulsazione
 };
 
