@@ -14,7 +14,7 @@ import { Reflector } from "three/addons/objects/Reflector.js";
 
 // ---------- Configurazione ----------
 const MODELS = {
-    environment: "assets/3d/models/environment.glb",
+    environment: "assets/3d/models/environment2.glb",
     character:   "assets/3d/models/character.glb",
 };
 
