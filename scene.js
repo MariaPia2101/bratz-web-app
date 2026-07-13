@@ -39,6 +39,16 @@ const MIRROR = {
 // Es. decori piatti del pavimento e il tappeto "Rug_Mesh_".
 const WALKABLE_NAMES = ["floor", "rug"];
 
+// Oggetto "camera.glb": la sua posizione è già baked nel modello (~-3.90, 0.76, 1.48).
+// Appare dopo un ritardo e ha un alone bianco pulsante.
+const CAMERA_PROP = {
+    url: "assets/3d/models/camera.glb",
+    delayMs: 20000,                  // compare 20'' dopo l'ingresso
+    center: [-3.90, 0.76, 1.48],     // centro oggetto (per l'alone)
+    glowSize: 0.55,                  // dimensione dell'alone
+    pulseSpeed: 2.2,                 // velocità della pulsazione
+};
+
 // Movimento
 const MOVE_SPEED   = 2.2;
 const RUN_MULT     = 1.8;
@@ -281,6 +291,9 @@ function tuneMaterials(root) {
 // ---------- Stato ----------
 const character = { obj: null, yaw: INITIAL_YAW, x: 0, z: 0, y: 0, footOffset: 0 };
 
+// Oggetto camera + alone (popolato in init, rivelato dopo il ritardo)
+let cameraProp = null; // { model, glow }
+
 const room = { minX: -Infinity, maxX: Infinity, minZ: -Infinity, maxZ: Infinity };
 let groundRayStartY = 8;   // da quanto in alto sparo il raggio verso il basso
 let floorRefY = 0;         // livello nominale del pavimento (per il filtro ostacoli)
@@ -396,6 +409,55 @@ function repositionLinesFloor(environment) {
     o.position.copy(target);
     o.updateMatrixWorld(true);
     console.info(`[scene] "${LINES_FLOOR_NAME}" riposizionata a world (${LINES_FLOOR_POS.x}, ${LINES_FLOOR_POS.y}, ${LINES_FLOOR_POS.z}).`);
+}
+
+// Texture radiale bianca (centro pieno -> bordo trasparente) per l'alone glow.
+function makeGlowTexture() {
+    const s = 256;
+    const cv = document.createElement("canvas");
+    cv.width = cv.height = s;
+    const ctx = cv.getContext("2d");
+    const g = ctx.createRadialGradient(s / 2, s / 2, 0, s / 2, s / 2, s / 2);
+    g.addColorStop(0.0, "rgba(255,255,255,1)");
+    g.addColorStop(0.25, "rgba(255,255,255,0.85)");
+    g.addColorStop(0.6, "rgba(255,255,255,0.25)");
+    g.addColorStop(1.0, "rgba(255,255,255,0)");
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, s, s);
+    const t = new THREE.CanvasTexture(cv);
+    t.colorSpace = THREE.SRGBColorSpace;
+    return t;
+}
+
+// Carica camera.glb (nascosto) + alone bianco: verranno rivelati dopo il ritardo.
+async function loadCameraProp() {
+    const model = await loadModel(CAMERA_PROP.url);
+    enableShadows(model);
+    model.visible = false;
+    scene.add(model);
+
+    const glow = new THREE.Sprite(new THREE.SpriteMaterial({
+        map: makeGlowTexture(),
+        color: 0xffffff,
+        transparent: true,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        opacity: 0,
+    }));
+    glow.position.set(CAMERA_PROP.center[0], CAMERA_PROP.center[1], CAMERA_PROP.center[2]);
+    glow.scale.set(CAMERA_PROP.glowSize, CAMERA_PROP.glowSize, 1);
+    glow.visible = false;
+    scene.add(glow);
+
+    cameraProp = { model, glow };
+}
+
+// Rivela l'oggetto camera e attiva l'alone pulsante.
+function revealCameraProp() {
+    if (!cameraProp) return;
+    cameraProp.model.visible = true;
+    cameraProp.glow.visible = true;
+    console.info("[scene] Oggetto camera comparso.");
 }
 
 // Mette una PointLight su ogni "Bulb_" (la lampadina dentro le lampade a
@@ -588,11 +650,16 @@ async function init() {
         scene.add(charModel);
         updateCamera();
 
+        await loadCameraProp();        // caricato ma nascosto: comparirà dopo il ritardo
+
         // Precompila gli shader e disegna il PRIMO frame con l'ambiente PRIMA di
         // togliere la loading page -> niente schermo nero durante il caricamento.
         renderer.compile(scene, camera);
         composer.render();
         hideLoading();
+
+        // L'utente è "entrato": avvia il timer di comparsa dell'oggetto camera.
+        setTimeout(revealCameraProp, CAMERA_PROP.delayMs);
 
         console.info(`[scene] Spawn (${spawn.x.toFixed(2)}, ${spawn.y.toFixed(2)}, ${spawn.z.toFixed(2)}) — pavimento trovato: ${spawn.grounded}`);
         window.__bratz = { scene, camera, renderer, character, room, colliders, floorMeshes, CAM };
@@ -663,6 +730,15 @@ function animate() {
 
         applyCharacterTransform();
         updateCamera();
+    }
+
+    // Alone bianco pulsante dell'oggetto camera
+    if (cameraProp && cameraProp.glow.visible) {
+        const t = performance.now() * 0.001;
+        const pulse = 0.5 + 0.5 * Math.sin(t * CAMERA_PROP.pulseSpeed); // 0..1
+        cameraProp.glow.material.opacity = 0.35 + 0.5 * pulse;
+        const s = CAMERA_PROP.glowSize * (0.9 + 0.2 * pulse);
+        cameraProp.glow.scale.set(s, s, 1);
     }
 
     composer.render(); // render con bloom (soft glow)
