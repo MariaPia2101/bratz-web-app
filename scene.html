@@ -76,6 +76,77 @@
         #scene-hint.is-faded {
             opacity: 0;
         }
+
+        /* ===== Overlay "3dgame/enter_page" (da Figma) sopra la scena 3D ===== */
+        #game-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 6;
+            pointer-events: none; /* il 3D resta interattivo; solo i controlli catturano il click */
+        }
+
+        #game-overlay .go-header {
+            position: absolute;
+            top: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: min(1344px, 94vw);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        #game-overlay .go-header .primary-button {
+            width: 207px;
+            pointer-events: auto;
+        }
+
+        #game-overlay .go-logo {
+            width: 166px;
+            height: 85px;
+            object-fit: contain;
+            user-select: none;
+        }
+
+        #game-overlay .go-yasmin {
+            position: absolute;
+            left: max(16px, calc(50% - 672px));
+            bottom: 0;
+            width: 152px;
+            height: auto;
+            user-select: none;
+            pointer-events: none;
+        }
+
+        /* pop_up (fumetto sopra l'icona) — comparirà dopo 5'' */
+        #game-overlay .go-popup {
+            position: absolute;
+            left: calc(max(16px, calc(50% - 672px)) + 100px);
+            bottom: 100px;
+            width: 239px;
+            min-height: 136px;
+            box-sizing: border-box;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            background: var(--popup-fill, #fff);
+            border: 1px solid var(--popup-stroke, #000);
+            pointer-events: auto;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        #game-overlay .go-popup.is-visible {
+            opacity: 1;
+        }
+
+        @media (max-width: 640px) {
+            #game-overlay .go-header .primary-button { width: 40vw; max-width: 207px; }
+            #game-overlay .go-logo { width: 110px; height: 56px; }
+            #game-overlay .go-yasmin { width: 108px; }
+            #game-overlay .go-popup { left: 12px; width: min(239px, 72vw); bottom: 86px; }
+        }
     </style>
 </head>
 
@@ -100,7 +171,24 @@
     <!-- Suggerimento comandi movimento -->
     <div id="scene-hint">⬆️⬇️ / W S muoviti &nbsp;·&nbsp; ⬅️➡️ / A D gira &nbsp;·&nbsp; Shift corri</div>
 
-    <script type="module" src="scene.js?v=13"></script>
+    <!-- ===== Overlay 3dgame/enter_page (Figma) ===== -->
+    <div id="game-overlay" aria-hidden="false">
+        <header class="go-header">
+            <button type="button" class="primary-button active" id="go-dollz-btn">marpi.dollz</button>
+            <img class="go-logo" src="assets/images/logo_image.gif" alt="Bratz">
+            <button type="button" class="primary-button" id="go-community-btn" disabled>community</button>
+        </header>
+
+        <img class="go-yasmin" src="assets/images/yasmin_icon.png" alt="">
+
+        <!-- pop_up: nascosto, compare dopo 5''. Il contenuto cambierà nel tempo. -->
+        <aside class="go-popup" id="go-popup" aria-hidden="true" hidden>
+            <button type="button" class="enter-popup-close" id="go-popup-close">Close</button>
+            <p class="enter-popup-text">Welcome to my room, babe.<br>This is where you'll write<br>your stories. Explore the<br>space and find daily<br>hidden objects.</p>
+        </aside>
+    </div>
+
+    <script type="module" src="scene.js?v=14"></script>
 </body>
 
 </html>

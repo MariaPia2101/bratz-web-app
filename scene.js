@@ -283,6 +283,25 @@ function fadeHint() {
 }
 setTimeout(fadeHint, 6000);
 
+// ---------- Overlay "3dgame/enter_page": pop-up dopo 5'' ----------
+const GAME_POPUP_DELAY_MS = 5000;
+const gamePopup = document.getElementById("go-popup");
+const gamePopupClose = document.getElementById("go-popup-close");
+if (gamePopupClose) gamePopupClose.addEventListener("click", hideGamePopup);
+
+function showGamePopup() {
+    if (!gamePopup) return;
+    gamePopup.hidden = false;
+    gamePopup.setAttribute("aria-hidden", "false");
+    requestAnimationFrame(() => gamePopup.classList.add("is-visible"));
+}
+function hideGamePopup() {
+    if (!gamePopup) return;
+    gamePopup.classList.remove("is-visible");
+    gamePopup.setAttribute("aria-hidden", "true");
+    setTimeout(() => { gamePopup.hidden = true; }, 400);
+}
+
 // ---------- Classificazione geometria ----------
 // Foundament_Home_ -> pavimento (grounding + confini). Tutte le altre mesh solide
 // che sporgono dal suolo -> ostacoli (bounding box). Soffitti/decori piatti esclusi.
@@ -720,7 +739,8 @@ function animate() {
     if (sceneReady && !loadingHidden) {
         if (++warmFrames >= 3) {
             hideLoading();
-            // L'utente è "entrato": avvia il timer di comparsa dell'oggetto camera.
+            // L'utente è "entrato": avvia i timer (pop-up a 5'', oggetto camera a 20'').
+            setTimeout(showGamePopup, GAME_POPUP_DELAY_MS);
             setTimeout(revealCameraProp, CAMERA_PROP.delayMs);
         }
     }
