@@ -302,6 +302,16 @@ function hideGamePopup() {
     setTimeout(() => { gamePopup.hidden = true; }, 400);
 }
 
+// Bottone marpi.dollz: mostra il nickname scelto nell'onboarding e, se cliccato,
+// riporta alla pagina da cui si è entrati nella scena (fallback user_page).
+const goDollzBtn = document.getElementById("go-dollz-btn");
+if (goDollzBtn) {
+    goDollzBtn.textContent = (localStorage.getItem("bratz_nickname") || "marpi.dollz").trim();
+    goDollzBtn.addEventListener("click", () => {
+        window.location.href = sessionStorage.getItem("bratz_return_page") || "user_page.html";
+    });
+}
+
 // ---------- Classificazione geometria ----------
 // Foundament_Home_ -> pavimento (grounding + confini). Tutte le altre mesh solide
 // che sporgono dal suolo -> ostacoli (bounding box). Soffitti/decori piatti esclusi.

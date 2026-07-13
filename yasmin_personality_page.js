@@ -96,7 +96,11 @@ if (logo) {
 document.querySelectorAll(".primary-button").forEach((btn) => {
     const label = btn.textContent.trim().replace(/\s+/g, " ").toLowerCase();
     if (label === "play game") {
-        btn.addEventListener("click", () => navigateWithLoading("scene.html"));
+        btn.addEventListener("click", () => {
+            // Ricorda la pagina di provenienza: marpi.dollz nella scena tornerà qui.
+            sessionStorage.setItem("bratz_return_page", location.pathname.split("/").pop() || "user_page.html");
+            navigateWithLoading("scene.html");
+        });
     }
 });
 
