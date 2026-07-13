@@ -8,55 +8,163 @@
     <link rel="stylesheet" href="style.css">
 
     <style>
-        /* ===== stories_page (stile provvisorio, in attesa del Figma) ===== */
-        .stories-page {
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            padding: 40px;
-            box-sizing: border-box;
+        /* ===== stories_page — fedele al Figma "stories_page" (1440x1024) =====
+           Layout a due colonne da 720px:
+             - sinistra  = container_instruction (istruzioni + PLOT, grigio)
+             - destra    = container_lecture (VUOTO, compilabile durante la scrittura)
+           Header sopra: back-button (sx), logo (centro), save (dx). */
+        :root {
+            --fill-reading: #ffffff;   /* fill/reading  */
+            --fill-card: #ffffff;      /* fill/card     */
+            --stroke-card: #000000;    /* stroke/card   */
+            --fill-background: #ffffff;/* fill/background_color */
+            --instruction-grey: #bebebe; /* description/instruction */
         }
 
-        .stories-page__content {
+        .stories-page {
+            position: relative;
+            min-height: 100vh;
+            background: var(--fill-background);
+        }
+
+        /* ---- header (back / logo / save) ---- */
+        .stories-header {
+            position: absolute;
+            top: 48px;
+            left: 48px;
+            right: 48px;
+            height: 85px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 2;
+        }
+
+        .stories-header .stories-logo {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            transform: translateX(-50%);
+            width: 166px;
+            height: 85px;
+            object-fit: contain;
+            user-select: none;
+            cursor: pointer;
+        }
+
+        .stories-header .save-button {
+            width: 207px;
+        }
+
+        /* ---- due colonne da 720px, centrate su max 1440 ---- */
+        .stories-columns {
+            display: flex;
             width: 100%;
-            max-width: 900px;
+            max-width: 1440px;
+            margin: 0 auto;
+            min-height: 100vh;
+        }
+
+        .container-instruction {
+            flex: 1 1 50%;
+            box-sizing: border-box;
+            background: var(--fill-reading);
+            padding: 153px 62px 48px 48px;
+        }
+
+        .instruction-stories {
             display: flex;
             flex-direction: column;
-            gap: 28px;
+            gap: 72px;
+            max-width: 610px;
         }
 
-        /* container_lecture: VUOTO di default, compilabile durante la scrittura */
+        .instruction-text {
+            margin: 0;
+            font-family: var(--font-mono, "Akkurat Mono");
+            font-weight: 400;
+            font-size: 16px;
+            line-height: 23px;
+            letter-spacing: 0;
+            text-transform: uppercase;
+            color: var(--instruction-grey);
+            white-space: pre-line;
+        }
+
+        /* container_lecture: VUOTO di default, compilabile durante la scrittura.
+           Stile testo fedele al Figma: Akkurat Mono, 16/23, MAIUSCOLO. */
         .container-lecture {
-            min-height: 60vh;
+            flex: 1 1 50%;
             box-sizing: border-box;
-            padding: 24px;
-            background: var(--popup-fill, #fff);
-            border: 1px solid var(--popup-stroke, #000);
-            font-family: var(--font-mono, "Akkurat Mono", monospace);
-            font-size: 14px;
-            line-height: 17px;
-            letter-spacing: -0.98px;
-            color: var(--popup-text, #000);
+            background: var(--fill-card);
+            border-left: 1px solid var(--stroke-card);
+            padding: 153px 48px 48px 62px;
+            font-family: var(--font-mono, "Akkurat Mono");
+            font-weight: 400;
+            font-size: 16px;
+            line-height: 23px;
+            letter-spacing: 0;
+            text-transform: uppercase;
+            color: #000;
             outline: none;
             overflow-y: auto;
             white-space: pre-wrap;
+            word-break: break-word;
         }
 
-        /* placeholder mostrato solo quando è vuoto */
+        /* placeholder mostrato solo quando è vuoto (non fa parte del contenuto) */
         .container-lecture:empty::before {
             content: attr(data-placeholder);
-            opacity: 0.4;
+            color: var(--instruction-grey);
         }
 
+        /* ===== Mobile (Figma stories_page_mobile): colonna unica ===== */
         @media (max-width: 768px) {
-            .stories-page { padding: 20px; }
-            .container-lecture { min-height: 62vh; padding: 16px; }
+            .only-desktop { display: none; }
+            .stories-header {
+                top: 20px;
+                left: 20px;
+                right: 20px;
+                height: 67px;
+            }
+            .stories-header .stories-logo {
+                width: 132px;
+                height: 67px;
+            }
+            .stories-header .save-button {
+                width: 207px;
+            }
+            .stories-columns {
+                flex-direction: column;
+                min-height: auto;
+            }
+            .container-instruction {
+                padding: 184px 20px 40px;
+            }
+            .instruction-stories {
+                gap: 40px;
+                max-width: none;
+            }
+            .instruction-text {
+                font-size: 14px;
+                line-height: 22px;
+                letter-spacing: -0.98px;
+            }
+            .container-lecture {
+                border-left: none;
+                border-top: 1px solid var(--stroke-card);
+                min-height: 55vh;
+                padding: 32px 20px 40px;
+                font-size: 14px;
+                line-height: 22px;
+                letter-spacing: -0.98px;
+            }
         }
     </style>
 </head>
 
 <body>
-    <!-- ===== LOADING PAGE ===== -->
+    <!-- ===== LOADING PAGE (transito) ===== -->
     <section class="loading-page" id="loading-page" style="display:flex;opacity:1;" aria-hidden="false">
         <div class="loading-input">
             <img class="loading-logo" src="assets/images/logo_image.gif" alt="Bratz">
@@ -72,27 +180,35 @@
 
     <!-- ===== STORIES PAGE ===== -->
     <main class="stories-page">
-        <div class="stories-page__content" id="stories-content">
-            <header class="user-header">
-                <button type="button" class="primary-button is-current" id="user-dollz-btn">marpi.dollz</button>
-                <img class="user-logo" src="assets/images/logo_image.gif" alt="Bratz">
-                <button type="button" class="primary-button" id="user-community-btn" disabled>community</button>
-            </header>
+        <!-- header: back (sx) · logo (centro) · save (dx) -->
+        <header class="stories-header">
+            <button type="button" class="back-button" id="stories-back-btn" aria-label="Torna indietro">
+                <svg class="back-button__arrow" viewBox="0 0 53 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="M17.4668 13.6973L14.8838 16.3486H39.998V17.3486H14.8838L17.4668 20L16.75 20.6973L13.3398 17.1973L13 16.8486L13.3398 16.5L16.75 13L17.4668 13.6973Z"
+                        fill="black" />
+                </svg>
+            </button>
+            <img class="stories-logo" src="assets/images/logo_image.gif" alt="Bratz">
+            <button type="button" class="primary-button save-button" id="stories-save-btn" disabled>save</button>
+        </header>
 
-            <div class="container-title">
-                <button type="button" class="back-button" id="stories-back-btn" aria-label="Torna indietro">
-                    <svg class="back-button__arrow" viewBox="0 0 53 34" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path
-                            d="M17.4668 13.6973L14.8838 16.3486H39.998V17.3486H14.8838L17.4668 20L16.75 20.6973L13.3398 17.1973L13 16.8486L13.3398 16.5L16.75 13L17.4668 13.6973Z"
-                            fill="black" />
-                    </svg>
-                </button>
-                <h1 class="card-title">Stories</h1>
-            </div>
+        <div class="stories-columns">
+            <!-- container_instruction: istruzioni + PLOT -->
+            <section class="container-instruction">
+                <div class="instruction-stories">
+                    <p class="instruction-text">Create a title first,
+then press enter to write a story following the plot below.</p>
+                    <p class="instruction-text">PLOT
+In the quiet of the evening, the ultimate styling sanctuary was finally ready. The room was filled with plush oversized pillows, fairy lights reflecting off metallic fabrics, and a late-night playlist humming softly in the background. The floor was covered in fashion sketches, textile samples, and open lookbooks from past runway seasons.
+
+continue your story<span class="only-desktop"> on the right page</span>...</p>
+                </div>
+            </section>
 
             <!-- container_lecture: vuoto, compilabile durante la scrittura -->
-            <div class="container-lecture" id="container-lecture" contenteditable="true" role="textbox"
-                aria-multiline="true" data-placeholder="Write your story..."></div>
+            <section class="container-lecture" id="container-lecture" contenteditable="true" role="textbox"
+                aria-multiline="true" data-placeholder=""></section>
         </div>
     </main>
 

@@ -313,7 +313,7 @@ if (goDollzBtn) {
 }
 
 // ---------- Click sull'oggetto camera -> pop-up "story" con bottone "write" ----------
-// NB: contenuto placeholder in attesa del design Figma "3dgame/story_page".
+// Contenuto fedele al Figma "3dgame/story_page" (pop_up 239x170).
 const _clickRay = new THREE.Raycaster();
 const _clickNdc = new THREE.Vector2();
 let cameraClicked = false;
@@ -328,7 +328,7 @@ function setStoryPopup() {
     close.addEventListener("click", hideGamePopup);
     const text = document.createElement("p");
     text.className = "enter-popup-text";
-    text.innerHTML = "You found the camera.<br>Snap the moment and<br>write its story.";
+    text.textContent = "Yay, you found it, babe. Object unlocked. Your next goal is to start writing its story right now.";
     const write = document.createElement("button");
     write.type = "button";
     write.className = "primary-button active go-write-btn";

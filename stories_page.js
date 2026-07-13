@@ -1,9 +1,4 @@
-// ===== STORIES PAGE: nickname + loading reale + back + scrittura =====
-
-// ---------- Nickname nell'header ----------
-const nickname = (localStorage.getItem("bratz_nickname") || "marpi.dollz").trim();
-const dollzBtn = document.getElementById("user-dollz-btn");
-if (dollzBtn) dollzBtn.textContent = nickname;
+// ===== STORIES PAGE: loading reale + navigazione + scrittura =====
 
 // ---------- Animazione "Loading" (1 → 2 → 3 punti in loop) ----------
 const loadingText = document.getElementById("loading-text");
@@ -72,21 +67,46 @@ const backBtn = document.getElementById("stories-back-btn");
 if (backBtn) backBtn.addEventListener("click", () => navigateWithLoading("scene.html"));
 
 // Logo → user_page
-const logo = document.querySelector(".user-logo");
-if (logo) {
-    logo.classList.add("is-link");
-    logo.addEventListener("click", () => navigateWithLoading("user_page.html"));
-}
+const logo = document.querySelector(".stories-logo");
+if (logo) logo.addEventListener("click", () => navigateWithLoading("user_page.html"));
 
 // ---------- Scrittura: il container_lecture parte VUOTO ed è compilabile ----------
 // (contenteditable). Salvo la bozza in locale così non si perde.
 const lecture = document.getElementById("container-lecture");
+const saveBtn = document.getElementById("stories-save-btn");
 const DRAFT_KEY = "bratz_story_draft";
+
+// Il bottone "save" è attivo (bianco) solo quando c'è del testo scritto,
+// disabilitato (grigio) quando il container è vuoto — come da Figma.
+function refreshSaveState() {
+    const hasText = !!(lecture && lecture.textContent.trim().length);
+    if (!saveBtn) return;
+    if (hasText) {
+        saveBtn.disabled = false;
+        saveBtn.classList.add("active");
+    } else {
+        saveBtn.disabled = true;
+        saveBtn.classList.remove("active");
+    }
+}
+
 if (lecture) {
     const draft = localStorage.getItem(DRAFT_KEY);
     if (draft) lecture.textContent = draft;
+    refreshSaveState();
     lecture.addEventListener("input", () => {
         localStorage.setItem(DRAFT_KEY, lecture.textContent);
+        refreshSaveState();
     });
     lecture.focus();
+}
+
+if (saveBtn) {
+    saveBtn.addEventListener("click", () => {
+        if (saveBtn.disabled) return;
+        localStorage.setItem(DRAFT_KEY, lecture ? lecture.textContent : "");
+        const prev = saveBtn.textContent;
+        saveBtn.textContent = "saved";
+        setTimeout(() => { saveBtn.textContent = prev; }, 1200);
+    });
 }
