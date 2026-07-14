@@ -249,6 +249,30 @@ const character = { obj: null, yaw: INITIAL_YAW, x: 0, z: 0, y: 0, footOffset: 0
 
 // Oggetto camera + alone (popolato in init, rivelato dopo il ritardo)
 let cameraProp = null; // { model, glow }
+let cameraRevealed = false;
+
+// ---------- Ripresa della scena ----------
+// Se si torna al 3D dopo essere andati su un'altra pagina, si riparte ESATTAMENTE
+// da dove ci si era fermati (posizione + stato dell'oggetto camera), senza rifare
+// lo spawn iniziale né la sequenza d'introduzione (enter-popup / comparsa camera).
+const SCENE_STATE_KEY = "bratz_scene_state";
+let savedState = null;
+try { savedState = JSON.parse(sessionStorage.getItem(SCENE_STATE_KEY) || "null"); } catch (_) { savedState = null; }
+const isResume = !!(savedState && typeof savedState.x === "number");
+const gameStartTime = (savedState && savedState.gameStartTime) || Date.now();
+
+function saveSceneState() {
+    if (!character.obj) return; // salva solo a scena inizializzata
+    try {
+        sessionStorage.setItem(SCENE_STATE_KEY, JSON.stringify({
+            x: character.x, z: character.z, yaw: character.yaw,
+            cameraRevealed, cameraCollected: cameraClicked, gameStartTime,
+        }));
+    } catch (_) { /* storage pieno/negato: ignora */ }
+}
+// Persisti allo scaricamento della pagina (navigazione verso un'altra pagina).
+window.addEventListener("pagehide", saveSceneState);
+document.addEventListener("visibilitychange", () => { if (document.hidden) saveSceneState(); });
 
 // Gestione ingresso: la loading page si chiude solo dopo alcuni frame realmente
 // renderizzati (mai schermo nero tra "modelli caricati" e "primo render").
@@ -316,7 +340,7 @@ if (goDollzBtn) {
 // Contenuto fedele al Figma "3dgame/story_page" (pop_up 239x170).
 const _clickRay = new THREE.Raycaster();
 const _clickNdc = new THREE.Vector2();
-let cameraClicked = false;
+let cameraClicked = isResume && savedState.cameraCollected === true;
 
 function setStoryPopup() {
     if (!gamePopup) return;
@@ -524,7 +548,21 @@ function revealCameraProp() {
     if (!cameraProp) return;
     cameraProp.model.visible = true;
     cameraProp.glow.visible = true;
+    cameraRevealed = true;
     console.info("[scene] Oggetto camera comparso.");
+}
+
+// Alla ripresa, riporta l'oggetto camera allo stato salvato (raccolto / rivelato).
+function applyResumeCameraState() {
+    if (!isResume || !cameraProp) return;
+    if (savedState.cameraCollected) {
+        cameraProp.model.visible = true;   // già raccolto: oggetto visibile, niente alone
+        cameraProp.glow.visible = false;
+        cameraRevealed = true;
+    } else if (savedState.cameraRevealed) {
+        revealCameraProp();                 // era comparso ma non ancora raccolto
+    }
+    // se non era ancora comparso, ci pensa il blocco warmFrames col tempo residuo
 }
 
 // Mette una PointLight su ogni "Bulb_" (la lampadina dentro le lampade a
@@ -712,12 +750,20 @@ async function init() {
         character.y = spawn.y;
         character.obj = charModel;
 
+        // Ripresa: riparti dalla posizione salvata, non dallo spawn iniziale.
+        if (isResume) {
+            character.x = savedState.x;
+            character.z = savedState.z;
+            character.yaw = savedState.yaw;
+        }
+
         character.y = groundY();       // aggancio esatto alla partenza (senza smoothing)
         applyCharacterTransform();
         scene.add(charModel);
         updateCamera();
 
         await loadCameraProp();        // caricato ma nascosto: comparirà dopo il ritardo
+        applyResumeCameraState();      // ripresa: ripristina lo stato dell'oggetto camera
         await loadCityBackground();    // sfondo urbano pronto prima del primo frame
 
         // Precompila gli shader: la loading page resta finché non ho renderizzato
@@ -812,9 +858,16 @@ function animate() {
     if (sceneReady && !loadingHidden) {
         if (++warmFrames >= 3) {
             hideLoading();
-            // L'utente è "entrato": avvia i timer (pop-up a 5'', oggetto camera a 20'').
-            setTimeout(showGamePopup, GAME_POPUP_DELAY_MS);
-            setTimeout(revealCameraProp, CAMERA_PROP.delayMs);
+            if (!isResume) {
+                // Primo ingresso: avvia i timer (pop-up a 5'', oggetto camera a 20'').
+                setTimeout(showGamePopup, GAME_POPUP_DELAY_MS);
+                setTimeout(revealCameraProp, CAMERA_PROP.delayMs);
+            } else if (!cameraClicked && !cameraRevealed) {
+                // Ripresa: niente enter-popup; se la camera non era ancora comparsa,
+                // falla comparire col tempo residuo rispetto all'inizio del gioco.
+                const remaining = CAMERA_PROP.delayMs - (Date.now() - gameStartTime);
+                setTimeout(revealCameraProp, Math.max(0, remaining));
+            }
         }
     }
 }

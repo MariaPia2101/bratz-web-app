@@ -185,9 +185,9 @@
                 height: 67px;
             }
             .stories-header .save-button {
-                flex: 1 1 0;
-                min-width: 0;
-                width: auto;
+                flex: 0 0 auto;
+                width: 207px;                    /* stessa dimensione del primary_button (Figma) */
+                max-width: calc(100% - 72px);    /* lascia posto al back-button senza overflow */
                 font-size: 12px;
             }
             .stories-columns {
