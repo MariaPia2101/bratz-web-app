@@ -167,6 +167,11 @@ if (titleEl) {
     titleEl.focus();
 }
 
+function getSavedStories() {
+    try { return JSON.parse(localStorage.getItem("bratz_saved_stories") || "[]") || []; }
+    catch (_) { return []; }
+}
+
 if (saveBtn) {
     saveBtn.addEventListener("click", () => {
         if (saveBtn.disabled) return;
@@ -176,12 +181,22 @@ if (saveBtn) {
         localStorage.setItem(BODY_KEY, body);
         // Storia SALVATA (solo al click su save): comparirà come card nella
         // yasmin/stories_page. title→title_text, nickname→subtitle_text, corpo→preview.
-        localStorage.setItem("bratz_saved_story", JSON.stringify({
+        const story = {
             title,
             body,
             nickname: (localStorage.getItem("bratz_nickname") || "marpi.dollz").trim(),
             ts: Date.now(),
-        }));
+        };
+        const stories = getSavedStories();
+        const editIndex = parseInt(localStorage.getItem("bratz_story_edit_index"), 10);
+        if (!Number.isNaN(editIndex) && editIndex >= 0 && stories[editIndex]) {
+            stories[editIndex] = story;                 // modifica di una storia esistente
+        } else {
+            stories.push(story);                        // nuova storia
+            // da ora un nuovo click aggiorna QUESTA storia (niente doppioni)
+            localStorage.setItem("bratz_story_edit_index", String(stories.length - 1));
+        }
+        localStorage.setItem("bratz_saved_stories", JSON.stringify(stories));
         // Stato tapped persistente: "saved" finché non si scrive di nuovo.
         isSaved = true;
         saveBtn.classList.add("is-saved");

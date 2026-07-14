@@ -1190,7 +1190,12 @@ body {
     text-transform: uppercase;
     color: var(--card-stroke);
     word-break: break-word;
-    white-space: pre-wrap;
+    /* anteprima: massimo 6 righe, poi troncata */
+    display: -webkit-box;
+    -webkit-line-clamp: 6;
+    line-clamp: 6;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 .persona-card__title {
@@ -1262,6 +1267,14 @@ body {
 }
 
 /* box_goalz: riquadro istruzioni del tab GOALZ (in alto nella colonna 70%) */
+/* container_box_goalz: lista verticale degli obiettivi (gap 20, come Figma) */
+.goalz-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+}
+
 .box-goalz {
     box-sizing: border-box;
     width: 100%;

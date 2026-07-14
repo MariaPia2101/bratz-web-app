@@ -221,17 +221,17 @@
 
         <img class="go-yasmin" src="assets/images/yasmin_icon.png" alt="">
 
-        <!-- pop_up: nascosto, compare dopo 5''. Il contenuto cambierà nel tempo. -->
+        <!-- pop_up: nascosto; il contenuto è impostato via JS in base all'obiettivo corrente. -->
         <aside class="go-popup" id="go-popup" aria-hidden="true" hidden>
             <button type="button" class="enter-popup-close" id="go-popup-close">Close</button>
-            <p class="enter-popup-text">Welcome to my room, babe.<br>This is where you'll write<br>your stories. Explore the<br>space and find daily<br>hidden objects.</p>
+            <p class="enter-popup-text">Welcome to my room, babe. This is where you'll write your stories. Explore the space and find the first hidden object.</p>
         </aside>
     </div>
 
     <!-- Overlay "stories": tiene viva la scena 3D sotto, così tornando indietro riprende dal punto esatto -->
     <iframe id="stories-frame" class="stories-frame" title="Stories" hidden></iframe>
 
-    <script type="module" src="scene.js?v=18"></script>
+    <script type="module" src="scene.js?v=19"></script>
 </body>
 
 </html>

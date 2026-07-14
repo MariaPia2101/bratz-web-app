@@ -215,13 +215,75 @@ if (!Number.isNaN(savedIdx) && selectButtons[savedIdx]) {
     applySelection(selectButtons[savedIdx], false);
 }
 
+// ---------- Progressione condivisa col 3D (localStorage) ----------
+function getSavedStories() {
+    try { return JSON.parse(localStorage.getItem("bratz_saved_stories") || "[]") || []; }
+    catch (_) { return []; }
+}
+function getObjectsFound() {
+    const n = parseInt(localStorage.getItem("bratz_objects_found"), 10);
+    return Number.isNaN(n) ? 0 : n;
+}
+
+// Sblocca una tab bloccata (usata quando la progressione rende la sezione visibile).
+function unlockTab(name) {
+    const tab = tabs.find((t) => t.dataset.tab === name);
+    if (tab && tab.disabled) {
+        tab.disabled = false;
+        tab.classList.remove("side-locked");
+        if (tab.dataset.tab !== activeTab) tab.classList.add("active");
+    }
+}
+
+// ---------- yasmin/goalz_page: obiettivi ATTIVI in base alla progressione ----------
+const GOALS = {
+    G1: "Explore every corner of the immersive space to unlock the complete vibe of the environment",
+    G2: "Use your sharp fashion eye to find the first hidden item in the scene",
+    G3: "Write a unique fashion-forward story inspired by the secret object you just uncovered",
+    G4: "Look closer at the details and track down the second hidden item waiting in the room",
+    G5: "Let your creativity run wild and write a captivating story inspired by this new discovery",
+    G6: "Scan the space to reveal the third secret object and add it to your collection",
+    G7: "Craft the story for the final object to complete your vibe and finish the challenge.",
+    G8: "Complete the layout and publish your magazine",
+};
+
+// Obiettivi visibili per lo stato (found = oggetti trovati, saved = storie scritte).
+function activeGoals(found, saved) {
+    if (found === saved) {
+        if (saved === 0) return [GOALS.G1, GOALS.G2]; // cerca 1° oggetto
+        if (saved === 1) return [GOALS.G4, GOALS.G5]; // cerca 2° oggetto + scrivi
+        if (saved === 2) return [GOALS.G6, GOALS.G7]; // cerca 3° oggetto + scrivi
+        return [GOALS.G8];                            // magazine
+    }
+    if (found === 1) return [GOALS.G3]; // scrivi storia 1
+    if (found === 2) return [GOALS.G5]; // scrivi storia 2
+    if (found === 3) return [GOALS.G7]; // scrivi storia 3
+    return [];
+}
+
+const goalzList = document.getElementById("goalz-list");
+function renderGoalz() {
+    if (!goalzList) return;
+    const goals = activeGoals(getObjectsFound(), getSavedStories().length);
+    goalzList.innerHTML = "";
+    goals.forEach((text) => {
+        const box = document.createElement("div");
+        box.className = "box-goalz";
+        const p = document.createElement("p");
+        p.className = "box-goalz__text";
+        p.textContent = text;
+        box.appendChild(p);
+        goalzList.appendChild(box);
+    });
+}
+
 // ---------- Storie salvate: yasmin/stories_page da vuota a piena ----------
-// Se l'utente ha salvato una storia dalla scena 3D (tasto "save"), mostriamo il
-// complete_card_button: titolo→title_text, nickname→subtitle_text, corpo→preview.
+// Un complete_card_button per storia salvata:
+// titolo→title_text, nickname→subtitle_text, corpo→preview (max 6 righe).
 const storiesEmpty = document.getElementById("stories-empty");
 const storiesCards = document.getElementById("stories-cards");
 
-function buildStoryCard(story) {
+function buildStoryCard(story, index) {
     const card = document.createElement("article");
     card.className = "persona-card story-card";
 
@@ -229,7 +291,8 @@ function buildStoryCard(story) {
     upper.className = "persona-card__upper story-card__upper";
     const desc = document.createElement("p");
     desc.className = "persona-card__desc story-card__desc";
-    desc.textContent = story.body || "";               // anteprima della storia
+    // anteprima continua (i newline diventano spazi): il clamp mostra max 6 righe
+    desc.textContent = (story.body || "").replace(/\s+/g, " ").trim();
     upper.appendChild(desc);
 
     const below = document.createElement("div");
@@ -251,7 +314,10 @@ function buildStoryCard(story) {
     modify.className = "primary-button active story-modify";
     modify.textContent = "modify";
     modify.addEventListener("click", () => {
-        // torna qui dopo la modifica
+        // modifica QUESTA storia: carica la bozza e segna l'indice
+        localStorage.setItem("bratz_story_edit_index", String(index));
+        localStorage.setItem("bratz_story_title", story.title || "");
+        localStorage.setItem("bratz_story_body", story.body || "");
         sessionStorage.setItem("bratz_stories_return", location.pathname.split("/").pop() || "user_page.html");
         navigateWithLoading("stories_page.html");
     });
@@ -264,27 +330,24 @@ function buildStoryCard(story) {
 
 function renderSavedStories() {
     if (!storiesCards || !storiesEmpty) return;
-    let story = null;
-    try { story = JSON.parse(localStorage.getItem("bratz_saved_story") || "null"); } catch (_) { story = null; }
-    const hasStory = !!(story && ((story.title && story.title.trim()) || (story.body && story.body.trim())));
+    const stories = getSavedStories();
+    const hasStory = stories.some((s) => (s.title && s.title.trim()) || (s.body && s.body.trim()));
 
     if (hasStory) {
         storiesCards.innerHTML = "";
-        storiesCards.appendChild(buildStoryCard(story));
+        stories.forEach((story, idx) => storiesCards.appendChild(buildStoryCard(story, idx)));
         storiesCards.hidden = false;
         storiesEmpty.hidden = true;
-        // la sezione stories non è più "vuota": sblocca la relativa tab
-        const storiesTab = tabs.find((t) => t.dataset.tab === "stories");
-        if (storiesTab && storiesTab.disabled) {
-            storiesTab.disabled = false;
-            storiesTab.classList.remove("side-locked");
-            if (storiesTab.dataset.tab !== activeTab) storiesTab.classList.add("active");
-        }
+        unlockTab("stories");   // la sezione non è più vuota
     } else {
         storiesCards.hidden = true;
         storiesEmpty.hidden = false;
     }
 }
+
+// Se il gioco è iniziato, la sezione goalz è comunque consultabile.
+if (getObjectsFound() > 0 || getSavedStories().length > 0) unlockTab("goalz");
+renderGoalz();
 renderSavedStories();
 
 // Stato iniziale del popup (tab identity): impostato via JS ora che il bottone

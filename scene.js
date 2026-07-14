@@ -39,15 +39,17 @@ const MIRROR = {
 // Es. decori piatti del pavimento e il tappeto "Rug_Mesh_".
 const WALKABLE_NAMES = ["floor", "rug"];
 
-// Oggetto "camera.glb": la sua posizione è già baked nel modello (~-3.90, 0.76, 1.48).
-// Appare dopo un ritardo e ha un alone bianco pulsante.
-const CAMERA_PROP = {
-    url: "assets/3d/models/camera.glb",
-    delayMs: 20000,                  // compare 20'' dopo l'ingresso
-    center: [-3.90, 0.76, 1.48],     // centro oggetto (per l'alone)
-    glowSize: 0.32,                  // dimensione dell'alone
-    pulseSpeed: 2.2,                 // velocità della pulsazione
-};
+// Oggetti da trovare, IN ORDINE (camera → lipstick → bag). La posizione è già
+// baked in ogni modello; il centro dell'alone è calcolato dalla bounding box.
+// Stesso alone bianco pulsante della camera per tutti.
+const GAME_OBJECTS = [
+    { url: "assets/3d/models/camera.glb",   glowSize: 0.32 },
+    { url: "assets/3d/models/lipstick.glb" },
+    { url: "assets/3d/models/bag.glb" },
+];
+const GLOW_PULSE_SPEED = 2.2;        // velocità della pulsazione dell'alone
+const POPUP_DELAY_MS = 5000;         // il pop_up appare 5'' dopo l'ingresso/ritorno
+const OBJECT_DELAY_MS = 5000;        // l'oggetto appare 5'' dopo il pop_up
 
 // Movimento
 const MOVE_SPEED   = 2.2;
@@ -247,32 +249,44 @@ function tuneMaterials(root) {
 // ---------- Stato ----------
 const character = { obj: null, yaw: INITIAL_YAW, x: 0, z: 0, y: 0, footOffset: 0 };
 
-// Oggetto camera + alone (popolato in init, rivelato dopo il ritardo)
-let cameraProp = null; // { model, glow }
-let cameraRevealed = false;
+// Oggetti da trovare (popolati in init): [{ model, glow, glowSize }]. activeObject
+// = indice dell'oggetto attualmente cercabile (con alone), -1 = nessuno.
+let gameObjects = [];
+let activeObjectIndex = -1;
 
-// ---------- Ripresa della scena ----------
-// Se si torna al 3D dopo essere andati su un'altra pagina, si riparte ESATTAMENTE
-// da dove ci si era fermati (posizione + stato dell'oggetto camera), senza rifare
-// lo spawn iniziale né la sequenza d'introduzione (enter-popup / comparsa camera).
+// ---------- Ripresa della scena (solo posizione) ----------
+// Tornando al 3D da un'altra pagina si riparte dalla posizione in cui ci si era
+// fermati. Lo stato del "gioco" (oggetti/obiettivi) è invece derivato dalla
+// progressione condivisa in localStorage (vedi sotto).
 const SCENE_STATE_KEY = "bratz_scene_state";
 let savedState = null;
 try { savedState = JSON.parse(sessionStorage.getItem(SCENE_STATE_KEY) || "null"); } catch (_) { savedState = null; }
 const isResume = !!(savedState && typeof savedState.x === "number");
-const gameStartTime = (savedState && savedState.gameStartTime) || Date.now();
 
 function saveSceneState() {
     if (!character.obj) return; // salva solo a scena inizializzata
     try {
         sessionStorage.setItem(SCENE_STATE_KEY, JSON.stringify({
             x: character.x, z: character.z, yaw: character.yaw,
-            cameraRevealed, cameraCollected: cameraClicked, gameStartTime,
         }));
     } catch (_) { /* storage pieno/negato: ignora */ }
 }
-// Persisti allo scaricamento della pagina (navigazione verso un'altra pagina).
 window.addEventListener("pagehide", saveSceneState);
 document.addEventListener("visibilitychange", () => { if (document.hidden) saveSceneState(); });
+
+// ---------- Progressione obiettivi (condivisa con yasmin/goalz_page e /stories_page) ----------
+// found = quanti oggetti trovati (0..3); saved = quante storie salvate (= n. card).
+// Fase: found===saved → "cerca oggetto (index=found)" oppure magazine se found===3;
+//       found===saved+1 → "scrivi la storia dell'oggetto appena trovato".
+function getObjectsFound() {
+    const n = parseInt(localStorage.getItem("bratz_objects_found"), 10);
+    return Number.isNaN(n) ? 0 : n;
+}
+function setObjectsFound(n) { localStorage.setItem("bratz_objects_found", String(n)); }
+function getStoriesSaved() {
+    try { return (JSON.parse(localStorage.getItem("bratz_saved_stories") || "[]") || []).length; }
+    catch (_) { return 0; }
+}
 
 // Gestione ingresso: la loading page si chiude solo dopo alcuni frame realmente
 // renderizzati (mai schermo nero tra "modelli caricati" e "primo render").
@@ -307,8 +321,7 @@ function fadeHint() {
 }
 setTimeout(fadeHint, 6000);
 
-// ---------- Overlay "3dgame/enter_page": pop-up dopo 5'' ----------
-const GAME_POPUP_DELAY_MS = 5000;
+// ---------- Overlay "3dgame/enter_page": pop-up di gioco ----------
 const gamePopup = document.getElementById("go-popup");
 const gamePopupClose = document.getElementById("go-popup-close");
 if (gamePopupClose) gamePopupClose.addEventListener("click", hideGamePopup);
@@ -336,12 +349,26 @@ if (goDollzBtn) {
     });
 }
 
-// ---------- Click sull'oggetto camera -> pop-up "story" con bottone "write" ----------
-// Contenuto fedele al Figma "3dgame/story_page" (pop_up 239x170).
+// ---------- Pop-up di gioco: annuncio (Close+testo) e "story" (Close+testo+write) ----------
 const _clickRay = new THREE.Raycaster();
 const _clickNdc = new THREE.Vector2();
-let cameraClicked = isResume && savedState.cameraCollected === true;
 
+// Pop-up di annuncio: Close + testo (welcome / due nuove missioni / magazine).
+function setAnnouncePopup(text) {
+    if (!gamePopup) return;
+    gamePopup.innerHTML = "";
+    const close = document.createElement("button");
+    close.type = "button";
+    close.className = "enter-popup-close";
+    close.textContent = "Close";
+    close.addEventListener("click", hideGamePopup);
+    const p = document.createElement("p");
+    p.className = "enter-popup-text";
+    p.textContent = text;
+    gamePopup.append(close, p);
+}
+
+// Pop-up "story": Close + testo + bottone "write" (fedele al Figma 3dgame/story_page).
 function setStoryPopup() {
     if (!gamePopup) return;
     gamePopup.innerHTML = "";
@@ -368,9 +395,14 @@ const storiesFrame = document.getElementById("stories-frame");
 
 function openStories() {
     if (!storiesFrame) { window.location.href = "stories_page.html"; return; }
+    clearPhaseTimers();
     hideGamePopup();
     keys.clear();                 // niente movimenti residui mentre si scrive
-    if (!storiesFrame.getAttribute("src")) storiesFrame.src = "stories_page.html";
+    // Nuova storia: bozza vuota (l'editor parte pulito).
+    localStorage.setItem("bratz_story_edit_index", "-1");
+    localStorage.removeItem("bratz_story_title");
+    localStorage.removeItem("bratz_story_body");
+    storiesFrame.src = "stories_page.html?t=" + Date.now(); // ricarica -> editor vuoto
     storiesFrame.hidden = false;
     storiesOpen = true;           // congela il loop 3D (vedi animate)
 }
@@ -379,20 +411,67 @@ function closeStories() {
     storiesFrame.hidden = true;
     storiesOpen = false;          // riprende dal punto esatto in cui si era fermato
     clock.getDelta();             // scarta il tempo trascorso in pausa (niente scatti)
+    startPhaseFlow();             // annuncia il prossimo obiettivo (dopo 5''), eventuale nuovo oggetto
 }
 // La pagina stories (dentro l'iframe) chiede la chiusura col back-button.
 window.addEventListener("message", (e) => {
     if (e.data && e.data.type === "bratz:stories-close") closeStories();
 });
 
+// ---------- Macchina delle fasi (obiettivi / oggetti) ----------
+function revealObject(index) {
+    const o = gameObjects[index];
+    if (!o) return;
+    o.model.visible = true;
+    o.glow.visible = true;
+    activeObjectIndex = index;
+}
+
+let phaseTimers = [];
+function clearPhaseTimers() { phaseTimers.forEach(clearTimeout); phaseTimers = []; }
+
+// Dopo 5'' mostra il pop_up dell'obiettivo corrente; in fase "cerca oggetto"
+// l'oggetto compare 5'' dopo il pop_up (stesso iter della camera.glb).
+function startPhaseFlow() {
+    clearPhaseTimers();
+    activeObjectIndex = -1;
+    const found = getObjectsFound();
+    const saved = getStoriesSaved();
+
+    if (found === saved + 1) {
+        // Oggetto trovato ma storia non ancora scritta: riproponi il pop_up "write".
+        phaseTimers.push(setTimeout(() => { setStoryPopup(); showGamePopup(); }, POPUP_DELAY_MS));
+        return;
+    }
+    if (found >= GAME_OBJECTS.length) {
+        // Tutte le storie scritte: obiettivo finale (magazine).
+        phaseTimers.push(setTimeout(() => {
+            setAnnouncePopup("OMG, look at you. You're totally ready to build your very first magazine. Let's do this, babe.");
+            showGamePopup();
+        }, POPUP_DELAY_MS));
+        return;
+    }
+    // Fase "cerca oggetto" (index = found).
+    const text = (found === 0)
+        ? "Welcome to my room, babe. This is where you'll write your stories. Explore the space and find the first hidden object."
+        : "Hey, we got two new missions. Time for the next step, go find another hidden object now.";
+    phaseTimers.push(setTimeout(() => { setAnnouncePopup(text); showGamePopup(); }, POPUP_DELAY_MS));
+    phaseTimers.push(setTimeout(() => { revealObject(found); }, POPUP_DELAY_MS + OBJECT_DELAY_MS));
+}
+
+// Click su un oggetto attivo -> "trovato": alone via, +1 oggetto, pop_up "write".
 renderer.domElement.addEventListener("pointerdown", (e) => {
-    if (!cameraProp || !cameraProp.model.visible || cameraClicked) return;
+    if (storiesOpen || activeObjectIndex < 0) return;
+    const o = gameObjects[activeObjectIndex];
+    if (!o || !o.model.visible) return;
     _clickNdc.x = (e.clientX / window.innerWidth) * 2 - 1;
     _clickNdc.y = -(e.clientY / window.innerHeight) * 2 + 1;
     _clickRay.setFromCamera(_clickNdc, camera);
-    if (_clickRay.intersectObject(cameraProp.model, true).length) {
-        cameraClicked = true;
-        if (cameraProp.glow) cameraProp.glow.visible = false; // oggetto "raccolto"
+    if (_clickRay.intersectObject(o.model, true).length) {
+        o.glow.visible = false;                                   // oggetto "raccolto"
+        setObjectsFound(Math.max(getObjectsFound(), activeObjectIndex + 1));
+        activeObjectIndex = -1;
+        clearPhaseTimers();
         setStoryPopup();
         showGamePopup();
     }
@@ -518,51 +597,48 @@ function makeGlowTexture() {
     return t;
 }
 
-// Carica camera.glb (nascosto) + alone bianco: verranno rivelati dopo il ritardo.
-async function loadCameraProp() {
-    const model = await loadModel(CAMERA_PROP.url);
-    enableShadows(model);
-    model.visible = false;
-    scene.add(model);
+// Carica i 3 oggetti (camera, lipstick, bag) nascosti + il loro alone bianco.
+// Il centro dell'alone è calcolato dalla bounding box del modello (posizione baked).
+async function loadGameObjects() {
+    for (const cfg of GAME_OBJECTS) {
+        const model = await loadModel(cfg.url);
+        enableShadows(model);
+        model.visible = false;
+        scene.add(model);
 
-    const glow = new THREE.Sprite(new THREE.SpriteMaterial({
-        map: makeGlowTexture(),
-        color: 0xffffff,
-        transparent: true,
-        blending: THREE.AdditiveBlending,
-        depthWrite: false,
-        depthTest: false, // disegnato SOPRA: copre l'oggetto e il ripiano, niente compenetrazione
-        opacity: 0,
-    }));
-    glow.position.set(CAMERA_PROP.center[0], CAMERA_PROP.center[1], CAMERA_PROP.center[2]);
-    glow.scale.set(CAMERA_PROP.glowSize, CAMERA_PROP.glowSize, 1);
-    glow.renderOrder = 999;
-    glow.visible = false;
-    scene.add(glow);
+        model.updateMatrixWorld(true);
+        const box = new THREE.Box3().setFromObject(model);
+        const center = box.getCenter(new THREE.Vector3());
+        const size = box.getSize(new THREE.Vector3());
+        const maxDim = Math.max(size.x, size.y, size.z);
+        const glowSize = cfg.glowSize || THREE.MathUtils.clamp(maxDim * 1.8, 0.22, 0.45);
 
-    cameraProp = { model, glow };
-}
+        const glow = new THREE.Sprite(new THREE.SpriteMaterial({
+            map: makeGlowTexture(),
+            color: 0xffffff,
+            transparent: true,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false,
+            depthTest: false, // disegnato SOPRA: copre l'oggetto e il ripiano, niente compenetrazione
+            opacity: 0,
+        }));
+        glow.position.copy(center);
+        glow.scale.set(glowSize, glowSize, 1);
+        glow.renderOrder = 999;
+        glow.visible = false;
+        scene.add(glow);
 
-// Rivela l'oggetto camera e attiva l'alone pulsante.
-function revealCameraProp() {
-    if (!cameraProp) return;
-    cameraProp.model.visible = true;
-    cameraProp.glow.visible = true;
-    cameraRevealed = true;
-    console.info("[scene] Oggetto camera comparso.");
-}
-
-// Alla ripresa, riporta l'oggetto camera allo stato salvato (raccolto / rivelato).
-function applyResumeCameraState() {
-    if (!isResume || !cameraProp) return;
-    if (savedState.cameraCollected) {
-        cameraProp.model.visible = true;   // già raccolto: oggetto visibile, niente alone
-        cameraProp.glow.visible = false;
-        cameraRevealed = true;
-    } else if (savedState.cameraRevealed) {
-        revealCameraProp();                 // era comparso ma non ancora raccolto
+        gameObjects.push({ model, glow, glowSize });
     }
-    // se non era ancora comparso, ci pensa il blocco warmFrames col tempo residuo
+}
+
+// In base alla progressione, rende visibili (senza alone) gli oggetti già trovati.
+function setupFoundObjects() {
+    const found = getObjectsFound();
+    for (let i = 0; i < found && i < gameObjects.length; i++) {
+        gameObjects[i].model.visible = true;
+        gameObjects[i].glow.visible = false;
+    }
 }
 
 // Mette una PointLight su ogni "Bulb_" (la lampadina dentro le lampade a
@@ -762,8 +838,8 @@ async function init() {
         scene.add(charModel);
         updateCamera();
 
-        await loadCameraProp();        // caricato ma nascosto: comparirà dopo il ritardo
-        applyResumeCameraState();      // ripresa: ripristina lo stato dell'oggetto camera
+        await loadGameObjects();       // 3 oggetti nascosti (camera/lipstick/bag) + aloni
+        setupFoundObjects();           // gli oggetti già trovati restano visibili (senza alone)
         await loadCityBackground();    // sfondo urbano pronto prima del primo frame
 
         // Precompila gli shader: la loading page resta finché non ho renderizzato
@@ -843,13 +919,14 @@ function animate() {
         updateCamera();
     }
 
-    // Alone bianco pulsante dell'oggetto camera
-    if (cameraProp && cameraProp.glow.visible) {
+    // Alone bianco pulsante dell'oggetto attivo (da cercare)
+    if (activeObjectIndex >= 0 && gameObjects[activeObjectIndex] && gameObjects[activeObjectIndex].glow.visible) {
+        const o = gameObjects[activeObjectIndex];
         const t = performance.now() * 0.001;
-        const pulse = 0.5 + 0.5 * Math.sin(t * CAMERA_PROP.pulseSpeed); // 0..1
-        cameraProp.glow.material.opacity = 0.35 + 0.5 * pulse;
-        const s = CAMERA_PROP.glowSize * (0.9 + 0.2 * pulse);
-        cameraProp.glow.scale.set(s, s, 1);
+        const pulse = 0.5 + 0.5 * Math.sin(t * GLOW_PULSE_SPEED); // 0..1
+        o.glow.material.opacity = 0.35 + 0.5 * pulse;
+        const s = o.glowSize * (0.9 + 0.2 * pulse);
+        o.glow.scale.set(s, s, 1);
     }
 
     composer.render(); // render con bloom (soft glow)
@@ -858,16 +935,8 @@ function animate() {
     if (sceneReady && !loadingHidden) {
         if (++warmFrames >= 3) {
             hideLoading();
-            if (!isResume) {
-                // Primo ingresso: avvia i timer (pop-up a 5'', oggetto camera a 20'').
-                setTimeout(showGamePopup, GAME_POPUP_DELAY_MS);
-                setTimeout(revealCameraProp, CAMERA_PROP.delayMs);
-            } else if (!cameraClicked && !cameraRevealed) {
-                // Ripresa: niente enter-popup; se la camera non era ancora comparsa,
-                // falla comparire col tempo residuo rispetto all'inizio del gioco.
-                const remaining = CAMERA_PROP.delayMs - (Date.now() - gameStartTime);
-                setTimeout(revealCameraProp, Math.max(0, remaining));
-            }
+            // Avvia la fase corrente (obiettivo dopo 5''; eventuale oggetto 5'' dopo).
+            startPhaseFlow();
         }
     }
 }
