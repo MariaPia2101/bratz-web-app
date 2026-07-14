@@ -60,6 +60,13 @@
             width: 207px;
         }
 
+        /* stato "saved": tapped persistente finché non si apporta una nuova modifica */
+        .stories-header .save-button.is-saved {
+            background: var(--btn-fill-tapped, #c7a9ff);
+            color: var(--btn-text-active, #000);
+            cursor: default;
+        }
+
         /* ---- due colonne da 720px, centrate su max 1440 ---- */
         .stories-columns {
             display: flex;
@@ -154,24 +161,41 @@
         /* ===== Mobile (Figma stories_page_mobile): colonna unica ===== */
         @media (max-width: 768px) {
             .only-desktop { display: none; }
+            /* header mobile come tutte le altre pagine (Figma stories_page_mobile):
+               logo in alto a tutta larghezza, back-button + save affiancati sotto. */
             .stories-header {
-                top: 20px;
+                position: static;
+                left: auto;
+                transform: none;
                 width: calc(100% - 40px);
-                height: 67px;
+                margin: 20px auto 0;
+                height: auto;
+                flex-wrap: wrap;
+                row-gap: 22px;
+                column-gap: 19px;
+                align-items: center;
+                justify-content: space-between;
             }
             .stories-header .stories-logo {
-                width: 132px;
+                position: static;
+                transform: none;
+                order: -1;
+                flex: 0 0 100%;
+                width: auto;
                 height: 67px;
             }
             .stories-header .save-button {
-                width: 207px;
+                flex: 1 1 0;
+                min-width: 0;
+                width: auto;
+                font-size: 12px;
             }
             .stories-columns {
                 flex-direction: column;
                 min-height: auto;
             }
             .container-instruction {
-                padding: 184px 20px 40px;
+                padding: 40px 20px 40px;
             }
             .instruction-stories {
                 gap: 40px;

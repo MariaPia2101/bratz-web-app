@@ -119,6 +119,18 @@ function refreshSaveState() {
     saveBtn.classList.toggle("active", hasText);
 }
 
+// Dopo il salvataggio il bottone resta "saved" (stato tapped) finché non si
+// apporta una nuova modifica al testo: allora torna "save".
+let isSaved = false;
+function clearSaved() {
+    if (!isSaved) return;
+    isSaved = false;
+    if (saveBtn) {
+        saveBtn.classList.remove("is-saved");
+        saveBtn.textContent = "save";
+    }
+}
+
 if (titleEl) {
     // Ripristino bozza (se presente).
     const draftTitle = localStorage.getItem(TITLE_KEY) || "";
@@ -138,12 +150,14 @@ if (titleEl) {
     });
     titleEl.addEventListener("input", () => {
         localStorage.setItem(TITLE_KEY, titleEl.textContent);
+        clearSaved();       // nuova modifica → il bottone torna "save"
         refreshSaveState();
     });
 
     if (bodyEl) {
         bodyEl.addEventListener("input", () => {
             localStorage.setItem(BODY_KEY, bodyEl.textContent);
+            clearSaved();   // nuova modifica → il bottone torna "save"
             refreshSaveState();
         });
     }
@@ -156,8 +170,9 @@ if (saveBtn) {
         if (saveBtn.disabled) return;
         localStorage.setItem(TITLE_KEY, titleEl ? titleEl.textContent : "");
         localStorage.setItem(BODY_KEY, bodyEl ? bodyEl.textContent : "");
-        const prev = saveBtn.textContent;
+        // Stato tapped persistente: "saved" finché non si scrive di nuovo.
+        isSaved = true;
+        saveBtn.classList.add("is-saved");
         saveBtn.textContent = "saved";
-        setTimeout(() => { saveBtn.textContent = prev; }, 1200);
     });
 }
