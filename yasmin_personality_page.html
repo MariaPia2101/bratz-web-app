@@ -247,11 +247,15 @@
                             </div>
                         </div>
 
-                        <!-- tab STORIES: empty_page (yasmin/stories/empty_page) -->
-                        <div class="tab-panel" data-tab="stories" hidden>
-                            <div class="empty-state">
+                        <!-- tab STORIES: da yasmin/stories/empty_page a yasmin/stories_page (piena)
+                             quando l'utente salva una storia dalla scena 3D. -->
+                        <div class="tab-panel tab-panel--scroll" data-tab="stories" hidden>
+                            <!-- empty_page: nessuna storia salvata -->
+                            <div class="empty-state" id="stories-empty">
                                 <p class="empty-state__text">Follow the goalz<br>to unlock this section</p>
                             </div>
+                            <!-- full_page: card (complete_card_button) generate da JS -->
+                            <div class="cards-grid stories-cards" id="stories-cards" hidden></div>
                         </div>
 
                         <!-- tab MAGAZINES: empty_page (yasmin/magazines/empty_page) -->

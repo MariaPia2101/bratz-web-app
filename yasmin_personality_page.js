@@ -215,6 +215,78 @@ if (!Number.isNaN(savedIdx) && selectButtons[savedIdx]) {
     applySelection(selectButtons[savedIdx], false);
 }
 
+// ---------- Storie salvate: yasmin/stories_page da vuota a piena ----------
+// Se l'utente ha salvato una storia dalla scena 3D (tasto "save"), mostriamo il
+// complete_card_button: titolo→title_text, nickname→subtitle_text, corpo→preview.
+const storiesEmpty = document.getElementById("stories-empty");
+const storiesCards = document.getElementById("stories-cards");
+
+function buildStoryCard(story) {
+    const card = document.createElement("article");
+    card.className = "persona-card story-card";
+
+    const upper = document.createElement("div");
+    upper.className = "persona-card__upper story-card__upper";
+    const desc = document.createElement("p");
+    desc.className = "persona-card__desc story-card__desc";
+    desc.textContent = story.body || "";               // anteprima della storia
+    upper.appendChild(desc);
+
+    const below = document.createElement("div");
+    below.className = "persona-card__below";
+    const row = document.createElement("div");
+    row.className = "container-below-button";
+    const textCard = document.createElement("div");
+    textCard.className = "container-text-card";
+    const title = document.createElement("p");
+    title.className = "persona-card__title";
+    title.textContent = story.title || "";             // titolo digitato
+    const subtitle = document.createElement("p");
+    subtitle.className = "persona-card__subtitle";
+    subtitle.textContent = story.nickname || nickname; // nickname dell'onboarding
+    textCard.append(title, subtitle);
+
+    const modify = document.createElement("button");
+    modify.type = "button";
+    modify.className = "primary-button active story-modify";
+    modify.textContent = "modify";
+    modify.addEventListener("click", () => {
+        // torna qui dopo la modifica
+        sessionStorage.setItem("bratz_stories_return", location.pathname.split("/").pop() || "user_page.html");
+        navigateWithLoading("stories_page.html");
+    });
+
+    row.append(textCard, modify);
+    below.appendChild(row);
+    card.append(upper, below);
+    return card;
+}
+
+function renderSavedStories() {
+    if (!storiesCards || !storiesEmpty) return;
+    let story = null;
+    try { story = JSON.parse(localStorage.getItem("bratz_saved_story") || "null"); } catch (_) { story = null; }
+    const hasStory = !!(story && ((story.title && story.title.trim()) || (story.body && story.body.trim())));
+
+    if (hasStory) {
+        storiesCards.innerHTML = "";
+        storiesCards.appendChild(buildStoryCard(story));
+        storiesCards.hidden = false;
+        storiesEmpty.hidden = true;
+        // la sezione stories non è più "vuota": sblocca la relativa tab
+        const storiesTab = tabs.find((t) => t.dataset.tab === "stories");
+        if (storiesTab && storiesTab.disabled) {
+            storiesTab.disabled = false;
+            storiesTab.classList.remove("side-locked");
+            if (storiesTab.dataset.tab !== activeTab) storiesTab.classList.add("active");
+        }
+    } else {
+        storiesCards.hidden = true;
+        storiesEmpty.hidden = false;
+    }
+}
+renderSavedStories();
+
 // Stato iniziale del popup (tab identity): impostato via JS ora che il bottone
 // non ha più l'attributo HTML "hidden"
 updatePopup();

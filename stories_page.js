@@ -70,7 +70,9 @@ function goBack() {
     if (inSceneOverlay) {
         window.parent.postMessage({ type: "bratz:stories-close" }, "*");
     } else {
-        navigateWithLoading("scene.html");
+        // Aperta direttamente (es. "modify" dalla stories_page della doll):
+        // torna alla pagina di provenienza, altrimenti alla scena 3D.
+        navigateWithLoading(sessionStorage.getItem("bratz_stories_return") || "scene.html");
     }
 }
 const backBtn = document.getElementById("stories-back-btn");
@@ -168,8 +170,18 @@ if (titleEl) {
 if (saveBtn) {
     saveBtn.addEventListener("click", () => {
         if (saveBtn.disabled) return;
-        localStorage.setItem(TITLE_KEY, titleEl ? titleEl.textContent : "");
-        localStorage.setItem(BODY_KEY, bodyEl ? bodyEl.textContent : "");
+        const title = titleEl ? titleEl.textContent.trim() : "";
+        const body = bodyEl ? bodyEl.textContent.trim() : "";
+        localStorage.setItem(TITLE_KEY, title);
+        localStorage.setItem(BODY_KEY, body);
+        // Storia SALVATA (solo al click su save): comparirà come card nella
+        // yasmin/stories_page. title→title_text, nickname→subtitle_text, corpo→preview.
+        localStorage.setItem("bratz_saved_story", JSON.stringify({
+            title,
+            body,
+            nickname: (localStorage.getItem("bratz_nickname") || "marpi.dollz").trim(),
+            ts: Date.now(),
+        }));
         // Stato tapped persistente: "saved" finché non si scrive di nuovo.
         isSaved = true;
         saveBtn.classList.add("is-saved");

@@ -1166,8 +1166,31 @@ body {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: px;
+    gap: 8px;
     width: 132px;
+}
+
+/* ===== stories_page (piena): card = complete_card_button con la storia salvata.
+   Riusa la struttura di .persona-card; la description è l'anteprima della storia
+   (stile Figma: Akkurat Mono 16/23, MAIUSCOLO) e viene ritagliata all'altezza. */
+/* l'attributo [hidden] deve vincere su display:flex/grid (empty vs card) */
+.empty-state[hidden],
+.cards-grid[hidden] {
+    display: none;
+}
+
+.story-card__upper {
+    overflow: hidden;
+}
+
+.story-card__desc {
+    font-size: 16px;
+    line-height: 23px;
+    letter-spacing: 0;
+    text-transform: uppercase;
+    color: var(--card-stroke);
+    word-break: break-word;
+    white-space: pre-wrap;
 }
 
 .persona-card__title {
