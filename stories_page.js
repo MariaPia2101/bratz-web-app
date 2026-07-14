@@ -62,49 +62,100 @@ function navigateWithLoading(url) {
     setTimeout(() => { window.location.href = url; }, 60);
 }
 
-// Back → torna alla scena 3D (da dove è partita la scrittura)
-const backBtn = document.getElementById("stories-back-btn");
-if (backBtn) backBtn.addEventListener("click", () => navigateWithLoading("scene.html"));
-
-// Logo → user_page
-const logo = document.querySelector(".stories-logo");
-if (logo) logo.addEventListener("click", () => navigateWithLoading("user_page.html"));
-
-// ---------- Scrittura: il container_lecture parte VUOTO ed è compilabile ----------
-// (contenteditable). Salvo la bozza in locale così non si perde.
-const lecture = document.getElementById("container-lecture");
-const saveBtn = document.getElementById("stories-save-btn");
-const DRAFT_KEY = "bratz_story_draft";
-
-// Il bottone "save" è attivo (bianco) solo quando c'è del testo scritto,
-// disabilitato (grigio) quando il container è vuoto — come da Figma.
-function refreshSaveState() {
-    const hasText = !!(lecture && lecture.textContent.trim().length);
-    if (!saveBtn) return;
-    if (hasText) {
-        saveBtn.disabled = false;
-        saveBtn.classList.add("active");
+// Back → torna alla scena 3D. Se siamo dentro l'overlay (iframe della scena),
+// chiediamo alla scena di chiudere l'overlay: così il 3D RIPRENDE dal punto in cui
+// si era fermato, senza reload/caricamento iniziale. Fuori dall'iframe: fallback.
+const inSceneOverlay = window.parent && window.parent !== window;
+function goBack() {
+    if (inSceneOverlay) {
+        window.parent.postMessage({ type: "bratz:stories-close" }, "*");
     } else {
-        saveBtn.disabled = true;
-        saveBtn.classList.remove("active");
+        navigateWithLoading("scene.html");
+    }
+}
+const backBtn = document.getElementById("stories-back-btn");
+if (backBtn) backBtn.addEventListener("click", goBack);
+
+// (Il logo NON è cliccabile — nessun handler.)
+
+// ---------- Scrittura: title_text → trattino → description_text ----------
+// Il container_lecture parte VUOTO. Il 1° rigo è il TITOLO (title_text). Premendo
+// INVIO compare automaticamente il trattino "-" (secondo title_text) e il cursore
+// si sposta nell'area della storia (description_text), pronta alla scrittura.
+const titleEl = document.getElementById("story-title");
+const dashEl = document.getElementById("story-dash");
+const bodyEl = document.getElementById("story-body");
+const saveBtn = document.getElementById("stories-save-btn");
+const TITLE_KEY = "bratz_story_title";
+const BODY_KEY = "bratz_story_body";
+
+function focusEnd(el) {
+    el.focus();
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    range.collapse(false);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+}
+
+// Rivela il trattino + l'area storia (una volta scritto il titolo).
+function revealStory(focus) {
+    if (dashEl) dashEl.hidden = false;
+    if (bodyEl) {
+        bodyEl.hidden = false;
+        if (focus) focusEnd(bodyEl);
     }
 }
 
-if (lecture) {
-    const draft = localStorage.getItem(DRAFT_KEY);
-    if (draft) lecture.textContent = draft;
+// "save" attivo (bianco) solo quando c'è del testo, disabilitato (grigio) se vuoto.
+function refreshSaveState() {
+    if (!saveBtn) return;
+    const hasText = !!(
+        (titleEl && titleEl.textContent.trim().length) ||
+        (bodyEl && bodyEl.textContent.trim().length)
+    );
+    saveBtn.disabled = !hasText;
+    saveBtn.classList.toggle("active", hasText);
+}
+
+if (titleEl) {
+    // Ripristino bozza (se presente).
+    const draftTitle = localStorage.getItem(TITLE_KEY) || "";
+    const draftBody = localStorage.getItem(BODY_KEY) || "";
+    if (draftTitle) titleEl.textContent = draftTitle;
+    if (draftBody) { if (bodyEl) bodyEl.textContent = draftBody; }
+    if (draftTitle && (draftBody || draftTitle)) revealStory(false);
     refreshSaveState();
-    lecture.addEventListener("input", () => {
-        localStorage.setItem(DRAFT_KEY, lecture.textContent);
+
+    // Il titolo è una sola riga: INVIO conferma → compare "-" e si passa alla storia.
+    titleEl.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            if (titleEl.textContent.trim().length === 0) return; // serve prima un titolo
+            revealStory(true);
+        }
+    });
+    titleEl.addEventListener("input", () => {
+        localStorage.setItem(TITLE_KEY, titleEl.textContent);
         refreshSaveState();
     });
-    lecture.focus();
+
+    if (bodyEl) {
+        bodyEl.addEventListener("input", () => {
+            localStorage.setItem(BODY_KEY, bodyEl.textContent);
+            refreshSaveState();
+        });
+    }
+
+    titleEl.focus();
 }
 
 if (saveBtn) {
     saveBtn.addEventListener("click", () => {
         if (saveBtn.disabled) return;
-        localStorage.setItem(DRAFT_KEY, lecture ? lecture.textContent : "");
+        localStorage.setItem(TITLE_KEY, titleEl ? titleEl.textContent : "");
+        localStorage.setItem(BODY_KEY, bodyEl ? bodyEl.textContent : "");
         const prev = saveBtn.textContent;
         saveBtn.textContent = "saved";
         setTimeout(() => { saveBtn.textContent = prev; }, 1200);

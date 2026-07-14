@@ -333,9 +333,33 @@ function setStoryPopup() {
     write.type = "button";
     write.className = "primary-button active go-write-btn";
     write.textContent = "write";
-    write.addEventListener("click", () => { window.location.href = "stories_page.html"; });
+    write.addEventListener("click", openStories);
     gamePopup.append(close, text, write);
 }
+
+// ---------- Stories come overlay: la scena 3D resta viva e "congelata",
+// così tornando indietro riprende esattamente da dov'era (niente reload). ----------
+let storiesOpen = false;
+const storiesFrame = document.getElementById("stories-frame");
+
+function openStories() {
+    if (!storiesFrame) { window.location.href = "stories_page.html"; return; }
+    hideGamePopup();
+    keys.clear();                 // niente movimenti residui mentre si scrive
+    if (!storiesFrame.getAttribute("src")) storiesFrame.src = "stories_page.html";
+    storiesFrame.hidden = false;
+    storiesOpen = true;           // congela il loop 3D (vedi animate)
+}
+function closeStories() {
+    if (!storiesFrame) return;
+    storiesFrame.hidden = true;
+    storiesOpen = false;          // riprende dal punto esatto in cui si era fermato
+    clock.getDelta();             // scarta il tempo trascorso in pausa (niente scatti)
+}
+// La pagina stories (dentro l'iframe) chiede la chiusura col back-button.
+window.addEventListener("message", (e) => {
+    if (e.data && e.data.type === "bratz:stories-close") closeStories();
+});
 
 renderer.domElement.addEventListener("pointerdown", (e) => {
     if (!cameraProp || !cameraProp.model.visible || cameraClicked) return;
@@ -752,6 +776,7 @@ window.addEventListener("resize", () => {
 const clock = new THREE.Clock();
 function animate() {
     requestAnimationFrame(animate);
+    if (storiesOpen) return; // scena congelata mentre si scrive: riprende identica alla chiusura
     const dt = Math.min(clock.getDelta(), 0.05);
 
     if (character.obj) {

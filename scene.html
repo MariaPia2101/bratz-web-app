@@ -77,6 +77,18 @@
             opacity: 0;
         }
 
+        /* ===== Overlay "stories" (iframe a tutto schermo) ===== */
+        .stories-frame {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+            z-index: 20; /* sopra la scena e l'overlay del gioco */
+            background: #fff;
+        }
+        .stories-frame[hidden] { display: none; }
+
         /* ===== Overlay "3dgame/enter_page" (da Figma) sopra la scena 3D ===== */
         #game-overlay {
             position: fixed;
@@ -216,7 +228,10 @@
         </aside>
     </div>
 
-    <script type="module" src="scene.js?v=16"></script>
+    <!-- Overlay "stories": tiene viva la scena 3D sotto, così tornando indietro riprende dal punto esatto -->
+    <iframe id="stories-frame" class="stories-frame" title="Stories" hidden></iframe>
+
+    <script type="module" src="scene.js?v=17"></script>
 </body>
 
 </html>

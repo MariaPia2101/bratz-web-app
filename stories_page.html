@@ -27,12 +27,16 @@
             background: var(--fill-background);
         }
 
-        /* ---- header (back / logo / save) ---- */
+        /* ---- header (back / logo / save) ----
+           Stesso allineamento delle altre pagine: contenitore centrato max 1344px
+           (come .user-header dentro un container da 1344/1345), non ancorato ai bordi
+           del viewport. Così l'icon_button e "save" combaciano con gli header altrove. */
         .stories-header {
             position: absolute;
             top: 48px;
-            left: 48px;
-            right: 48px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: min(1344px, calc(100% - 96px));
             height: 85px;
             display: flex;
             align-items: center;
@@ -49,7 +53,7 @@
             height: 85px;
             object-fit: contain;
             user-select: none;
-            cursor: pointer;
+            pointer-events: none; /* il logo NON è cliccabile */
         }
 
         .stories-header .save-button {
@@ -92,13 +96,40 @@
         }
 
         /* container_lecture: VUOTO di default, compilabile durante la scrittura.
-           Stile testo fedele al Figma: Akkurat Mono, 16/23, MAIUSCOLO. */
+           Struttura fedele al Figma: title_text (titolo) → title_text "-" (trattino)
+           → description_text (storia). */
         .container-lecture {
             flex: 1 1 50%;
             box-sizing: border-box;
             background: var(--fill-card);
             border-left: 1px solid var(--stroke-card);
             padding: 153px 48px 48px 62px;
+            color: #000;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* title_text: Akkurat Mono Bold, 14/17, -0.98 (box_title da Figma) */
+        .story-title,
+        .story-dash {
+            font-family: var(--font-mono, "Akkurat Mono");
+            font-weight: 700;
+            font-size: 14px;
+            line-height: 17px;
+            letter-spacing: -0.98px;
+            color: #000;
+            outline: none;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        .story-title { min-height: 17px; }
+        .story-dash[hidden] { display: none; }
+
+        /* description_text: Akkurat Mono Regular, 16/23, MAIUSCOLO (stories_text da Figma) */
+        .story-body {
+            flex: 1 1 auto;
             font-family: var(--font-mono, "Akkurat Mono");
             font-weight: 400;
             font-size: 16px;
@@ -107,15 +138,17 @@
             text-transform: uppercase;
             color: #000;
             outline: none;
-            overflow-y: auto;
             white-space: pre-wrap;
             word-break: break-word;
         }
+        .story-body[hidden] { display: none; }
 
-        /* placeholder mostrato solo quando è vuoto (non fa parte del contenuto) */
-        .container-lecture:empty::before {
+        /* placeholder (solo suggerimento, non fa parte del contenuto scritto) */
+        .story-title:empty::before,
+        .story-body:empty::before {
             content: attr(data-placeholder);
             color: var(--instruction-grey);
+            text-transform: none;
         }
 
         /* ===== Mobile (Figma stories_page_mobile): colonna unica ===== */
@@ -123,8 +156,7 @@
             .only-desktop { display: none; }
             .stories-header {
                 top: 20px;
-                left: 20px;
-                right: 20px;
+                width: calc(100% - 40px);
                 height: 67px;
             }
             .stories-header .stories-logo {
@@ -155,6 +187,8 @@
                 border-top: 1px solid var(--stroke-card);
                 min-height: 55vh;
                 padding: 32px 20px 40px;
+            }
+            .story-body {
                 font-size: 14px;
                 line-height: 22px;
                 letter-spacing: -0.98px;
@@ -206,9 +240,15 @@ continue your story<span class="only-desktop"> on the right page</span>...</p>
                 </div>
             </section>
 
-            <!-- container_lecture: vuoto, compilabile durante la scrittura -->
-            <section class="container-lecture" id="container-lecture" contenteditable="true" role="textbox"
-                aria-multiline="true" data-placeholder=""></section>
+            <!-- container_lecture: vuoto, compilabile durante la scrittura.
+                 1° rigo = titolo; all'INVIO compare il trattino "-" e si va al corpo storia. -->
+            <section class="container-lecture" id="container-lecture">
+                <div class="story-title" id="story-title" contenteditable="true" role="textbox"
+                    aria-label="Titolo" data-placeholder="Title"></div>
+                <div class="story-dash" id="story-dash" aria-hidden="true" hidden>-</div>
+                <div class="story-body" id="story-body" contenteditable="true" role="textbox"
+                    aria-multiline="true" aria-label="Storia" data-placeholder="" hidden></div>
+            </section>
         </div>
     </main>
 
