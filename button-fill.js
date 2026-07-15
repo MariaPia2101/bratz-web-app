@@ -79,6 +79,7 @@
 
         btn.addEventListener("pointerenter", function (e) {
             if (e.pointerType === "touch" || !interactive(btn)) return;
+            btn.classList.remove("btn-tapped"); // nuovo hover: si riparte pulito
             var fill = currentFill(btn);
             if (!fill) return;
             var r = btn.getBoundingClientRect();
@@ -91,7 +92,19 @@
             fill.style.transform = "translate(0, 0)";
         });
 
+        // Al click: stato "tapped" immediato (finché il puntatore resta sopra) e
+        // niente più animazione di hover.
+        btn.addEventListener("pointerdown", function (e) {
+            if (e.pointerType === "touch" || !interactive(btn)) return;
+            btn.classList.add("btn-tapped");
+            var fill = currentFill(btn);
+            if (!fill) return;
+            fill.style.transition = "none";
+            fill.style.transform = "translateY(101%)"; // nascondi subito il fill hover
+        });
+
         btn.addEventListener("pointerleave", function (e) {
+            btn.classList.remove("btn-tapped"); // uscito: il prossimo hover si rianima
             if (e.pointerType === "touch") return;
             var fill = currentFill(btn);
             if (!fill) return;

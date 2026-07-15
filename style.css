@@ -352,6 +352,16 @@ html.btn-fill-on .secondary-button:hover { background: var(--secondary-btn-fill)
 html.btn-fill-on .back-button:hover,
 html.btn-fill-on .icon-button:hover { background: var(--icon-btn-fill); }
 
+/* Al click il bottone entra subito in stato "tapped" (colore tapped) e il fill
+   hover resta nascosto finché il puntatore non esce. */
+html.btn-fill-on .primary-button.active.btn-tapped { background: var(--btn-fill-tapped); color: var(--btn-text-active); }
+html.btn-fill-on .secondary-button.btn-tapped { background: var(--secondary-btn-fill-tapped); }
+html.btn-fill-on .back-button.btn-tapped,
+html.btn-fill-on .icon-button.btn-tapped { background: var(--btn-fill-tapped); }
+
+/* Nessuna animazione sui bottoni disabled. */
+.btn-fill-host:disabled > .btn-fill { display: none; }
+
 /* Rispetta chi preferisce ridurre il movimento. */
 @media (prefers-reduced-motion: reduce) {
     .btn-fill { transition: none; }
