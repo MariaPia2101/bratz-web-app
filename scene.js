@@ -368,6 +368,26 @@ function setAnnouncePopup(text) {
     gamePopup.append(close, p);
 }
 
+// Pop-up finale (magazine): Close + testo + bottone "print" -> tab magazines della doll page.
+function setMagazinePopup() {
+    if (!gamePopup) return;
+    gamePopup.innerHTML = "";
+    const close = document.createElement("button");
+    close.type = "button";
+    close.className = "enter-popup-close";
+    close.textContent = "Close";
+    close.addEventListener("click", hideGamePopup);
+    const text = document.createElement("p");
+    text.className = "enter-popup-text";
+    text.textContent = "OMG, look at you. You're totally ready to build your very first magazine. Let's do this, babe.";
+    const print = document.createElement("button");
+    print.type = "button";
+    print.className = "primary-button active go-write-btn";
+    print.textContent = "print";
+    print.addEventListener("click", () => { window.location.href = "yasmin_personality_page.html?tab=magazines"; });
+    gamePopup.append(close, text, print);
+}
+
 // Pop-up "story": Close + testo + bottone "write" (fedele al Figma 3dgame/story_page).
 function setStoryPopup() {
     if (!gamePopup) return;
@@ -444,11 +464,8 @@ function startPhaseFlow() {
         return;
     }
     if (found >= GAME_OBJECTS.length) {
-        // Tutte le storie scritte: obiettivo finale (magazine).
-        phaseTimers.push(setTimeout(() => {
-            setAnnouncePopup("OMG, look at you. You're totally ready to build your very first magazine. Let's do this, babe.");
-            showGamePopup();
-        }, POPUP_DELAY_MS));
+        // Tutte le storie scritte: obiettivo finale (magazine) col bottone "print".
+        phaseTimers.push(setTimeout(() => { setMagazinePopup(); showGamePopup(); }, POPUP_DELAY_MS));
         return;
     }
     // Fase "cerca oggetto" (index = found).

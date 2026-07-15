@@ -1247,16 +1247,11 @@ body {
 .community-card__title { font-weight: 700; }
 .community-card__author { font-weight: 400; }
 
-.community-card__save {
-    flex-shrink: 0;
-    padding: 4px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    line-height: 0;
-}
-.community-card__save img { width: 22px; height: 28px; display: block; transition: opacity 0.15s ease; }
-.community-card__save.is-saved img { opacity: 1; }
+/* save = icon-button con gli stessi stati del mydollz-plus-btn */
+.community-card__save { flex-shrink: 0; }
+.icon-button__save { display: block; width: 22px; height: 28px; }
+/* stato "salvato": bookmark pieno */
+.community-card__save.is-saved .icon-button__save path { fill: #000; }
 
 @media (max-width: 768px) {
     .community-grid { grid-template-columns: 1fr; }
@@ -2147,13 +2142,4 @@ body {
         padding-bottom: 20px;
     }
 
-    button.icon-button.mag-plus {
-        border: none;
-        padding: 0px;
-    }
-
-    button.icon-button.mag-plus img {
-        width: 48px;
-        height: 48px;
-    }
 }

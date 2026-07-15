@@ -110,6 +110,7 @@ const panels = Array.from(document.querySelectorAll(".tab-panel"));
 const popup = document.getElementById("personality-popup");
 const popupText = document.getElementById("personality-popup-text");
 const popupPlay = document.getElementById("popup-play-btn");
+const popupPrint = document.getElementById("popup-print-btn");
 const popupClose = document.getElementById("personality-popup-close");
 const mobilePlay = document.getElementById("mobile-play-btn");   // button_bar mobile
 
@@ -117,6 +118,7 @@ let selected = false;   // personalità scelta?
 let activeTab = "identity";
 
 function updatePopup() {
+    if (popupPrint) popupPrint.hidden = true;   // il print compare solo nella select_page
     if (activeTab === "identity") {
         popup.classList.remove("is-hidden");
         popupText.textContent = selected
@@ -144,6 +146,13 @@ function updatePopup() {
         } else if (getMagState() === "select") {
             popupText.textContent = "Pick your 3 favorite stories and hit the button below. Choose wisely, babe, the runway doesn’t forgive boring choices.";
             popupPlay.hidden = true;
+            // il bottone "print" vive nel pop_up: attivo solo con 3 storie scelte
+            if (popupPrint) {
+                popupPrint.hidden = false;
+                const can = getMagSelected().length >= 3;
+                popupPrint.disabled = !can;
+                popupPrint.classList.toggle("active", can);
+            }
         } else {
             popupText.textContent = "Pick your 3 favorite stories to compile the most iconic magazine ever. Serve the ultimate look and print it, babe.";
             popupPlay.hidden = true;
@@ -163,6 +172,11 @@ function updatePopup() {
 // Chiusura del popup (title_text "Close")
 if (popupClose) {
     popupClose.addEventListener("click", () => popup.classList.add("is-hidden"));
+}
+
+// Bottone "print" nel pop_up (select_page dei magazines)
+if (popupPrint) {
+    popupPrint.addEventListener("click", () => { if (!popupPrint.disabled) doPrintMagazine(); });
 }
 
 function setActiveTab(name) {
@@ -388,11 +402,16 @@ function renderMagAdd() {
     wrap.className = "mag-cover-wrap";
     const cover = document.createElement("div");
     cover.className = "mag-cover";
+    // stesso bottone del mydollz-plus-btn (icon-button con stati, SVG "+")
     const plus = document.createElement("button");
     plus.type = "button";
+    plus.id = "mydollz-plus-btn";
     plus.className = "icon-button mag-plus";
     plus.setAttribute("aria-label", "Crea magazine");
-    plus.innerHTML = '<img src="assets/images/plusbutton.svg" alt="">';
+    plus.innerHTML =
+        '<span class="icon-button__inner">' +
+        '<svg class="icon-button__plus" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+        '<path d="M10 1V19M1 10H19" stroke="black" stroke-width="1.2" /></svg></span>';
     plus.addEventListener("click", () => {
         localStorage.setItem(MAG_STATE_KEY, "select");
         localStorage.setItem(MAG_SEL_KEY, "[]");
@@ -403,21 +422,13 @@ function renderMagAdd() {
     magView.appendChild(wrap);
 }
 
+// Il bottone "print" vive nel pop_up del container_side_30% (vedi updatePopup):
+// qui costruiamo solo le card con i bottoni select.
 function renderMagSelect(stories) {
     const grid = document.createElement("div");
     grid.className = "cards-grid stories-cards";
 
-    const print = document.createElement("button");
-    print.type = "button";
-    print.className = "primary-button mag-print";
-    print.textContent = "print";
-
     function isSel(idx) { return getMagSelected().indexOf(idx) >= 0; }
-    function updatePrint() {
-        const can = getMagSelected().length >= 3;
-        print.disabled = !can;
-        print.classList.toggle("active", can);
-    }
 
     stories.forEach((story, idx) => {
         const card = buildStoryCard(story, idx);
@@ -429,31 +440,30 @@ function renderMagSelect(stories) {
             sel.textContent = isSel(idx) ? "selected" : "select";
         }
         paint();
-        // Aggiornamento IN PLACE (niente re-render dell'intera vista ad ogni click).
+        // Aggiornamento IN PLACE + aggiorna lo stato del "print" nel pop_up.
         sel.addEventListener("click", () => {
             let s = getMagSelected();
             if (s.indexOf(idx) >= 0) s = s.filter((i) => i !== idx);
             else if (s.length < 3) s.push(idx);
             localStorage.setItem(MAG_SEL_KEY, JSON.stringify(s));
             paint();
-            updatePrint();
             updatePopup();
         });
         if (btn) btn.replaceWith(sel);
         grid.appendChild(card);
     });
 
-    updatePrint();
-    print.addEventListener("click", () => {
-        if (print.disabled) return;
-        localStorage.setItem(MAG_PRINTED_KEY, "1");
-        localStorage.setItem(MAG_STATE_KEY, "printed");
-        activateCommunity();
-        renderMagazines();
-        updatePopup();
-    });
+    magView.append(grid);
+}
 
-    magView.append(grid, print);
+// Azione "print" (dal pop_up): stampa il magazine e attiva la community.
+function doPrintMagazine() {
+    if (getMagSelected().length < 3) return;
+    localStorage.setItem(MAG_PRINTED_KEY, "1");
+    localStorage.setItem(MAG_STATE_KEY, "printed");
+    activateCommunity();
+    renderMagazines();
+    updatePopup();
 }
 
 function renderMagPrinted() {
@@ -507,3 +517,9 @@ renderMagazines();
 // Stato iniziale del popup (tab identity): impostato via JS ora che il bottone
 // non ha più l'attributo HTML "hidden"
 updatePopup();
+
+// Arrivo dal 3D col bottone "print": apri direttamente la tab magazines.
+if (new URLSearchParams(location.search).get("tab") === "magazines") {
+    const magTab = tabs.find((t) => t.dataset.tab === "magazines");
+    if (magTab && !magTab.disabled) setActiveTab("magazines");
+}
