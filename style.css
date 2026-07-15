@@ -1261,10 +1261,10 @@ body {
 .mag-cover-wrap { position: relative; display: inline-block; }
 
 .mag-cover {
-    width: 205px;
-    aspect-ratio: 205 / 300;
+    width: 207px;
     border: 1px solid var(--card-stroke);
     background: var(--card-fill);
+    height: 304px;
 }
 
 .mag-plus {
@@ -1275,9 +1275,9 @@ body {
 }
 
 /* magazine stampato */
-.mag-magazine { width: 205px; display: flex; flex-direction: column; }
+.mag-magazine { width: 207px; display: flex; flex-direction: column; }
 .mag-magazine__cover {
-    aspect-ratio: 205 / 236;
+    aspect-ratio: 205 / 237;
     border: 1px solid var(--card-stroke);
     overflow: hidden;
 }
