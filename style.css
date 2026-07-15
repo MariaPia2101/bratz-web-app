@@ -570,7 +570,7 @@ body {
 }
 
 .onboarding .primary-button {
-    height: 35px;
+    height: 35px !important;
 }
 
 .user-welcome {
