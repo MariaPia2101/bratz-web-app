@@ -361,6 +361,16 @@ html.btn-fill-on .icon-button:hover { background: var(--icon-btn-fill); }
     .btn-fill { transition: none; }
 }
 
+/* Hover sulle scritte "Close" (title_text) dei pop-up: stesso colore hover dei bottoni. */
+.enter-popup-close,
+.personality-popup__close {
+    transition: color 0.2s ease;
+}
+.enter-popup-close:hover,
+.personality-popup__close:hover {
+    color: var(--btn-fill-hover, #e4d5ff);
+}
+
 /* ===== Transizioni SPA (fade fluido tra le pagine) ===== */
 .onboarding,
 .loading-page,
