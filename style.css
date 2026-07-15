@@ -1297,8 +1297,8 @@ body {
 /* pop_up che tocca il plus button (magazines/plusbutton_page) */
 .mag-plus-popup {
     position: absolute;
-    left: 50%;
-    bottom: 50%;
+    left: 53%;
+    bottom: 46%;
     width: 239px;
     box-sizing: border-box;
     padding: 16px;
@@ -1307,7 +1307,7 @@ body {
     gap: 16px;
     background: var(--popup-fill, #fff);
     border: 1px solid var(--popup-stroke, #000);
-    z-index: 3;
+    z-index: 4;
 }
 .mag-plus-popup[hidden] { display: none; }
 
