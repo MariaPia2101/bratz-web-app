@@ -1693,6 +1693,7 @@ body {
 .reward-input {
     box-sizing: border-box;
     width: 180px;
+    height: 35px;
     padding: 13px;
     display: flex;
     align-items: center;
