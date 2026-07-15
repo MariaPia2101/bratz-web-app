@@ -569,6 +569,10 @@ body {
     user-select: none;
 }
 
+.onboarding .primary-button {
+    height: 35px;
+}
+
 .user-welcome {
     margin: 0;
     max-width: 695px;
