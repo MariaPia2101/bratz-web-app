@@ -1284,7 +1284,7 @@ body {
 /* magazine stampato */
 .mag-magazine { width: 207px; display: flex; flex-direction: column; }
 .mag-magazine__cover {
-    aspect-ratio: 205 / 237;
+    aspect-ratio: 207 / 234;
     border: 1px solid var(--card-stroke);
     overflow: hidden;
 }
