@@ -1247,11 +1247,21 @@ body {
 .community-card__title { font-weight: 700; }
 .community-card__author { font-weight: 400; }
 
-/* save = icon-button con gli stessi stati del mydollz-plus-btn */
-.community-card__save { flex-shrink: 0; }
-.icon-button__save { display: block; width: 22px; height: 28px; }
-/* stato "salvato": bookmark pieno */
-.community-card__save.is-saved .icon-button__save path { fill: #000; }
+/* save_icon: il segnalibro È il bottone (niente box). La forma si riempie
+   negli stati — active: bianco, hover: #e4d5ff, tapped/salvato: #c7a9ff. */
+.community-card__save {
+    flex-shrink: 0;
+    padding: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    line-height: 0;
+}
+.community-card__save-icon { display: block; width: 22px; height: 28px; }
+.community-card__save-icon path { fill: #fff; transition: fill 0.15s ease; }
+.community-card__save:hover .community-card__save-icon path { fill: var(--btn-fill-hover); }
+.community-card__save:active .community-card__save-icon path,
+.community-card__save.is-saved .community-card__save-icon path { fill: var(--btn-fill-tapped); }
 
 @media (max-width: 768px) {
     .community-grid { grid-template-columns: 1fr; }
