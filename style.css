@@ -319,64 +319,6 @@ body {
     background: var(--btn-fill-tapped);
 }
 
-/* ===== Hover fill direzionale dei bottoni (stile karocrafts.com) =====
-   Un rettangolo del colore hover entra dal lato da cui arriva il cursore e
-   esce verso il lato da cui se ne va. Attivo solo con JS (html.btn-fill-on);
-   senza JS resta l'hover "istantaneo" originale come fallback. */
-.btn-fill-host {
-    position: relative;
-    overflow: hidden;
-    isolation: isolate;
-}
-
-/* il contenuto reale del bottone resta sopra il riempimento */
-.btn-fill-host > *:not(.btn-fill) {
-    position: relative;
-    z-index: 1;
-}
-
-.btn-fill {
-    position: absolute;
-    inset: 0;
-    background: var(--btn-fill-hover, #e4d5ff);
-    transform: translateY(101%); /* nascosto finché non parte l'hover (JS) */
-    pointer-events: none;
-    z-index: 0;
-    will-change: transform;
-    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-/* Con JS attivo, l'hover non cambia più il bg di colpo: ci pensa il fill animato. */
-html.btn-fill-on .primary-button.active:hover { background: var(--btn-fill-active); }
-html.btn-fill-on .secondary-button:hover { background: var(--secondary-btn-fill); }
-html.btn-fill-on .back-button:hover,
-html.btn-fill-on .icon-button:hover { background: var(--icon-btn-fill); }
-
-/* Al click il bottone entra subito in stato "tapped" (colore tapped) e il fill
-   hover resta nascosto finché il puntatore non esce. */
-html.btn-fill-on .primary-button.active.btn-tapped { background: var(--btn-fill-tapped); color: var(--btn-text-active); }
-html.btn-fill-on .secondary-button.btn-tapped { background: var(--secondary-btn-fill-tapped); }
-html.btn-fill-on .back-button.btn-tapped,
-html.btn-fill-on .icon-button.btn-tapped { background: var(--btn-fill-tapped); }
-
-/* Nessuna animazione sui bottoni disabled. */
-.btn-fill-host:disabled > .btn-fill { display: none; }
-
-/* Rispetta chi preferisce ridurre il movimento. */
-@media (prefers-reduced-motion: reduce) {
-    .btn-fill { transition: none; }
-}
-
-/* Hover sulle scritte "Close" (title_text) dei pop-up: stesso colore hover dei bottoni. */
-.enter-popup-close,
-.personality-popup__close {
-    transition: color 0.2s ease;
-}
-.enter-popup-close:hover,
-.personality-popup__close:hover {
-    color: var(--btn-fill-hover, #e4d5ff);
-}
-
 /* ===== Transizioni SPA (fade fluido tra le pagine) ===== */
 .onboarding,
 .loading-page,
