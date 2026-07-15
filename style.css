@@ -285,7 +285,8 @@ body {
 
 /* ===== Bottone START — stati del componente primary_button (Figma) ===== */
 .primary-button {
-    width: 100%;
+    width: 207px;
+    height: 35px;
     padding: 13px;
     font-family: var(--font-title);
     font-weight: 700;
@@ -656,6 +657,7 @@ body {
     align-items: center;
     gap: 17px;
     width: 132px;
+    height: 35px;
     padding: 10px 13px;
     border: 1px solid var(--secondary-btn-stroke);
     border-radius: 0;
@@ -1128,6 +1130,7 @@ body {
 .persona-card {
     display: flex;
     flex-direction: column;
+    overflow: hidden;
 }
 
 .persona-card__upper {
@@ -1166,7 +1169,7 @@ body {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    width: 132px;
+    width: 130px;
 }
 
 /* ===== stories_page (piena): card = complete_card_button con la storia salvata.
