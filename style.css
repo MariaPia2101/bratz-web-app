@@ -2139,4 +2139,14 @@ body {
     p.reward-card__desc {
         padding-bottom: 20px;
     }
+
+    button.icon-button.mag-plus {
+        border: none;
+        padding: 0px;
+    }
+
+    button.icon-button.mag-plus img {
+        width: 48px;
+        height: 48px;
+    }
 }
