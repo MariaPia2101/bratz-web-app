@@ -1256,6 +1256,122 @@ html.btn-fill-on .icon-button.btn-tapped { background: var(--btn-fill-tapped); }
     overflow: hidden;
 }
 
+/* ===== community_page: griglia magazine della community (complete_card_icon) ===== */
+.community-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    width: 100%;
+}
+
+.community-card { display: flex; flex-direction: column; }
+
+.community-card__photo {
+    aspect-ratio: 435 / 341;
+    border: 1px solid var(--card-stroke);
+    overflow: hidden;
+}
+.community-card__photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.community-card__below {
+    box-sizing: border-box;
+    padding: 16px;
+    background: var(--card-fill);
+    border: 1px solid var(--card-stroke);
+    border-top: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.community-card__text { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+
+.community-card__title,
+.community-card__author {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    line-height: 17px;
+    letter-spacing: -0.98px;
+    color: var(--card-stroke);
+}
+.community-card__title { font-weight: 700; }
+.community-card__author { font-weight: 400; }
+
+.community-card__save {
+    flex-shrink: 0;
+    padding: 4px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    line-height: 0;
+}
+.community-card__save img { width: 14px; height: 20px; display: block; transition: opacity 0.15s ease; }
+.community-card__save:not(.is-saved) img { opacity: 0.35; }
+.community-card__save.is-saved img { opacity: 1; }
+
+@media (max-width: 768px) {
+    .community-grid { grid-template-columns: 1fr; }
+}
+
+/* ===== magazines tab: copertina + plus (add) / magazine stampato (printed) ===== */
+.magazines-view { width: 100%; }
+
+.mag-cover-wrap { position: relative; display: inline-block; }
+
+.mag-cover {
+    width: 205px;
+    aspect-ratio: 205 / 300;
+    border: 1px solid var(--card-stroke);
+    background: var(--card-fill);
+}
+
+.mag-plus {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* magazine stampato */
+.mag-magazine { width: 205px; display: flex; flex-direction: column; }
+.mag-magazine__cover {
+    aspect-ratio: 205 / 300;
+    border: 1px solid var(--card-stroke);
+    overflow: hidden;
+}
+.mag-magazine__cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.mag-magazine__below {
+    box-sizing: border-box;
+    padding: 16px;
+    border: 1px solid var(--card-stroke);
+    border-top: none;
+    background: var(--card-fill);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.mag-magazine__title,
+.mag-magazine__author {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    line-height: 17px;
+    letter-spacing: -0.98px;
+    color: var(--card-stroke);
+}
+.mag-magazine__title { font-weight: 700; }
+.mag-magazine__author { font-weight: 400; }
+
+/* bottone select/selected e print (select_page) */
+.primary-button.mag-select.is-selected {
+    background: var(--btn-fill-tapped);
+    color: var(--btn-text-active);
+    cursor: pointer;
+}
+.mag-print { width: 207px; margin-top: 20px; }
+
 .persona-card__title {
     margin: 0;
     font-family: var(--font-mono);

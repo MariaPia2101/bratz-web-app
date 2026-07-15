@@ -137,8 +137,17 @@ function updatePopup() {
         popupPlay.hidden = false;
     } else if (activeTab === "magazines") {
         popup.classList.remove("is-hidden");
-        popupText.textContent = "Stack up your stories to design and print ultimate magazines.";
-        popupPlay.hidden = false;
+        if (getSavedStories().length < 3) {
+            // sezione ancora bloccata (meno di 3 storie)
+            popupText.textContent = "Stack up your stories to design and print ultimate magazines.";
+            popupPlay.hidden = false;
+        } else if (getMagState() === "select") {
+            popupText.textContent = "Pick your 3 favorite stories and hit the button below. Choose wisely, babe, the runway doesn’t forgive boring choices.";
+            popupPlay.hidden = true;
+        } else {
+            popupText.textContent = "Pick your 3 favorite stories to compile the most iconic magazine ever. Serve the ultimate look and print it, babe.";
+            popupPlay.hidden = true;
+        }
     } else {
         popup.classList.add("is-hidden");
     }
@@ -345,10 +354,155 @@ function renderSavedStories() {
     }
 }
 
+// ---------- yasmin/magazines_page: add → select → printed ----------
+// Con 3 storie salvate la sezione passa da empty a magazines_page. Il plus apre
+// la select_page; selezionate le 3 storie, "print" stampa il magazine. Solo il
+// container_side_70% e il testo del popup cambiano (stessa pagina).
+const magEmpty = document.getElementById("mag-empty");
+const magView = document.getElementById("mag-view");
+const MAG_STATE_KEY = "bratz_magazine_state";     // "add" | "select" | "printed"
+const MAG_SEL_KEY = "bratz_magazine_selected";    // indici selezionati
+const MAG_PRINTED_KEY = "bratz_magazine_printed"; // "1" dopo la stampa
+
+function getMagState() {
+    if (localStorage.getItem(MAG_PRINTED_KEY) === "1") return "printed";
+    return localStorage.getItem(MAG_STATE_KEY) || "add";
+}
+function getMagSelected() {
+    try { return JSON.parse(localStorage.getItem(MAG_SEL_KEY) || "[]") || []; } catch (_) { return []; }
+}
+
+// Attiva il bottone "community" (dopo la stampa) e lo collega a community_page.
+function activateCommunity() {
+    const c = document.getElementById("user-community-btn");
+    if (!c || c.dataset.communityReady) return;
+    c.dataset.communityReady = "1";
+    c.disabled = false;
+    c.classList.add("active");
+    c.addEventListener("click", () => navigateWithLoading("community_page.html"));
+}
+
+// --- render dei 3 stati ---
+function renderMagAdd() {
+    const wrap = document.createElement("div");
+    wrap.className = "mag-cover-wrap";
+    const cover = document.createElement("div");
+    cover.className = "mag-cover";
+    const plus = document.createElement("button");
+    plus.type = "button";
+    plus.className = "icon-button mag-plus";
+    plus.setAttribute("aria-label", "Crea magazine");
+    plus.innerHTML = '<img src="assets/images/plusbutton.svg" alt="">';
+    plus.addEventListener("click", () => {
+        localStorage.setItem(MAG_STATE_KEY, "select");
+        localStorage.setItem(MAG_SEL_KEY, "[]");
+        renderMagazines();
+        updatePopup();
+    });
+    wrap.append(cover, plus);
+    magView.appendChild(wrap);
+}
+
+function renderMagSelect(stories) {
+    const grid = document.createElement("div");
+    grid.className = "cards-grid stories-cards";
+
+    const print = document.createElement("button");
+    print.type = "button";
+    print.className = "primary-button mag-print";
+    print.textContent = "print";
+
+    function isSel(idx) { return getMagSelected().indexOf(idx) >= 0; }
+    function updatePrint() {
+        const can = getMagSelected().length >= 3;
+        print.disabled = !can;
+        print.classList.toggle("active", can);
+    }
+
+    stories.forEach((story, idx) => {
+        const card = buildStoryCard(story, idx);
+        const btn = card.querySelector(".story-modify");
+        const sel = document.createElement("button");
+        sel.type = "button";
+        function paint() {
+            sel.className = "primary-button mag-select " + (isSel(idx) ? "is-selected" : "active");
+            sel.textContent = isSel(idx) ? "selected" : "select";
+        }
+        paint();
+        // Aggiornamento IN PLACE (niente re-render dell'intera vista ad ogni click).
+        sel.addEventListener("click", () => {
+            let s = getMagSelected();
+            if (s.indexOf(idx) >= 0) s = s.filter((i) => i !== idx);
+            else if (s.length < 3) s.push(idx);
+            localStorage.setItem(MAG_SEL_KEY, JSON.stringify(s));
+            paint();
+            updatePrint();
+            updatePopup();
+        });
+        if (btn) btn.replaceWith(sel);
+        grid.appendChild(card);
+    });
+
+    updatePrint();
+    print.addEventListener("click", () => {
+        if (print.disabled) return;
+        localStorage.setItem(MAG_PRINTED_KEY, "1");
+        localStorage.setItem(MAG_STATE_KEY, "printed");
+        activateCommunity();
+        renderMagazines();
+        updatePopup();
+    });
+
+    magView.append(grid, print);
+}
+
+function renderMagPrinted() {
+    const wrap = document.createElement("div");
+    wrap.className = "mag-cover-wrap";
+    const card = document.createElement("article");
+    card.className = "mag-magazine";
+    const cover = document.createElement("div");
+    cover.className = "mag-magazine__cover";
+    const img = document.createElement("img");
+    img.src = "assets/images/summerparty_magazine.jpg";
+    img.alt = "";
+    cover.appendChild(img);
+    const below = document.createElement("div");
+    below.className = "mag-magazine__below";
+    const title = document.createElement("p");
+    title.className = "mag-magazine__title";
+    title.textContent = "Summer party";
+    const author = document.createElement("p");
+    author.className = "mag-magazine__author";
+    author.textContent = nickname;
+    below.append(title, author);
+    card.append(cover, below);
+    wrap.appendChild(card);
+    magView.appendChild(wrap);
+}
+
+function renderMagazines() {
+    if (!magView || !magEmpty) return;
+    if (getSavedStories().length < 3) {   // ancora bloccata
+        magView.hidden = true;
+        magEmpty.hidden = false;
+        return;
+    }
+    unlockTab("magazines");
+    magEmpty.hidden = true;
+    magView.hidden = false;
+    magView.innerHTML = "";
+    const state = getMagState();
+    if (state === "printed") { activateCommunity(); renderMagPrinted(); }
+    else if (state === "select") renderMagSelect(getSavedStories());
+    else renderMagAdd();
+}
+
 // Se il gioco è iniziato, la sezione goalz è comunque consultabile.
 if (getObjectsFound() > 0 || getSavedStories().length > 0) unlockTab("goalz");
 renderGoalz();
 renderSavedStories();
+renderMagazines();
 
 // Stato iniziale del popup (tab identity): impostato via JS ora che il bottone
 // non ha più l'attributo HTML "hidden"

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BRATZ — Community</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <!-- ===== LOADING PAGE ===== -->
+    <section class="loading-page" id="loading-page" style="display:flex;opacity:1;" aria-hidden="false">
+        <div class="loading-input">
+            <img class="loading-logo" src="assets/images/logo_image.gif" alt="Bratz">
+            <div class="container-bar-and-text">
+                <div class="loading-bar" id="loading-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100"
+                    aria-valuenow="0">
+                    <div class="loading-bar-fill" id="loading-bar-fill"></div>
+                </div>
+                <p class="loading-text" id="loading-text">Loading...</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== COMMUNITY PAGE ===== -->
+    <main class="user-page">
+        <div class="user-page__content" id="community-content">
+            <div class="container-user-page">
+
+                <div class="upper-container">
+                    <header class="user-header">
+                        <button type="button" class="primary-button active" id="user-dollz-btn">marpi.dollz</button>
+                        <img class="user-logo" src="assets/images/logo_image.gif" alt="Bratz">
+                        <button type="button" class="primary-button is-current" id="community-current-btn">community</button>
+                    </header>
+
+                    <p class="user-welcome">Here you can read the hottest<br>stories and drop your feedback.</p>
+                </div>
+
+                <!-- bottom_container_community_page: griglia magazine della community -->
+                <div class="community-grid">
+                    <article class="community-card">
+                        <div class="community-card__photo"><img src="assets/images/magazine_community_01.png" alt=""></div>
+                        <div class="community-card__below">
+                            <div class="community-card__text">
+                                <p class="community-card__title">B-Day Bash Glam</p>
+                                <p class="community-card__author">Costa.Angelz</p>
+                            </div>
+                            <button type="button" class="community-card__save" aria-label="Salva">
+                                <img src="assets/images/savebutton.svg" alt="">
+                            </button>
+                        </div>
+                    </article>
+
+                    <article class="community-card">
+                        <div class="community-card__photo"><img src="assets/images/magazine_community_02.png" alt=""></div>
+                        <div class="community-card__below">
+                            <div class="community-card__text">
+                                <p class="community-card__title">Runway Ready</p>
+                                <p class="community-card__author">Talades.Starz</p>
+                            </div>
+                            <button type="button" class="community-card__save" aria-label="Salva">
+                                <img src="assets/images/savebutton.svg" alt="">
+                            </button>
+                        </div>
+                    </article>
+
+                    <article class="community-card">
+                        <div class="community-card__photo"><img src="assets/images/magazine_community_03.png" alt=""></div>
+                        <div class="community-card__below">
+                            <div class="community-card__text">
+                                <p class="community-card__title">Street Stylz</p>
+                                <p class="community-card__author">Fede.Glamourz</p>
+                            </div>
+                            <button type="button" class="community-card__save" aria-label="Salva">
+                                <img src="assets/images/savebutton.svg" alt="">
+                            </button>
+                        </div>
+                    </article>
+
+                    <article class="community-card">
+                        <div class="community-card__photo"><img src="assets/images/magazine_community_04.png" alt=""></div>
+                        <div class="community-card__below">
+                            <div class="community-card__text">
+                                <p class="community-card__title">Style Warfare</p>
+                                <p class="community-card__author">Linda.Blingz</p>
+                            </div>
+                            <button type="button" class="community-card__save" aria-label="Salva">
+                                <img src="assets/images/savebutton.svg" alt="">
+                            </button>
+                        </div>
+                    </article>
+
+                    <article class="community-card">
+                        <div class="community-card__photo"><img src="assets/images/magazine_community_05.png" alt=""></div>
+                        <div class="community-card__below">
+                            <div class="community-card__text">
+                                <p class="community-card__title">Nailed It</p>
+                                <p class="community-card__author">Marika.Baddie</p>
+                            </div>
+                            <button type="button" class="community-card__save" aria-label="Salva">
+                                <img src="assets/images/savebutton.svg" alt="">
+                            </button>
+                        </div>
+                    </article>
+
+                    <article class="community-card">
+                        <div class="community-card__photo"><img src="assets/images/magazine_community_06.jpg" alt=""></div>
+                        <div class="community-card__below">
+                            <div class="community-card__text">
+                                <p class="community-card__title">Groovy Beats</p>
+                                <p class="community-card__author">Giudi.Drip</p>
+                            </div>
+                            <button type="button" class="community-card__save" aria-label="Salva">
+                                <img src="assets/images/savebutton.svg" alt="">
+                            </button>
+                        </div>
+                    </article>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <script src="button-fill.js"></script>
+    <script src="community-unlock.js"></script>
+    <script src="community_page.js"></script>
+</body>
+
+</html>

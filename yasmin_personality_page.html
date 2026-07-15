@@ -256,11 +256,12 @@
                             <div class="cards-grid stories-cards" id="stories-cards" hidden></div>
                         </div>
 
-                        <!-- tab MAGAZINES: empty_page (yasmin/magazines/empty_page) -->
-                        <div class="tab-panel" data-tab="magazines" hidden>
-                            <div class="empty-state">
+                        <!-- tab MAGAZINES: da empty_page a magazines_page (add → select → printed) -->
+                        <div class="tab-panel tab-panel--scroll" data-tab="magazines" hidden>
+                            <div class="empty-state" id="mag-empty">
                                 <p class="empty-state__text">Start exploring the world<br>to unlock this section</p>
                             </div>
+                            <div class="magazines-view" id="mag-view" hidden></div>
                         </div>
                     </div>
                 </div>
@@ -275,6 +276,7 @@
     </main>
 
     <script src="button-fill.js"></script>
+    <script src="community-unlock.js"></script>
     <script src="yasmin_personality_page.js"></script>
 </body>
 
