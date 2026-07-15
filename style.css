@@ -319,9 +319,9 @@ body {
     background: var(--btn-fill-tapped);
 }
 
-/* ===== Hover fill animato dei bottoni (stile GSAP) =====
-   Un cerchio del colore hover cresce dal punto d'ingresso del mouse e si
-   contrae verso il punto d'uscita. Attivo solo con JS (html.btn-fill-on);
+/* ===== Hover fill direzionale dei bottoni (stile karocrafts.com) =====
+   Un rettangolo del colore hover entra dal lato da cui arriva il cursore e
+   esce verso il lato da cui se ne va. Attivo solo con JS (html.btn-fill-on);
    senza JS resta l'hover "istantaneo" originale come fallback. */
 .btn-fill-host {
     position: relative;
@@ -337,17 +337,13 @@ body {
 
 .btn-fill {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 0;
-    height: 0;
-    border-radius: 50%;
+    inset: 0;
     background: var(--btn-fill-hover, #e4d5ff);
-    transform: scale(0);
+    transform: translateY(101%); /* nascosto finché non parte l'hover (JS) */
     pointer-events: none;
     z-index: 0;
     will-change: transform;
-    transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* Con JS attivo, l'hover non cambia più il bg di colpo: ci pensa il fill animato. */
