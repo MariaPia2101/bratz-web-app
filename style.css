@@ -1311,7 +1311,7 @@ body {
     color: var(--btn-text-active);
     cursor: pointer;
 }
-.mag-print { width: 207px; margin-top: 20px; }
+.mag-print { width: 207px; }
 
 .persona-card__title {
     margin: 0;
