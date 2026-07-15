@@ -319,6 +319,48 @@ body {
     background: var(--btn-fill-tapped);
 }
 
+/* ===== Hover fill animato dei bottoni (stile GSAP) =====
+   Un cerchio del colore hover cresce dal punto d'ingresso del mouse e si
+   contrae verso il punto d'uscita. Attivo solo con JS (html.btn-fill-on);
+   senza JS resta l'hover "istantaneo" originale come fallback. */
+.btn-fill-host {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+}
+
+/* il contenuto reale del bottone resta sopra il riempimento */
+.btn-fill-host > *:not(.btn-fill) {
+    position: relative;
+    z-index: 1;
+}
+
+.btn-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: var(--btn-fill-hover, #e4d5ff);
+    transform: scale(0);
+    pointer-events: none;
+    z-index: 0;
+    will-change: transform;
+    transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Con JS attivo, l'hover non cambia più il bg di colpo: ci pensa il fill animato. */
+html.btn-fill-on .primary-button.active:hover { background: var(--btn-fill-active); }
+html.btn-fill-on .secondary-button:hover { background: var(--secondary-btn-fill); }
+html.btn-fill-on .back-button:hover,
+html.btn-fill-on .icon-button:hover { background: var(--icon-btn-fill); }
+
+/* Rispetta chi preferisce ridurre il movimento. */
+@media (prefers-reduced-motion: reduce) {
+    .btn-fill { transition: none; }
+}
+
 /* ===== Transizioni SPA (fade fluido tra le pagine) ===== */
 .onboarding,
 .loading-page,
