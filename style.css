@@ -1139,7 +1139,7 @@ body {
 
 .persona-card__upper {
     box-sizing: border-box;
-    height: 233px;
+    height: 229px;
     padding: 16px;
     background: var(--card-fill);
     border: 1px solid var(--card-stroke);
@@ -1271,7 +1271,7 @@ body {
     width: 207px;
     border: 1px solid var(--card-stroke);
     background: var(--card-fill);
-    height: 304px;
+    height: 297px;
 }
 
 .mag-plus {
@@ -1284,7 +1284,7 @@ body {
 /* magazine stampato */
 .mag-magazine { width: 207px; display: flex; flex-direction: column; }
 .mag-magazine__cover {
-    aspect-ratio: 207 / 234;
+    aspect-ratio: 207 / 230;
     border: 1px solid var(--card-stroke);
     overflow: hidden;
 }
@@ -1364,7 +1364,7 @@ body {
 .empty-state {
     box-sizing: border-box;
     width: 100%;
-    height: 100%;
+    height: 613px;
     min-height: 400px;
     padding: 20px;
     display: flex;
@@ -1459,7 +1459,7 @@ body {
 .trophy-card__photo {
     position: relative;
     width: 433px;
-    height: 304px;
+    height: 297px;
     flex-shrink: 0;
     box-sizing: border-box;
     border: 1px solid var(--card-stroke);
@@ -1483,7 +1483,7 @@ body {
 .trophy-card__side {
     flex: 1 1 0;
     min-width: 0;
-    height: 304px;
+    height: 297px;
     box-sizing: border-box;
     padding: 16px 20px;
     background: var(--card-fill);
