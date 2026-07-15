@@ -1284,7 +1284,32 @@ body {
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
+    z-index: 4; /* sopra il pop_up che lo tocca, così resta cliccabile */
 }
+
+/* riga: magazine creati + slot per crearne un altro (bottom_container magazine_page) */
+.mag-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+}
+
+/* pop_up che tocca il plus button (magazines/plusbutton_page) */
+.mag-plus-popup {
+    position: absolute;
+    left: 50%;
+    bottom: 50%;
+    width: 239px;
+    box-sizing: border-box;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    background: var(--popup-fill, #fff);
+    border: 1px solid var(--popup-stroke, #000);
+    z-index: 3;
+}
+.mag-plus-popup[hidden] { display: none; }
 
 /* magazine stampato */
 .mag-magazine { width: 207px; display: flex; flex-direction: column; }

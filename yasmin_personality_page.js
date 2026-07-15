@@ -111,6 +111,7 @@ const popup = document.getElementById("personality-popup");
 const popupText = document.getElementById("personality-popup-text");
 const popupPlay = document.getElementById("popup-play-btn");
 const popupPrint = document.getElementById("popup-print-btn");
+const popupStart = document.getElementById("popup-start-btn");
 const popupClose = document.getElementById("personality-popup-close");
 const mobilePlay = document.getElementById("mobile-play-btn");   // button_bar mobile
 
@@ -119,6 +120,7 @@ let activeTab = "identity";
 
 function updatePopup() {
     if (popupPrint) popupPrint.hidden = true;   // il print compare solo nella select_page
+    if (popupStart) popupStart.hidden = true;   // lo start compare solo in add/printed
     if (activeTab === "identity") {
         popup.classList.remove("is-hidden");
         popupText.textContent = selected
@@ -154,8 +156,10 @@ function updatePopup() {
                 popupPrint.classList.toggle("active", can);
             }
         } else {
-            popupText.textContent = "Pick your 3 favorite stories to compile the most iconic magazine ever. Serve the ultimate look and print it, babe.";
+            // add / printed: pop_up del container_side_30% della magazines_page
+            popupText.textContent = "Stack up your stories to design and print ultimate magazines.";
             popupPlay.hidden = true;
+            if (popupStart) popupStart.hidden = false;
         }
     } else {
         popup.classList.add("is-hidden");
@@ -397,12 +401,13 @@ function activateCommunity() {
 }
 
 // --- render dei 3 stati ---
-function renderMagAdd() {
+// Slot per creare un magazine: copertina vuota + plus (come mydollz-plus-btn) +
+// pop_up che TOCCA il plus button (fedele a magazines/plusbutton_page).
+function buildAddSlot() {
     const wrap = document.createElement("div");
     wrap.className = "mag-cover-wrap";
     const cover = document.createElement("div");
     cover.className = "mag-cover";
-    // stesso bottone del mydollz-plus-btn (icon-button con stati, SVG "+")
     const plus = document.createElement("button");
     plus.type = "button";
     plus.id = "mydollz-plus-btn";
@@ -418,8 +423,53 @@ function renderMagAdd() {
         renderMagazines();
         updatePopup();
     });
-    wrap.append(cover, plus);
-    magView.appendChild(wrap);
+    // pop_up che tocca il plus
+    const pop = document.createElement("aside");
+    pop.className = "mag-plus-popup";
+    const close = document.createElement("button");
+    close.type = "button";
+    close.className = "enter-popup-close";
+    close.textContent = "Close";
+    close.addEventListener("click", () => { pop.hidden = true; });
+    const p = document.createElement("p");
+    p.className = "enter-popup-text";
+    p.textContent = "Pick your 3 favorite stories to compile the most iconic magazine ever. Serve the ultimate look and print it, babe.";
+    pop.append(close, p);
+    wrap.append(cover, plus, pop);
+    return wrap;
+}
+
+// Card del magazine stampato (Summer party).
+function buildMagazineCard() {
+    const card = document.createElement("article");
+    card.className = "mag-magazine";
+    const cover = document.createElement("div");
+    cover.className = "mag-magazine__cover";
+    const img = document.createElement("img");
+    img.src = "assets/images/summerparty_magazine.jpg";
+    img.alt = "";
+    cover.appendChild(img);
+    const below = document.createElement("div");
+    below.className = "mag-magazine__below";
+    const title = document.createElement("p");
+    title.className = "mag-magazine__title";
+    title.textContent = "Summer party";
+    const author = document.createElement("p");
+    author.className = "mag-magazine__author";
+    author.textContent = nickname;
+    below.append(title, author);
+    card.append(cover, below);
+    return card;
+}
+
+// bottom_container_doll/magazine_page: riga con i magazine creati + lo slot per
+// crearne un altro. Usata sia in "add" (solo slot) sia in "printed" (card + slot).
+function renderMagShelf() {
+    const row = document.createElement("div");
+    row.className = "mag-row";
+    if (getMagState() === "printed") row.appendChild(buildMagazineCard());
+    row.appendChild(buildAddSlot());
+    magView.appendChild(row);
 }
 
 // Il bottone "print" vive nel pop_up del container_side_30% (vedi updatePopup):
@@ -466,31 +516,6 @@ function doPrintMagazine() {
     updatePopup();
 }
 
-function renderMagPrinted() {
-    const wrap = document.createElement("div");
-    wrap.className = "mag-cover-wrap";
-    const card = document.createElement("article");
-    card.className = "mag-magazine";
-    const cover = document.createElement("div");
-    cover.className = "mag-magazine__cover";
-    const img = document.createElement("img");
-    img.src = "assets/images/summerparty_magazine.jpg";
-    img.alt = "";
-    cover.appendChild(img);
-    const below = document.createElement("div");
-    below.className = "mag-magazine__below";
-    const title = document.createElement("p");
-    title.className = "mag-magazine__title";
-    title.textContent = "Summer party";
-    const author = document.createElement("p");
-    author.className = "mag-magazine__author";
-    author.textContent = nickname;
-    below.append(title, author);
-    card.append(cover, below);
-    wrap.appendChild(card);
-    magView.appendChild(wrap);
-}
-
 function renderMagazines() {
     if (!magView || !magEmpty) return;
     if (getSavedStories().length < 3) {   // ancora bloccata
@@ -503,9 +528,8 @@ function renderMagazines() {
     magView.hidden = false;
     magView.innerHTML = "";
     const state = getMagState();
-    if (state === "printed") { activateCommunity(); renderMagPrinted(); }
-    else if (state === "select") renderMagSelect(getSavedStories());
-    else renderMagAdd();
+    if (state === "select") renderMagSelect(getSavedStories());
+    else { if (state === "printed") activateCommunity(); renderMagShelf(); }
 }
 
 // Se il gioco è iniziato, la sezione goalz è comunque consultabile.
