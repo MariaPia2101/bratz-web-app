@@ -1,13 +1,13 @@
-/* ===== Font locali (file in assets/fonts/) ===== */
+/* ===== Font locali (SOLO i file realmente presenti in assets/fonts/) =====
+   Nomi case-sensitive (GitHub Pages): puntiamo esattamente ai .ttf esistenti,
+   così niente più 404 su .woff2/.woff/.otf inesistenti. font-display: swap ->
+   il testo compare subito col fallback e NON blocca il caricamento del 3D. */
 @font-face {
     font-family: "Druk Wide";
     font-weight: 500;
     font-style: normal;
     font-display: swap;
-    src: url("assets/fonts/DrukWide-Medium.woff2") format("woff2"),
-        url("assets/fonts/DrukWide-Medium.woff") format("woff"),
-        url("assets/fonts/Druk-Wide-Medium-Regular.ttf") format("truetype"),
-        url("assets/fonts/DrukWide-Medium.otf") format("opentype");
+    src: url("assets/fonts/Druk-Wide-Medium-Regular.ttf") format("truetype");
 }
 
 @font-face {
@@ -15,11 +15,7 @@
     font-weight: 700;
     font-style: normal;
     font-display: swap;
-    src: url("assets/fonts/DrukWide-Bold.woff2") format("woff2"),
-        url("assets/fonts/DrukWide-Bold.woff") format("woff"),
-        url("assets/fonts/DrukWide-Bold.ttf") format("truetype"),
-        url("assets/fonts/Druk-Wide-Medium-Regular.ttf") format("truetype"),
-        url("assets/fonts/DrukWide-Bold.otf") format("opentype");
+    src: url("assets/fonts/Druk-Wide-Medium-Regular.ttf") format("truetype");
 }
 
 @font-face {
@@ -27,10 +23,7 @@
     font-weight: 400;
     font-style: normal;
     font-display: swap;
-    src: url("assets/fonts/AkkuratMono-Regular.woff2") format("woff2"),
-        url("assets/fonts/AkkuratMono-Regular.woff") format("woff"),
-        url("assets/fonts/AkkuratMonoTrialTT-Regular.ttf") format("truetype"),
-        url("assets/fonts/AkkuratMono-Regular.otf") format("opentype");
+    src: url("assets/fonts/AkkuratMonoTrialTT-Regular.ttf") format("truetype");
 }
 
 @font-face {
@@ -38,9 +31,7 @@
     font-weight: 700;
     font-style: normal;
     font-display: swap;
-    src: url("assets/fonts/AkkuratMono-Bold.woff2") format("woff2"),
-        url("assets/fonts/AkkuratMono-Bold.woff") format("woff"),
-        url("assets/fonts/AkkuratMonoTrialTT-Bold.ttf") format("truetype");
+    src: url("assets/fonts/AkkuratMonoTrialTT-Bold.ttf") format("truetype");
 }
 
 /* ===== Design tokens estratti da Figma (onboarding_page) ===== */
@@ -103,9 +94,10 @@
     /* Fallback di sfondo enter_page finché l'export 3D non è presente */
     --enter-bg-fallback: #2b1cc4;
 
-    /* Font digitalizzati localmente da Figma (nessun fallback) */
-    --font-title: "Druk Wide";
-    --font-mono: "Akkurat Mono";
+    /* Font locali + fallback di sistema: se il font non carica (404/rete) il
+       testo resta leggibile con un sans-serif / monospace. */
+    --font-title: "Druk Wide", system-ui, -apple-system, sans-serif;
+    --font-mono: "Akkurat Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
 }
 
 * {

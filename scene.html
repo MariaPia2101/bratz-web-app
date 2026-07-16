@@ -81,16 +81,19 @@
             opacity: 0;
         }
 
-        /* ===== Joystick virtuale (solo touch): controller per il pollice ===== */
+        /* ===== Joystick virtuale (solo touch): controller per il pollice =====
+           In basso a DESTRA. Stile custom: base bianca con bordo nero netto,
+           pomello bianco con bordo nero netto. */
         #joystick {
             position: fixed;
-            left: 252px;
+            right: 24px;
             bottom: 24px;
+            left: auto;
             width: 128px;
             height: 128px;
             border-radius: 50%;
-            background: rgba(228, 213, 255, 0.71);
-            border: 1px solid rgba(255, 255, 255, 0.35);
+            background: #ffffff;
+            border: 2px solid #000000;
             z-index: 8;
             display: none;              /* mostrato solo su schermi touch (vedi media query) */
             touch-action: none;
@@ -105,8 +108,8 @@
             height: 56px;
             margin: -28px 0 0 -28px;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.85);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+            background: #ffffff;
+            border: 2px solid #000000;
             pointer-events: none;
         }
 
@@ -273,7 +276,7 @@
     <iframe id="stories-frame" class="stories-frame" title="Stories" hidden></iframe>
 
     <script src="community-unlock.js"></script>
-    <script type="module" src="scene.js?v=28"></script>
+    <script type="module" src="scene.js?v=29"></script>
 </body>
 
 </html>

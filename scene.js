@@ -34,7 +34,9 @@ const MODELS = {
     character:   "assets/3d/models/character.glb",
 };
 
-const DRACO_DECODER_PATH = "https://unpkg.com/three@0.160.0/examples/jsm/libs/draco/";
+// Decoder Draco da jsdelivr (CDN stabile, MIME corretto per il .wasm su iOS
+// Safari; unpkg ogni tanto serviva un build incompatibile -> Aborted()).
+const DRACO_DECODER_PATH = "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/libs/draco/";
 
 // Nome della mesh che fa da PAVIMENTO calpestabile (con dislivelli).
 const FLOOR_MESH_NAME = "foundament";
@@ -224,12 +226,26 @@ function hideLoading() {
 }
 
 // ---------- Loaders ----------
-const dracoLoader = new DRACOLoader(manager);
-dracoLoader.setDecoderPath(DRACO_DECODER_PATH);
-dracoLoader.setDecoderConfig({ type: "wasm" }); // decoder WASM: veloce e con meno picco di memoria
-dracoLoader.preload();                            // inizializza il decoder PRIMA dei load (niente stallo/crash a metà)
+// Il decoder Draco viene RICREATO dopo aver decodificato l'ambiente (il modello
+// più pesante): così i worker WASM e la loro heap vengono liberati subito, senza
+// restare allocati per tutta la sessione -> meno pressione di memoria su iOS.
+function makeDracoLoader() {
+    const d = new DRACOLoader(manager);
+    d.setDecoderPath(DRACO_DECODER_PATH);
+    d.setDecoderConfig({ type: "wasm" }); // worker WebAssembly
+    return d;
+}
+let dracoLoader = makeDracoLoader();
+dracoLoader.preload();                     // inizializza il decoder PRIMA dei load
 const gltfLoader = new GLTFLoader(manager);
 gltfLoader.setDRACOLoader(dracoLoader);
+
+// Rilascia il decoder Draco corrente e ne crea uno nuovo (heap WASM azzerata).
+function recycleDraco() {
+    try { dracoLoader.dispose(); } catch (_) { /* ignora */ }
+    dracoLoader = makeDracoLoader();
+    gltfLoader.setDRACOLoader(dracoLoader);
+}
 
 // ---------- Gestione memoria (VRAM): dispose + downscale texture ----------
 // Libera ricorsivamente geometrie/materiali/texture di un sottoalbero.
@@ -1018,6 +1034,10 @@ function applyCharacterTransform() {
 async function init() {
     try {
         const environment = await loadModel(MODELS.environment);
+        // Parsing dell'ambiente completato: libera SUBITO il decoder Draco (heap
+        // WASM) prima di continuare. È il modello più pesante -> massimo sollievo
+        // di memoria per iOS Safari.
+        recycleDraco();
         enableShadows(environment);
         tuneMaterials(environment);
         // Su mobile riduce le texture dell'ambiente PRIMA del primo upload GPU
@@ -1070,8 +1090,30 @@ async function init() {
         window.__bratz = { scene, camera, renderer, character, room, colliders, floorMeshes, CAM };
     } catch (err) {
         console.error("[scene] Init fallita:", err);
-        loadingText.textContent = "Load error";
+        showSceneError();
     }
+}
+
+// Feedback chiaro se il 3D non parte (es. decoder Draco in "Aborted" / memoria):
+// niente blocco totale, mostro un messaggio e un modo per tornare indietro.
+function showSceneError() {
+    try { dracoLoader.dispose(); } catch (_) { /* ignora */ }
+    if (loadingText) loadingText.textContent = "Scena 3D non caricabile qui.";
+    if (loadingBar) loadingBar.style.display = "none";
+    const input = loadingEl && loadingEl.querySelector(".loading-input");
+    if (input && !document.getElementById("scene-error-back")) {
+        const back = document.createElement("button");
+        back.id = "scene-error-back";
+        back.type = "button";
+        back.className = "primary-button active";
+        back.textContent = "torna indietro";
+        back.style.cssText = "width:207px;margin-top:8px;";
+        back.addEventListener("click", () => {
+            window.location.href = sessionStorage.getItem("bratz_return_page") || "user_page.html";
+        });
+        input.appendChild(back);
+    }
+    loadingEl && loadingEl.classList.remove("is-hidden");
 }
 
 // Spawn valido: dal centro verso l'esterno a spirale, il primo punto che è
