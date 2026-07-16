@@ -117,7 +117,10 @@ const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerH
 camera.position.set(0, CAM.height, CAM.back);
 
 const pmrem = new THREE.PMREMGenerator(renderer);
-scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+const _roomEnv = new RoomEnvironment();
+scene.environment = pmrem.fromScene(_roomEnv, 0.04).texture;
+pmrem.dispose();          // libera il generatore PMREM (l'env map resta valida)
+disposeObject(_roomEnv);  // libera la scena temporanea dell'ambiente (memoria)
 
 // ---------- Sfondo: paesaggio urbano (foto fornita) ----------
 // Fuori dal modello, al posto del nero, la foto "Foto_Background_3D_.jpeg"
@@ -222,8 +225,56 @@ function hideLoading() {
 // ---------- Loaders ----------
 const dracoLoader = new DRACOLoader(manager);
 dracoLoader.setDecoderPath(DRACO_DECODER_PATH);
+dracoLoader.setDecoderConfig({ type: "wasm" }); // decoder WASM: veloce e con meno picco di memoria
+dracoLoader.preload();                            // inizializza il decoder PRIMA dei load (niente stallo/crash a metà)
 const gltfLoader = new GLTFLoader(manager);
 gltfLoader.setDRACOLoader(dracoLoader);
+
+// ---------- Gestione memoria (VRAM): dispose + downscale texture ----------
+// Libera ricorsivamente geometrie/materiali/texture di un sottoalbero.
+function disposeObject(root) {
+    if (!root) return;
+    root.traverse((o) => {
+        if (o.geometry) o.geometry.dispose();
+        const mats = o.material ? (Array.isArray(o.material) ? o.material : [o.material]) : [];
+        mats.forEach((m) => {
+            for (const k in m) { const v = m[k]; if (v && v.isTexture) v.dispose(); }
+            if (m.dispose) m.dispose();
+        });
+    });
+}
+
+// Su LOW rimpicciolisce le texture troppo grandi (riscalate via canvas): riduce
+// DRASTICAMENTE la VRAM occupata a runtime -> evita il crash su iPhone.
+const _TEX_KEYS = ["map", "emissiveMap", "normalMap", "roughnessMap", "metalnessMap", "aoMap", "bumpMap", "specularMap"];
+function downscaleTextures(root, maxSize) {
+    const seen = new Set();
+    root.traverse((o) => {
+        if (!o.isMesh || !o.material) return;
+        const mats = Array.isArray(o.material) ? o.material : [o.material];
+        mats.forEach((m) => {
+            _TEX_KEYS.forEach((k) => {
+                const tex = m[k];
+                if (!tex || !tex.image || seen.has(tex)) return;
+                seen.add(tex);
+                const img = tex.image;
+                const iw = img.width || img.videoWidth || 0;
+                const ih = img.height || img.videoHeight || 0;
+                if (!iw || !ih || Math.max(iw, ih) <= maxSize) return;
+                try {
+                    const scale = maxSize / Math.max(iw, ih);
+                    const cw = Math.max(1, Math.round(iw * scale));
+                    const ch = Math.max(1, Math.round(ih * scale));
+                    const cv = document.createElement("canvas");
+                    cv.width = cw; cv.height = ch;
+                    cv.getContext("2d").drawImage(img, 0, 0, cw, ch);
+                    tex.image = cv;
+                    tex.needsUpdate = true;
+                } catch (_) { /* immagine non disegnabile (es. compressa): lascia invariata */ }
+            });
+        });
+    });
+}
 
 function loadModel(url) {
     return new Promise((resolve, reject) => gltfLoader.load(url, (g) => resolve(g.scene), undefined, reject));
@@ -296,6 +347,19 @@ function saveSceneState() {
 window.addEventListener("pagehide", saveSceneState);
 document.addEventListener("visibilitychange", () => { if (document.hidden) saveSceneState(); });
 
+// Lasciando la pagina 3D: libera TUTTA la memoria GPU (geometrie/materiali/
+// texture/render target) così tornando alle altre pagine il telefono respira.
+let _disposed = false;
+function disposeAll() {
+    if (_disposed) return;
+    _disposed = true;
+    disposeObject(scene);
+    if (scene.environment && scene.environment.dispose) scene.environment.dispose();
+    if (composer && composer.dispose) composer.dispose();
+    renderer.dispose();
+}
+window.addEventListener("pagehide", disposeAll);
+
 // ---------- Progressione obiettivi (condivisa con yasmin/goalz_page e /stories_page) ----------
 // found = quanti oggetti trovati (0..3); saved = quante storie salvate (= n. card).
 // Fase: found===saved → "cerca oggetto (index=found)" oppure magazine se found===3;
@@ -332,6 +396,40 @@ window.addEventListener("keydown", (e) => {
     fadeHint();
 });
 window.addEventListener("keyup", (e) => keys.delete(e.code));
+
+// Input joystick virtuale (mobile): joy.x = gira (dx +), joy.y = avanti/indietro
+// (su -1). Valori normalizzati [-1, 1], con piccola dead-zone anti-jitter.
+const joy = { x: 0, y: 0 };
+(function initJoystick() {
+    const base = document.getElementById("joystick");
+    const thumb = document.getElementById("joystick-thumb");
+    if (!base || !thumb) return;
+    const DEAD = 0.08;
+    let id = null, cx = 0, cy = 0, R = 54;
+
+    function setThumb(dx, dy) { thumb.style.transform = `translate(${dx}px, ${dy}px)`; }
+    function reset() { id = null; joy.x = 0; joy.y = 0; setThumb(0, 0); }
+    function apply(e) {
+        let dx = e.clientX - cx, dy = e.clientY - cy;
+        const len = Math.hypot(dx, dy) || 1;
+        const cl = Math.min(len, R);
+        dx = dx / len * cl; dy = dy / len * cl;
+        setThumb(dx, dy);
+        let x = dx / R, y = dy / R;
+        joy.x = Math.abs(x) < DEAD ? 0 : x;
+        joy.y = Math.abs(y) < DEAD ? 0 : y;
+    }
+    base.addEventListener("pointerdown", (e) => {
+        id = e.pointerId;
+        try { base.setPointerCapture(id); } catch (_) { /* ignora */ }
+        const r = base.getBoundingClientRect();
+        cx = r.left + r.width / 2; cy = r.top + r.height / 2; R = r.width / 2 - 10;
+        apply(e);
+    });
+    base.addEventListener("pointermove", (e) => { if (e.pointerId === id) apply(e); });
+    base.addEventListener("pointerup", (e) => { if (e.pointerId === id) reset(); });
+    base.addEventListener("pointercancel", (e) => { if (e.pointerId === id) reset(); });
+})();
 
 const hintEl = document.getElementById("scene-hint");
 let hintFaded = false;
@@ -921,6 +1019,9 @@ async function init() {
         const environment = await loadModel(MODELS.environment);
         enableShadows(environment);
         tuneMaterials(environment);
+        // Su mobile riduce le texture dell'ambiente PRIMA del primo upload GPU
+        // (la versione full-size non tocca mai la VRAM) -> niente crash.
+        if (IS_LOW) downscaleTextures(environment, 1024);
         scene.add(environment);
         classifyEnvironment(environment);
         repositionLinesFloor(environment);
@@ -929,6 +1030,7 @@ async function init() {
 
         const charModel = await loadModel(MODELS.character);
         enableShadows(charModel);
+        if (IS_LOW) downscaleTextures(charModel, 1024);
         charModel.updateMatrixWorld(true);
         character.footOffset = new THREE.Box3().setFromObject(charModel).min.y; // origine ai piedi (~0)
 
@@ -951,8 +1053,12 @@ async function init() {
         updateCamera();
 
         await loadGameObjects();       // 3 oggetti nascosti (camera/lipstick/bag) + aloni
+        if (IS_LOW) gameObjects.forEach((g) => downscaleTextures(g.model, 512));
         setupFoundObjects();           // gli oggetti già trovati restano visibili (senza alone)
         await loadCityBackground();    // sfondo urbano pronto prima del primo frame
+
+        // Finiti tutti i download Draco: libera i worker del decoder (memoria).
+        dracoLoader.dispose();
 
         // Precompila gli shader: la loading page resta finché non ho renderizzato
         // per davvero (vedi warmFrames nel loop) -> mai schermo nero.
@@ -1017,10 +1123,13 @@ function animate() {
         // durante il pickup il personaggio è fermo: solo l'oggetto è animato
         updatePickup(dt);
     } else if (character.obj) {
-        const turn = (isDown("ArrowLeft", "KeyA") ? 1 : 0) - (isDown("ArrowRight", "KeyD") ? 1 : 0);
+        // tastiera + joystick: gira (sx/dx) e avanti/indietro (su/giù)
+        const turnKb = (isDown("ArrowLeft", "KeyA") ? 1 : 0) - (isDown("ArrowRight", "KeyD") ? 1 : 0);
+        const moveKb = (isDown("ArrowUp", "KeyW") ? 1 : 0) - (isDown("ArrowDown", "KeyS") ? 1 : 0);
+        const turn = THREE.MathUtils.clamp(turnKb - joy.x, -1, 1);   // joystick dx -> gira a dx
+        const move = THREE.MathUtils.clamp(moveKb - joy.y, -1, 1);   // joystick su -> avanti
         character.yaw += turn * TURN_SPEED * dt;
 
-        const move = (isDown("ArrowUp", "KeyW") ? 1 : 0) - (isDown("ArrowDown", "KeyS") ? 1 : 0);
         if (move !== 0) {
             const speed = MOVE_SPEED * (isDown("ShiftLeft", "ShiftRight") ? RUN_MULT : 1);
             const fwd = headingForward(character.yaw);
