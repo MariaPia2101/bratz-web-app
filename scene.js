@@ -28,10 +28,10 @@ const IS_LOW = (typeof matchMedia === "function" && matchMedia("(pointer: coarse
     || window.innerWidth < 820;
 
 // ---------- Configurazione ----------
-// Su mobile carichiamo environment.glb (modello alternativo, provalo sul telefono);
+// Su mobile carichiamo environment4.glb (mesh decimata, più leggera);
 // su desktop resta environment3.glb.
 const MODELS = {
-    environment: IS_LOW ? "assets/3d/models/environment.glb" : "assets/3d/models/environment3.glb",
+    environment: IS_LOW ? "assets/3d/models/environment4.glb" : "assets/3d/models/environment3.glb",
     character:   "assets/3d/models/character.glb",
 };
 
