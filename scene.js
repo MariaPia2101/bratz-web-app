@@ -54,6 +54,7 @@ const GAME_OBJECTS = [
 const GLOW_PULSE_SPEED = 2.2;        // velocità della pulsazione dell'alone
 const POPUP_DELAY_MS = 5000;         // il pop_up appare 5'' dopo l'ingresso/ritorno
 const OBJECT_DELAY_MS = 5000;        // l'oggetto appare 5'' dopo il pop_up
+const PICKUP_MS = 5000;              // durata dell'animazione "oggetto in primo piano" prima del pop_up
 
 // Movimento
 const MOVE_SPEED   = 2.2;
@@ -93,14 +94,21 @@ const loadingBar  = document.getElementById("scene-loading-bar");
 const loadingFill = document.getElementById("scene-loading-fill");
 const loadingText = document.getElementById("scene-loading-text");
 
+// ---------- Modalità leggera (mobile / dispositivi touch / schermi piccoli) ----------
+// Su mobile la scena era troppo pesante (freeze / crash). In LOW disattiviamo le
+// feature costose: post-processing bloom, specchio (Reflector), ombre, antialias,
+// e riduciamo il pixel ratio. Il look resta simile, ma gira anche da telefono.
+const IS_LOW = (typeof matchMedia === "function" && matchMedia("(pointer: coarse)").matches)
+    || window.innerWidth < 820;
+
 // ---------- Renderer ----------
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: "high-performance" });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: !IS_LOW, powerPreference: "high-performance" });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, IS_LOW ? 1.25 : 2));
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 0.8; // più basso = alte luci meno bruciate (look più soffuso)
-renderer.shadowMap.enabled = true;
+renderer.shadowMap.enabled = !IS_LOW;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
 // ---------- Scena e camera ----------
@@ -118,20 +126,25 @@ const CITY_BG_URL = "assets/3d/textures/Foto_Background_3D_.jpeg";
 
 // ---------- Post-processing: bloom per il "soft glow" morbido ----------
 // Solo le zone luminose (LED, neon, lampade) fioriscono -> alone soffuso.
-const composer = new EffectComposer(renderer);
-composer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-composer.addPass(new RenderPass(scene, camera));
-const bloomPass = new UnrealBloomPass(
-    new THREE.Vector2(window.innerWidth, window.innerHeight),
-    0.16,  // strength (glow soft, non lattiginoso)
-    0.85,  // radius (quanto si allarga)
-    0.0    // threshold 0 = TUTTA la scena fiorisce -> glow morbido e uniforme
-);
-// Tinta ROSA del glow (solo il bloom, non l'immagine intera): riduce verde/blu.
-const _bloomTint = new THREE.Vector3(1.0, 0.78, 0.9);
-bloomPass.bloomTintColors = bloomPass.bloomTintColors.map(() => _bloomTint.clone());
-composer.addPass(bloomPass);
-composer.addPass(new OutputPass());
+// In LOW (mobile) il bloom è disattivato: si renderizza direttamente (grosso
+// risparmio), gli emissivi restano comunque visibili grazie al loro colore.
+let composer = null;
+if (!IS_LOW) {
+    composer = new EffectComposer(renderer);
+    composer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    composer.addPass(new RenderPass(scene, camera));
+    const bloomPass = new UnrealBloomPass(
+        new THREE.Vector2(window.innerWidth, window.innerHeight),
+        0.16,  // strength (glow soft, non lattiginoso)
+        0.85,  // radius (quanto si allarga)
+        0.0    // threshold 0 = TUTTA la scena fiorisce -> glow morbido e uniforme
+    );
+    // Tinta ROSA del glow (solo il bloom, non l'immagine intera): riduce verde/blu.
+    const _bloomTint = new THREE.Vector3(1.0, 0.78, 0.9);
+    bloomPass.bloomTintColors = bloomPass.bloomTintColors.map(() => _bloomTint.clone());
+    composer.addPass(bloomPass);
+    composer.addPass(new OutputPass());
+}
 
 // ---------- Illuminazione (simula il light bake di Blender) ----------
 // LIGHT_TUNE alza/abbassa TUTTA l'intensità in un colpo solo.
@@ -458,6 +471,7 @@ function clearPhaseTimers() { phaseTimers.forEach(clearTimeout); phaseTimers = [
 // l'oggetto compare 5'' dopo il pop_up (stesso iter della camera.glb).
 function startPhaseFlow() {
     clearPhaseTimers();
+    resetPickup();        // se si torna dalla scrittura, l'oggetto riprende posa/posizione normale
     activeObjectIndex = -1;
     const found = getObjectsFound();
     const saved = getStoriesSaved();
@@ -482,21 +496,86 @@ function startPhaseFlow() {
 
 // Click su un oggetto attivo -> "trovato": alone via, +1 oggetto, pop_up "write".
 renderer.domElement.addEventListener("pointerdown", (e) => {
-    if (storiesOpen || activeObjectIndex < 0) return;
+    if (storiesOpen || pickup || activeObjectIndex < 0) return;
     const o = gameObjects[activeObjectIndex];
     if (!o || !o.model.visible) return;
     _clickNdc.x = (e.clientX / window.innerWidth) * 2 - 1;
     _clickNdc.y = -(e.clientY / window.innerHeight) * 2 + 1;
     _clickRay.setFromCamera(_clickNdc, camera);
     if (_clickRay.intersectObject(o.model, true).length) {
-        o.glow.visible = false;                                   // oggetto "raccolto"
+        // Oggetto "trovato": +1 e parte l'animazione (ingrandisce, va in primo
+        // piano e gira col suo bagliore). Dopo PICKUP_MS esce il pop_up "write".
         setObjectsFound(Math.max(getObjectsFound(), activeObjectIndex + 1));
-        activeObjectIndex = -1;
         clearPhaseTimers();
+        startPickup(o);
+        activeObjectIndex = -1;
+    }
+});
+
+// ---------- Animazione "oggetto in primo piano" (prima del pop_up di scrittura) ----------
+let pickup = null;
+const _pickDir = new THREE.Vector3();
+const _pickTarget = new THREE.Vector3();
+
+function startPickup(o) {
+    if (pickup) return;
+    o.model.updateMatrixWorld(true);
+    const box = new THREE.Box3().setFromObject(o.model);
+    const center = box.getCenter(new THREE.Vector3());
+    const size = box.getSize(new THREE.Vector3());
+    // pivot al CENTRO dell'oggetto: scala e rotazione avvengono attorno al centro.
+    const pivot = new THREE.Group();
+    pivot.position.copy(center);
+    scene.add(pivot);
+    // salva i transform locali originali (relativi alla scena) per il ripristino
+    const orig = {
+        mPos: o.model.position.clone(), mQuat: o.model.quaternion.clone(), mScale: o.model.scale.clone(),
+        gPos: o.glow.position.clone(), gScale: o.glow.scale.clone(),
+    };
+    pivot.attach(o.model);   // mantiene la posa mondo, ora figlio del pivot
+    pivot.attach(o.glow);    // l'alone segue l'oggetto
+    o.glow.visible = true;   // "sempre con il suo bagliore"
+    o.glow.material.opacity = 0.85;
+    pickup = {
+        o, pivot, orig,
+        start: performance.now(),
+        startPos: center.clone(),
+        baseMax: Math.max(size.x, size.y, size.z) || 0.3,
+        popupShown: false,
+    };
+}
+
+function updatePickup(dt) {
+    const t = Math.min((performance.now() - pickup.start) / PICKUP_MS, 1);
+    const ease = t * t * (3 - 2 * t); // smoothstep
+    // target: davanti alla camera, centrato -> "primo piano"
+    camera.getWorldDirection(_pickDir);
+    _pickTarget.copy(camera.position).addScaledVector(_pickDir, 1.8);
+    pickup.pivot.position.lerpVectors(pickup.startPos, _pickTarget, ease);
+    const targetScale = Math.min(Math.max(1.8, 0.9 / pickup.baseMax), 4); // ingrandimento 1.8x..4x
+    pickup.pivot.scale.setScalar(1 + ease * (targetScale - 1));
+    pickup.pivot.rotation.y += dt * 1.6;                     // gira di continuo
+    if (t >= 1 && !pickup.popupShown) {
+        pickup.popupShown = true;
         setStoryPopup();
         showGamePopup();
     }
-});
+}
+
+function resetPickup() {
+    if (!pickup) return;
+    const { o, orig, pivot } = pickup;
+    scene.add(o.model);   // torna figlio della scena
+    o.model.position.copy(orig.mPos);
+    o.model.quaternion.copy(orig.mQuat);
+    o.model.scale.copy(orig.mScale);
+    scene.add(o.glow);
+    o.glow.position.copy(orig.gPos);
+    o.glow.scale.copy(orig.gScale);
+    o.glow.visible = false;
+    scene.remove(pivot);
+    pickup = null;
+}
 
 // ---------- Classificazione geometria ----------
 // Foundament_Home_ -> pavimento (grounding + confini). Tutte le altre mesh solide
@@ -697,6 +776,9 @@ function addBulbLights(environment) {
 // Aggiunge uno specchio realmente riflettente sul piano "Mirror" e nasconde
 // il materiale originale (opaco), lasciando visibile solo il Reflector.
 function setupMirror(environment) {
+    // In LOW il Reflector (ri-renderizza la scena ogni frame) è troppo costoso:
+    // lo specchio resta come vetro statico, niente riflesso live.
+    if (IS_LOW) return;
     environment.updateMatrixWorld(true);
 
     // Trova la mesh (primitive) che usa il materiale "Mirror".
@@ -912,7 +994,7 @@ window.addEventListener("resize", () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
-    composer.setSize(window.innerWidth, window.innerHeight);
+    if (composer) composer.setSize(window.innerWidth, window.innerHeight);
 });
 
 // ---------- Loop ----------
@@ -922,7 +1004,10 @@ function animate() {
     if (storiesOpen) return; // scena congelata mentre si scrive: riprende identica alla chiusura
     const dt = Math.min(clock.getDelta(), 0.05);
 
-    if (character.obj) {
+    if (pickup) {
+        // durante il pickup il personaggio è fermo: solo l'oggetto è animato
+        updatePickup(dt);
+    } else if (character.obj) {
         const turn = (isDown("ArrowLeft", "KeyA") ? 1 : 0) - (isDown("ArrowRight", "KeyD") ? 1 : 0);
         character.yaw += turn * TURN_SPEED * dt;
 
@@ -950,7 +1035,8 @@ function animate() {
         o.glow.scale.set(s, s, 1);
     }
 
-    composer.render(); // render con bloom (soft glow)
+    if (composer) composer.render(); // render con bloom (soft glow)
+    else renderer.render(scene, camera); // LOW: render diretto (niente post-processing)
 
     // Chiudi la loading page SOLO dopo qualche frame davvero disegnato.
     if (sceneReady && !loadingHidden) {

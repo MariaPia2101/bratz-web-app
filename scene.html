@@ -40,12 +40,16 @@
             touch-action: none; /* i gesti (pinch/drag) vanno agli OrbitControls, non allo scroll */
         }
 
-        /* Overlay di caricamento: riusa lo stile del sito, resta finché la scena non è pronta. */
+        /* Overlay di caricamento: riusa lo stile del sito, resta finché la scena non è pronta.
+           opacity:1 esplicito: senza, .loading-page (opacity:0) lo rendeva invisibile e si
+           vedeva il nero del body durante tutto il caricamento. */
         #scene-loading {
             position: fixed;
             inset: 0;
             z-index: 10;
             display: flex;
+            opacity: 1;
+            background: var(--bg-color, #fff);
             transition: opacity 0.6s ease;
         }
 
@@ -232,7 +236,7 @@
     <iframe id="stories-frame" class="stories-frame" title="Stories" hidden></iframe>
 
     <script src="community-unlock.js"></script>
-    <script type="module" src="scene.js?v=20"></script>
+    <script type="module" src="scene.js?v=21"></script>
 </body>
 
 </html>

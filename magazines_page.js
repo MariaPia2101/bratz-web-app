@@ -36,6 +36,18 @@ function ownMagazineTitle() {
 const thirdInput = document.getElementById("mag-third-input");
 if (thirdInput) thirdInput.hidden = (type !== "community");
 
+// ---------- Oggetti 3D (camera/lipstick/bag): solo per il proprio magazine ----------
+const magObjects = document.getElementById("mag-objects");
+if (type === "own") {
+    // carica three.js + i mini-viewer solo qui (niente peso 3D sulla community)
+    const s = document.createElement("script");
+    s.type = "module";
+    s.src = "magazine_objects.js";
+    document.body.appendChild(s);
+} else if (magObjects) {
+    magObjects.remove();
+}
+
 // ---------- Loading reale legato alle immagini ----------
 const loadingText = document.getElementById("loading-text");
 let dotsTimer = null;

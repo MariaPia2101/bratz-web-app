@@ -1815,6 +1815,20 @@ body {
     overflow: hidden;
 }
 
+/* i 3 oggetti trovati (camera/lipstick/bag) al posto di Rectangle 1/2/3,
+   posizionati come nella pagina Figma magazines_page (% della pagina sinistra). */
+.mag-objects {
+    position: absolute;
+    inset: 0;
+    z-index: 1;                /* sotto la spine (z-index 3) */
+    pointer-events: none;
+}
+.mag-obj { position: absolute; }
+.mag-obj__canvas { display: block; width: 100%; height: 100%; }
+.mag-obj--1 { left: 35%; top: 36%; width: 23%; height: 14%; }
+.mag-obj--2 { left: 71%; top: 53%; width: 10%; height: 12%; }
+.mag-obj--3 { left: 47%; top: 72%; width: 24%; height: 14%; }
+
 /* DESTRA: scrolla */
 .mag-col--lecture {
     border-left: 1px solid var(--card-stroke);
@@ -1948,6 +1962,7 @@ body {
     font-family: var(--font-title);
     font-weight: 700;
     font-size: 14px;
+    text-transform: uppercase;
     cursor: pointer;
     transition: background-color 0.15s ease;
 }
