@@ -157,9 +157,9 @@ function updatePopup() {
             }
         } else {
             // add / printed: pop_up del container_side_30% della magazines_page
+            // -> stesso testo e bottone "play game" (fedele agli screenshot Figma)
             popupText.textContent = "Stack up your stories to design and print ultimate magazines.";
-            popupPlay.hidden = true;
-            if (popupStart) popupStart.hidden = false;
+            popupPlay.hidden = false;
         }
     } else {
         popup.classList.add("is-hidden");
@@ -421,16 +421,17 @@ function buildAddSlot(disabled) {
     // plus del box_add_magazine è disabilitato — fedele a yasmin/magazines_page.
     if (disabled) {
         plus.disabled = true;
-        wrap.append(cover, plus);
-        return wrap;
+    } else {
+        plus.addEventListener("click", () => {
+            localStorage.setItem(MAG_STATE_KEY, "select");
+            localStorage.setItem(MAG_SEL_KEY, "[]");
+            renderMagazines();
+            updatePopup();
+        });
     }
-    plus.addEventListener("click", () => {
-        localStorage.setItem(MAG_STATE_KEY, "select");
-        localStorage.setItem(MAG_SEL_KEY, "[]");
-        renderMagazines();
-        updatePopup();
-    });
-    // pop_up che tocca il plus (solo in "add": guida l'utente all'azione)
+    // pop_up che tocca il plus (presente in entrambi gli stati, testo diverso):
+    // - add      -> invita a premere il plus (plusbutton_page)
+    // - printed  -> ricorda come si compila un magazine (magazines_page)
     const pop = document.createElement("aside");
     pop.className = "mag-plus-popup";
     const close = document.createElement("button");
@@ -440,7 +441,9 @@ function buildAddSlot(disabled) {
     close.addEventListener("click", () => { pop.hidden = true; });
     const p = document.createElement("p");
     p.className = "enter-popup-text";
-    p.textContent = "Pick your 3 favorite stories to compile the most iconic magazine ever. Serve the ultimate look and print it, babe.";
+    p.textContent = disabled
+        ? "Pick your 3 favorite stories to compile the most iconic magazine ever. Serve the ultimate look and print it, babe."
+        : "Tap the plus button to compile the most iconic magazine ever. Serve the ultimate look and print it, babe.";
     pop.append(close, p);
     wrap.append(cover, plus, pop);
     return wrap;
