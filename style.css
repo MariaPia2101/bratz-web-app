@@ -1818,7 +1818,7 @@ body {
 .mag-spine__logo {
     width: 132px;
     height: auto;
-    transform: rotate(-90deg);
+    transform: rotate(90deg);
     flex: 0 0 auto;
     pointer-events: none;
 }
@@ -1834,7 +1834,6 @@ body {
 .mag-spine__vol,
 .mag-spine__author {
     writing-mode: vertical-rl;
-    transform: rotate(180deg);
     white-space: nowrap;
     font-family: var(--font-mono);
     letter-spacing: -0.98px;
@@ -1897,7 +1896,8 @@ body {
 
 .mag-third-input__send {
     flex: 0 0 auto;
-    width: 146px;
+    width: 207px;
+    height: 35px;
     background: var(--btn-fill-active);
     border: 1px solid var(--input-stroke);
     font-family: var(--font-title);
@@ -2440,8 +2440,8 @@ body {
 
     /* pop_up che tocca il plus (plusbutton_page) */
     .mag-plus-popup {
-        left: 55%;
-        bottom: -23%;
+        left: -6%;
+        bottom: -14%;
         width: 200px;
         padding: 14px;
         gap: 14px;
