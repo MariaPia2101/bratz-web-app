@@ -2457,10 +2457,10 @@ body {
         flex: 1 1 auto;
         padding: 40px 20px 24px 20px;
         gap: 20px;
+        border-left: none;
     }
     .mag-spine {
         width: 52px;
-        padding: 24px 0;
     }
     .mag-spine:hover {             /* niente espansione hover su mobile (spazio ridotto) */
         width: 52px;
