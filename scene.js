@@ -22,7 +22,7 @@ try { localStorage.setItem("bratz_started", "1"); } catch (_) { /* storage negat
 
 // ---------- Configurazione ----------
 const MODELS = {
-    environment: "assets/3d/models/environment2.glb",
+    environment: "assets/3d/models/environment3.glb",
     character:   "assets/3d/models/character.glb",
 };
 
