@@ -20,9 +20,18 @@ import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
 // "in corso") il trofeo "Style Explorer" nella tab trophies.
 try { localStorage.setItem("bratz_started", "1"); } catch (_) { /* storage negato */ }
 
+// ---------- Modalità leggera (mobile / dispositivi touch / schermi piccoli) ----------
+// Su mobile la scena era troppo pesante (freeze / crash). In LOW disattiviamo le
+// feature costose (bloom, specchio, ombre, antialias, luci extra), riduciamo il
+// pixel ratio e usiamo un modello ambiente più leggero.
+const IS_LOW = (typeof matchMedia === "function" && matchMedia("(pointer: coarse)").matches)
+    || window.innerWidth < 820;
+
 // ---------- Configurazione ----------
+// Su mobile carichiamo environment.glb (modello alternativo, provalo sul telefono);
+// su desktop resta environment3.glb.
 const MODELS = {
-    environment: "assets/3d/models/environment3.glb",
+    environment: IS_LOW ? "assets/3d/models/environment.glb" : "assets/3d/models/environment3.glb",
     character:   "assets/3d/models/character.glb",
 };
 
@@ -93,13 +102,6 @@ const loadingEl   = document.getElementById("scene-loading");
 const loadingBar  = document.getElementById("scene-loading-bar");
 const loadingFill = document.getElementById("scene-loading-fill");
 const loadingText = document.getElementById("scene-loading-text");
-
-// ---------- Modalità leggera (mobile / dispositivi touch / schermi piccoli) ----------
-// Su mobile la scena era troppo pesante (freeze / crash). In LOW disattiviamo le
-// feature costose: post-processing bloom, specchio (Reflector), ombre, antialias,
-// e riduciamo il pixel ratio. Il look resta simile, ma gira anche da telefono.
-const IS_LOW = (typeof matchMedia === "function" && matchMedia("(pointer: coarse)").matches)
-    || window.innerWidth < 820;
 
 // ---------- Renderer ----------
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: !IS_LOW, powerPreference: "high-performance" });
