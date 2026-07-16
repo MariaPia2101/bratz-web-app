@@ -2471,14 +2471,14 @@ body {
 
     /* box_add_magazine (copertina vuota col plus) */
     .mag-cover {
-        width: 160px;
-        height: 230px;
+        width: 175.5px;
+        height: 250px;
     }
 
     /* pop_up che tocca il plus (plusbutton_page) */
     .mag-plus-popup {
-        left: 50%;
-        bottom: 50%;
+        left: 55%;
+        bottom: -23%;
         width: 200px;
         padding: 14px;
         gap: 14px;
@@ -2486,7 +2486,7 @@ body {
 
     /* magazine stampato (Summer party) */
     .mag-magazine {
-        width: 160px;
+        width: 175.5px;
     }
     .mag-magazine__below {
         padding: 12px;
