@@ -16,6 +16,10 @@ import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
 import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
 
+// Entrare nella scena 3D = l'utente ha INIZIATO a esplorare: sblocca (in stato
+// "in corso") il trofeo "Style Explorer" nella tab trophies.
+try { localStorage.setItem("bratz_started", "1"); } catch (_) { /* storage negato */ }
+
 // ---------- Configurazione ----------
 const MODELS = {
     environment: "assets/3d/models/environment2.glb",

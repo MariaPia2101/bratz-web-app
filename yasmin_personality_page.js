@@ -557,21 +557,32 @@ function renderMagazines() {
     else { if (state === "printed") activateCommunity(); renderMagShelf(); }
 }
 
-// ---------- yasmin/trophies_page: sblocco progressivo delle card ----------
-// Ogni card_trophies_doll passa da locked a unlocked (overlay via, testi neri,
-// bar da empty a full) a un preciso traguardo della progressione:
-//   1) Style Explorer  -> obiettivo "Explore every corner" raggiunto (>=1 oggetto)
-//   2) Glam Detector   -> tutti e 3 gli oggetti trovati
-//   3) Trend Alchemist -> tutte e 3 le storie scritte
-//   4) Editor in Chief -> magazine pubblicato
+// ---------- yasmin/trophies_page: sblocco PROGRESSIVO delle card ----------
+// Ogni card_trophies_doll passa a "unlocked" (overlay via, testi neri) appena
+// l'utente INIZIA quell'obiettivo; la barra si riempie man mano e diventa FULL
+// solo a obiettivo completato.
+//   1) Style Explorer  -> inizia entrando nella scena; full al 1° oggetto trovato
+//   2) Glam Detector   -> inizia col 1° oggetto; full a 3 oggetti (found/3)
+//   3) Trend Alchemist -> inizia con la 1ª storia; full a 3 storie (saved/3)
+//   4) Editor in Chief -> inizia con le 3 storie pronte; full a magazine pubblicato
 function renderTrophies() {
     const found = getObjectsFound();
     const saved = getSavedStories().length;
     const printed = localStorage.getItem(MAG_PRINTED_KEY) === "1";
-    const unlocked = { 1: found >= 1, 2: found >= 3, 3: saved >= 3, 4: printed };
-    Object.keys(unlocked).forEach((n) => {
+    const started = localStorage.getItem("bratz_started") === "1" || found > 0 || saved > 0;
+    // { on: la card è unlocked (obiettivo iniziato), p: progresso 0..1 }
+    const st = {
+        1: { on: started,    p: found >= 1 ? 1 : (started ? 0.33 : 0) },
+        2: { on: found >= 1, p: Math.min(found, 3) / 3 },
+        3: { on: saved >= 1, p: Math.min(saved, 3) / 3 },
+        4: { on: saved >= 3, p: printed ? 1 : (saved >= 3 ? 0.5 : 0) },
+    };
+    Object.keys(st).forEach((n) => {
         const card = document.querySelector('.trophy-card[data-trophy="' + n + '"]');
-        if (card) card.classList.toggle("is-unlocked", unlocked[n]);
+        if (!card) return;
+        card.classList.toggle("is-unlocked", st[n].on);
+        const fill = card.querySelector(".trophy-bar__fill");
+        if (fill) fill.style.width = Math.round(st[n].p * 100) + "%";
     });
 }
 

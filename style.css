@@ -1551,12 +1551,22 @@ body {
 }
 
 .trophy-bar {
+    position: relative;
     width: 416px;
     max-width: 100%;
     height: 8px;
     box-sizing: border-box;
     background: var(--bar-empty);
     border: 1px solid var(--bar-stroke);
+    overflow: hidden;
+}
+
+/* riempimento progressivo (empty -> full) della barra del trofeo */
+.trophy-bar__fill {
+    height: 100%;
+    width: 0;
+    background: var(--bar-fill);
+    transition: width 0.35s ease;
 }
 
 .trophy-card__desc {
@@ -1571,11 +1581,12 @@ body {
 }
 
 /* ===== stato UNLOCKED (card_trophies_doll sbloccata) =====
-   dai componenti Figma: photo senza overlay, title/desc neri, bar piena. */
+   dai componenti Figma: photo senza overlay, title/desc neri. La barra NON
+   diventa piena qui: il riempimento è progressivo (vedi .trophy-bar__fill),
+   pieno solo a obiettivo completato. */
 .trophy-card.is-unlocked .trophy-card__overlay { display: none; }
 .trophy-card.is-unlocked .trophy-card__title { color: var(--card-stroke); }
 .trophy-card.is-unlocked .trophy-card__desc { color: var(--card-stroke); }
-.trophy-card.is-unlocked .trophy-bar { background: var(--bar-fill); }
 
 /* Pop-up nascosto per i tab senza contenuto dedicato */
 .personality-popup.is-hidden {
@@ -1728,6 +1739,24 @@ body {
     flex-shrink: 0;
 }
 
+/* ===== reward SBLOCCATA (card_trophies_user unlocked): testi neri, codice
+   leggibile, bottone copy attivo; stato "copied" (tapped) dopo il click. ===== */
+.reward-card:not(.reward-card--locked) .reward-card__title,
+.reward-card:not(.reward-card--locked) .reward-card__desc {
+    color: var(--card-stroke);
+}
+
+.reward-card:not(.reward-card--locked) .reward-input {
+    color: var(--input-text-active);
+}
+
+.primary-button.reward-copy.is-copied,
+.primary-button.reward-copy.is-copied:hover {
+    background: var(--btn-fill-tapped);
+    color: var(--btn-text-active);
+    cursor: default;
+}
+
 /* ===================================================================
    MAGAZINE READING PAGE (magazines_page)
    Stessa struttura della stories_page (due colonne 720px), MA senza header.
@@ -1749,12 +1778,11 @@ body {
     opacity: 1;
 }
 
-/* due colonne da 720px, centrate su max 1440 (come stories_page) */
+/* due colonne 50/50 a TUTTA larghezza: la spine resta ancorata al bordo
+   sinistro della pagina (nessun margine centrante che la stacchi dal bordo). */
 .mag-columns {
     display: flex;
     width: 100%;
-    max-width: 1440px;
-    margin: 0 auto;
     height: 100vh;              /* solo il container_lecture scrolla */
 }
 
@@ -1849,7 +1877,8 @@ body {
     display: flex;
     flex-direction: column;
     gap: 16px;
-    max-width: 610px;
+    /* stesso ingombro del testo della stories_page (colonna 720 - padding 62 - 40) */
+    max-width: 618px;
 }
 
 .mag-lecture__text p {
@@ -1870,7 +1899,7 @@ body {
 .mag-third-input {
     display: flex;
     width: 100%;
-    max-width: 610px;
+    max-width: 618px;
     height: 35px;
     margin-top: auto;
 }

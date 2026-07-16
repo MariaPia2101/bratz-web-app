@@ -86,3 +86,56 @@ if (logo) {
     logo.classList.add("is-link");
     logo.addEventListener("click", () => navigateWithLoading("user_page.html"));
 }
+
+// ---------- Sblocco della 1ª card_trophies_user (Doll Charmz Pack) ----------
+// Si sblocca quando TUTTI i trophies della tab "trophies" sono stati raggiunti
+// del tutto = magazine pubblicato (implica 3 oggetti + 3 storie). Allora appare
+// il codice "BRATZ2026" nell'input e il bottone copy diventa attivo; al click
+// copia il codice negli appunti e passa allo stato tapped "copied".
+(function unlockFirstReward() {
+    const found = parseInt(localStorage.getItem("bratz_objects_found"), 10) || 0;
+    let stories = 0;
+    try { stories = (JSON.parse(localStorage.getItem("bratz_saved_stories") || "[]") || []).length; }
+    catch (_) { stories = 0; }
+    const printed = localStorage.getItem("bratz_magazine_printed") === "1";
+    if (!(found >= 3 && stories >= 3 && printed)) return;   // trophies non ancora tutti completati
+
+    const card = document.querySelector(".reward-card");   // la prima (Doll Charmz Pack)
+    if (!card) return;
+    card.classList.remove("reward-card--locked");
+
+    const CODE = "BRATZ2026";
+    const input = card.querySelector(".reward-input");
+    if (input) input.textContent = CODE;
+
+    const copyBtn = card.querySelector(".reward-copy");
+    if (!copyBtn) return;
+    copyBtn.disabled = false;
+    copyBtn.classList.add("active");
+
+    copyBtn.addEventListener("click", async () => {
+        if (copyBtn.classList.contains("is-copied")) return;   // già copiato
+        let ok = false;
+        try {
+            await navigator.clipboard.writeText(CODE);
+            ok = true;
+        } catch (_) {
+            // fallback per contesti senza Clipboard API
+            try {
+                const ta = document.createElement("textarea");
+                ta.value = CODE;
+                ta.style.position = "fixed";
+                ta.style.opacity = "0";
+                document.body.appendChild(ta);
+                ta.focus();
+                ta.select();
+                ok = document.execCommand("copy");
+                document.body.removeChild(ta);
+            } catch (_) { ok = false; }
+        }
+        if (ok) {
+            copyBtn.textContent = "copied";
+            copyBtn.classList.add("is-copied");
+        }
+    });
+})();
