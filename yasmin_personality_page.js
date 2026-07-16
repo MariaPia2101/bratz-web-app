@@ -537,6 +537,7 @@ function doPrintMagazine() {
     activateCommunity();
     renderMagazines();
     renderGoalz();   // l'obiettivo "publish" lascia il posto al drop di domani
+    renderTrophies(); // sblocca la 4ª card (Editor in Chief)
     updatePopup();
 }
 
@@ -556,11 +557,30 @@ function renderMagazines() {
     else { if (state === "printed") activateCommunity(); renderMagShelf(); }
 }
 
+// ---------- yasmin/trophies_page: sblocco progressivo delle card ----------
+// Ogni card_trophies_doll passa da locked a unlocked (overlay via, testi neri,
+// bar da empty a full) a un preciso traguardo della progressione:
+//   1) Style Explorer  -> obiettivo "Explore every corner" raggiunto (>=1 oggetto)
+//   2) Glam Detector   -> tutti e 3 gli oggetti trovati
+//   3) Trend Alchemist -> tutte e 3 le storie scritte
+//   4) Editor in Chief -> magazine pubblicato
+function renderTrophies() {
+    const found = getObjectsFound();
+    const saved = getSavedStories().length;
+    const printed = localStorage.getItem(MAG_PRINTED_KEY) === "1";
+    const unlocked = { 1: found >= 1, 2: found >= 3, 3: saved >= 3, 4: printed };
+    Object.keys(unlocked).forEach((n) => {
+        const card = document.querySelector('.trophy-card[data-trophy="' + n + '"]');
+        if (card) card.classList.toggle("is-unlocked", unlocked[n]);
+    });
+}
+
 // Se il gioco è iniziato, la sezione goalz è comunque consultabile.
 if (getObjectsFound() > 0 || getSavedStories().length > 0) unlockTab("goalz");
 renderGoalz();
 renderSavedStories();
 renderMagazines();
+renderTrophies();
 
 // Stato iniziale del popup (tab identity): impostato via JS ora che il bottone
 // non ha più l'attributo HTML "hidden"

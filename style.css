@@ -1570,6 +1570,13 @@ body {
     color: #bebebe;
 }
 
+/* ===== stato UNLOCKED (card_trophies_doll sbloccata) =====
+   dai componenti Figma: photo senza overlay, title/desc neri, bar piena. */
+.trophy-card.is-unlocked .trophy-card__overlay { display: none; }
+.trophy-card.is-unlocked .trophy-card__title { color: var(--card-stroke); }
+.trophy-card.is-unlocked .trophy-card__desc { color: var(--card-stroke); }
+.trophy-card.is-unlocked .trophy-bar { background: var(--bar-fill); }
+
 /* Pop-up nascosto per i tab senza contenuto dedicato */
 .personality-popup.is-hidden {
     display: none;
