@@ -1721,6 +1721,231 @@ body {
     flex-shrink: 0;
 }
 
+/* ===================================================================
+   MAGAZINE READING PAGE (magazines_page): "libro" a due pagine.
+   - container_spine (SINISTRA): spine fissa + i 3 oggetti trovati.
+   - container_lecture (DESTRA): editoriale scrollabile + third_input_field.
+   =================================================================== */
+.mag-read {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: var(--bg-color);
+}
+
+.mag-read__content {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.45s ease;
+}
+
+.mag-read__content.is-ready {
+    opacity: 1;
+}
+
+.mag-book {
+    width: 1200px;
+    max-width: 100%;
+    height: calc(100vh - 48px);
+    display: flex;
+    background: var(--card-fill);
+    border: 1px solid var(--card-stroke);
+    overflow: hidden;
+}
+
+.mag-page {
+    position: relative;
+    flex: 1 1 50%;
+    min-width: 0;
+}
+
+/* pagina sinistra: FISSA (non scrolla) */
+.mag-page--left {
+    overflow: hidden;
+}
+
+/* pagina destra: SCROLLA */
+.mag-page--right {
+    border-left: 1px solid var(--card-stroke);
+    overflow-y: auto;
+}
+
+/* ---- spine (container_spine): fissa, cliccabile, con stati hover/tapped ---- */
+.mag-spine {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 88px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 96px;
+    padding: 48px 0;
+    background: var(--card-fill);
+    border: none;
+    border-right: 1px solid var(--card-stroke);
+    cursor: pointer;
+    z-index: 3;
+    transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+/* hover: rientra di 20px nella pagina e si tinge (fill/spine_hover) */
+.mag-spine:hover {
+    background: var(--btn-fill-hover);
+    transform: translateX(20px);
+}
+
+.mag-spine:active {
+    background: var(--btn-fill-tapped);
+}
+
+.mag-spine__logo {
+    width: 132px;
+    height: auto;
+    transform: rotate(-90deg);
+    flex: 0 0 auto;
+    pointer-events: none;
+}
+
+.mag-spine__title,
+.mag-spine__vol,
+.mag-spine__author {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    white-space: nowrap;
+    font-family: var(--font-mono);
+    letter-spacing: -0.98px;
+    color: #000;
+}
+
+.mag-spine__title {
+    font-weight: 700;
+    font-size: 14px;
+}
+
+.mag-spine__vol {
+    font-weight: 400;
+    font-size: 14px;
+}
+
+.mag-spine__author {
+    font-weight: 400;
+    font-size: 16px;
+    letter-spacing: -1.12px;
+}
+
+/* ---- i 3 oggetti trovati (camera/lipstick/bag) al posto di Rectangle 1/2/3 ---- */
+.mag-objects {
+    position: absolute;
+    left: 88px;
+    right: 0;
+    top: 0;
+    bottom: 0;
+}
+
+.mag-obj {
+    position: absolute;
+    background: #efedf1;
+}
+
+.mag-obj__canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.mag-obj--1 { left: 26%; top: 36%; width: 26%; height: 14%; }
+.mag-obj--2 { left: 66%; top: 53%; width: 11%; height: 13%; }
+.mag-obj--3 { left: 39%; top: 72%; width: 28%; height: 15%; }
+
+/* ---- container_lecture: editoriale + input ---- */
+.mag-lecture {
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    padding: 120px 48px 48px 62px;
+}
+
+.mag-lecture__text {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.mag-lecture__text p {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-weight: 400;
+    font-size: 15px;
+    line-height: 22px;
+    letter-spacing: -0.5px;
+    color: #000;
+}
+
+.mag-lecture__text p.is-muted {
+    color: #b3b3b3;
+}
+
+/* third_input_field (visibile solo per la community) */
+.mag-third-input {
+    display: flex;
+    width: 100%;
+    max-width: 520px;
+    height: 35px;
+    margin-top: auto;
+}
+
+.mag-third-input[hidden] {
+    display: none;
+}
+
+.mag-third-input__field {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 0 13px;
+    font-family: var(--font-mono);
+    font-weight: 400;
+    font-size: 12px;
+    letter-spacing: -0.84px;
+    color: var(--input-text-active);
+    background: var(--input-fill);
+    border: 1px solid var(--input-stroke);
+    border-right: none;
+    outline: none;
+}
+
+.mag-third-input__field::placeholder {
+    color: var(--input-text-disabled);
+}
+
+.mag-third-input__send {
+    flex: 0 0 auto;
+    width: 146px;
+    background: var(--btn-fill-active);
+    border: 1px solid var(--input-stroke);
+    font-family: var(--font-title);
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.mag-third-input__send:hover {
+    background: var(--btn-fill-hover);
+}
+
+.mag-third-input__send:active {
+    background: var(--btn-fill-tapped);
+}
+
 /* ===== Responsive sotto-pagine ===== */
 
 /* ===== Sotto-pagine user (mytrophies / myfaves): scala tipografica mobile.
@@ -2187,4 +2412,47 @@ body {
         padding-bottom: 20px;
     }
 
+}
+
+/* ===== Elementi cliccabili generici (card magazine, copertine community) ===== */
+.mag-magazine.is-link,
+.community-card__photo.is-link {
+    cursor: pointer;
+}
+
+/* ===== Magazine reading page: responsive mobile ===== */
+@media (max-width: 768px) {
+    .mag-read {
+        align-items: flex-start;
+        padding: 12px;
+    }
+    .mag-book {
+        flex-direction: column;
+        height: auto;
+        min-height: calc(100vh - 24px);
+    }
+    .mag-page {
+        flex: none;
+        width: 100%;
+    }
+    .mag-page--left {
+        height: 360px;
+    }
+    .mag-page--right {
+        border-left: none;
+        border-top: 1px solid var(--card-stroke);
+        overflow: visible;
+    }
+    .mag-spine {
+        width: 64px;
+        gap: 48px;
+        padding: 24px 0;
+    }
+    .mag-spine__logo { width: 96px; }
+    .mag-objects { left: 64px; }
+    .mag-lecture {
+        padding: 40px 20px 24px 20px;
+        gap: 28px;
+    }
+    .mag-third-input { max-width: 100%; }
 }

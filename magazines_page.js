@@ -1,9 +1,29 @@
-// ===== COMMUNITY PAGE: nickname + loading + navigazione + bookmark =====
+// ===== MAGAZINE READING PAGE =====
+// Reading del magazine (proprio o della community).
+//  - type=own        -> magazine stampato dall'utente: NIENTE third_input_field.
+//  - type=community  -> magazine della community: third_input_field VISIBILE.
+// La spine (container_spine) è fissa e cliccabile: riporta alla pagina di
+// provenienza (memorizzata in sessionStorage prima della navigazione).
 
-// Nickname nell'header
 const nickname = (localStorage.getItem("bratz_nickname") || "marpi.dollz").trim();
-const dollzBtn = document.getElementById("user-dollz-btn");
-if (dollzBtn) dollzBtn.textContent = nickname;
+const params = new URLSearchParams(location.search);
+const type = params.get("type") || "own";
+
+// ---------- Spine: titolo + autore in base al magazine aperto ----------
+const spineTitle = document.getElementById("mag-spine-title");
+const spineAuthor = document.getElementById("mag-spine-author");
+if (type === "community") {
+    if (spineTitle && params.get("title")) spineTitle.textContent = params.get("title");
+    if (spineAuthor && params.get("author")) spineAuthor.textContent = params.get("author");
+} else {
+    // magazine proprio (Summer party) firmato col nickname
+    if (spineTitle) spineTitle.textContent = "Summer party";
+    if (spineAuthor) spineAuthor.textContent = nickname;
+}
+
+// ---------- third_input_field: solo per la community ----------
+const thirdInput = document.getElementById("mag-third-input");
+if (thirdInput) thirdInput.hidden = (type !== "community");
 
 // ---------- Loading reale legato alle immagini ----------
 const loadingText = document.getElementById("loading-text");
@@ -18,7 +38,7 @@ function stopDots() { clearInterval(dotsTimer); dotsTimer = null; }
 const loadingPage = document.getElementById("loading-page");
 const loadingBar = document.getElementById("loading-bar");
 const loadingFill = document.getElementById("loading-bar-fill");
-const content = document.getElementById("community-content");
+const content = document.getElementById("mag-content");
 
 const images = Array.from(document.images);
 const total = images.length || 1;
@@ -46,30 +66,12 @@ function navigateWithLoading(url) {
     setTimeout(() => { window.location.href = url; }, 60);
 }
 
-// marpi.dollz / logo → user_page
-if (dollzBtn) dollzBtn.addEventListener("click", () => navigateWithLoading("user_page.html"));
-const logo = document.querySelector(".user-logo");
-if (logo) { logo.classList.add("is-link"); logo.addEventListener("click", () => navigateWithLoading("user_page.html")); }
-
-// Bookmark: toggle salvato (feedback visivo)
-document.querySelectorAll(".community-card__save").forEach((btn) => {
-    btn.addEventListener("click", () => btn.classList.toggle("is-saved"));
-});
-
-// Click sulla copertina di un magazine della community -> reading page CON
-// third_input_field. Passo titolo/autore così la spine mostra il magazine giusto;
-// la spine, nella reading page, riporterà qui.
-document.querySelectorAll(".community-card").forEach((card) => {
-    const photo = card.querySelector(".community-card__photo");
-    if (!photo) return;
-    photo.classList.add("is-link");
-    photo.addEventListener("click", () => {
-        const title = card.querySelector(".community-card__title");
-        const author = card.querySelector(".community-card__author");
-        const params = new URLSearchParams({ type: "community" });
-        if (title) params.set("title", title.textContent.trim());
-        if (author) params.set("author", author.textContent.trim());
-        sessionStorage.setItem("bratz_mag_return", "community_page.html");
-        navigateWithLoading("magazines_page.html?" + params.toString());
+// ---------- Spine: click -> pagina precedentemente visitata ----------
+const spine = document.getElementById("mag-spine");
+if (spine) {
+    spine.addEventListener("click", () => {
+        const back = sessionStorage.getItem("bratz_mag_return")
+            || (type === "community" ? "community_page.html" : "yasmin_personality_page.html?tab=magazines");
+        navigateWithLoading(back);
     });
-});
+}

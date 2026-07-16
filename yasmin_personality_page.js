@@ -272,6 +272,7 @@ const GOALS = {
     G6: "Scan the space to reveal the third secret object and add it to your collection",
     G7: "Craft the story for the final object to complete your vibe and finish the challenge.",
     G8: "Complete the layout and publish your magazine",
+    G9: "Return tomorrow to unlock three new objects and exclusive stories",
 };
 
 // Obiettivi visibili per lo stato (found = oggetti trovati, saved = storie scritte).
@@ -280,7 +281,10 @@ function activeGoals(found, saved) {
         if (saved === 0) return [GOALS.G1, GOALS.G2]; // cerca 1° oggetto
         if (saved === 1) return [GOALS.G4, GOALS.G5]; // cerca 2° oggetto + scrivi
         if (saved === 2) return [GOALS.G6, GOALS.G7]; // cerca 3° oggetto + scrivi
-        return [GOALS.G8];                            // magazine
+        // 3 storie scritte: pubblica il magazine; una volta STAMPATO l'obiettivo
+        // "publish" sparisce e resta l'attesa del prossimo drop giornaliero.
+        if (localStorage.getItem(MAG_PRINTED_KEY) === "1") return [GOALS.G9];
+        return [GOALS.G8];                            // magazine da pubblicare
     }
     if (found === 1) return [GOALS.G3]; // scrivi storia 1
     if (found === 2) return [GOALS.G5]; // scrivi storia 2
@@ -469,6 +473,13 @@ function buildMagazineCard() {
     author.textContent = nickname;
     below.append(title, author);
     card.append(cover, below);
+    // Click sul proprio magazine -> reading page SENZA third_input_field.
+    // La spine, nella reading page, riporterà qui (tab magazines).
+    card.classList.add("is-link");
+    card.addEventListener("click", () => {
+        sessionStorage.setItem("bratz_mag_return", "yasmin_personality_page.html?tab=magazines");
+        navigateWithLoading("magazines_page.html?type=own");
+    });
     return card;
 }
 
@@ -525,6 +536,7 @@ function doPrintMagazine() {
     localStorage.setItem(MAG_STATE_KEY, "printed");
     activateCommunity();
     renderMagazines();
+    renderGoalz();   // l'obiettivo "publish" lascia il posto al drop di domani
     updatePopup();
 }
 

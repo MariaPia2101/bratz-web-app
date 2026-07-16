@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BRATZ — Magazine</title>
+    <link rel="stylesheet" href="style.css">
+
+    <!-- three.js da CDN per i 3 oggetti trovati (camera/lipstick/bag) -->
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
+</head>
+
+<body>
+    <!-- ===== LOADING PAGE ===== -->
+    <section class="loading-page" id="loading-page" style="display:flex;opacity:1;" aria-hidden="false">
+        <div class="loading-input">
+            <img class="loading-logo" src="assets/images/logo_image.gif" alt="Bratz">
+            <div class="container-bar-and-text">
+                <div class="loading-bar" id="loading-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100"
+                    aria-valuenow="0">
+                    <div class="loading-bar-fill" id="loading-bar-fill"></div>
+                </div>
+                <p class="loading-text" id="loading-text">Loading...</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== MAGAZINE READING PAGE (magazines_page) ===== -->
+    <main class="mag-read">
+        <div class="mag-read__content" id="mag-content">
+            <div class="mag-book">
+
+                <!-- container_spine: pagina SINISTRA, FISSA (spine + oggetti) -->
+                <div class="mag-page mag-page--left">
+                    <!-- spine: hover rientra di 20px, click torna alla pagina precedente -->
+                    <button type="button" class="mag-spine" id="mag-spine" aria-label="Torna indietro">
+                        <img class="mag-spine__logo" src="assets/images/logo_magazine.png" alt="Bratz">
+                        <span class="mag-spine__title" id="mag-spine-title">The slumber party</span>
+                        <span class="mag-spine__vol">VOL. 001</span>
+                        <span class="mag-spine__author" id="mag-spine-author">Marpi.dollz</span>
+                    </button>
+
+                    <!-- i 3 oggetti trovati al posto di Rectangle 1/2/3 -->
+                    <div class="mag-objects">
+                        <div class="mag-obj mag-obj--1"><canvas class="mag-obj__canvas" data-model="camera"></canvas>
+                        </div>
+                        <div class="mag-obj mag-obj--2"><canvas class="mag-obj__canvas" data-model="lipstick"></canvas>
+                        </div>
+                        <div class="mag-obj mag-obj--3"><canvas class="mag-obj__canvas" data-model="bag"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- container_lecture: pagina DESTRA, SCROLLA -->
+                <div class="mag-page mag-page--right">
+                    <div class="mag-lecture">
+                        <div class="mag-lecture__text">
+                            <p class="is-muted">IN THE QUIET OF THE EVENING, THE ULTIMATE STYLING SANCTUARY WAS FINALLY
+                                READY. THE ROOM WAS FILLED WITH PLUSH OVERSIZED PILLOWS, FAIRY LIGHTS REFLECTING OFF
+                                METALLIC FABRICS, AND A LATE-NIGHT PLAYLIST HUMMING SOFTLY IN THE BACKGROUND. THE FLOOR
+                                WAS COVERED IN FASHION SKETCHES, TEXTILE SAMPLES, AND OPEN LOOKBOOKS FROM PAST RUNWAY
+                                SEASONS.</p>
+                            <p>THE FASHION RESEARCH HAD OFFICIALLY BEGUN, AND THE ENERGY WAS COMPLETELY MAGNETIC.</p>
+                            <p>•YAS• I THINK THIS OVERSIZED SILK ROBE MATCHES THE GLITTER PLATFORM SLIDES PERFECTLY, IT
+                                GIVES TOTAL PRINCESS ENERGY FOR A NIGHT IN AND FEELS INCREDIBLY EFFORTLESS</p>
+                            <p>•JAD• IT IS A LOOK, BUT YOU NEED THESE NEON HAIR CLIPS AND A DARK MESH UNDERSHIRT TO BREAK
+                                THE SWEETNESS AND ADD THAT SIGNATURE URBAN EDGE</p>
+                            <p>•YAS• YOU ALWAYS KNOW HOW TO REMIX A TRADITIONAL STYLE, LET•S SKETCH THESE OUTFIT
+                                COMBINATIONS BEFORE WE FORGET THE BEST COORDINATES FOR THE UPCOMING COLLECTION</p>
+                            <p>•JAD• AGREED, THE FASHION CREW NEEDS TO SEE THIS DIGITAL MOOD BOARD TOMORROW MORNING SO WE
+                                CAN START PROTOTYPING THE ACTUAL GARMENTS AS THE SKETCHES STARTED TO FILL THE BLANK PAGES
+                                OF THE MAGAZINE LAYOUT, THE CONVERSATION SHIFTED FROM RUNWAY PREDICTIONS TO THEIR UPCOMING
+                                WEEKEND PLANS. A COLLECTION OF VINTAGE CAMERAS SAT ON THE RUG, READY TO DOCUMENT EVERY
+                                SINGLE LOOK THEY CREATED DURING THE NIGHT.</p>
+                            <p>•YAS• WE SHOULD DEFINITELY SET UP A MINI PHOTOSHOOT RIGHT HERE AGAINST THE SATIN DRAPES
+                                WHILE THE MIDNIGHT LIGHTING IS THIS SOFT AND MOODY</p>
+                            <p>•JAD• LET•S DO IT, GRAB THE SILVER ACCESSORIES AND THE CHUNKY BOOTS FROM THE CLOSET SO WE
+                                CAN CREATE A BRAND NEW STORY FOR THE MAIN EDITORIAL PAGE</p>
+                            <p>•YAS• THIS IS GOING TO BE THE BEST ISSUE WE HAVE EVER DESIGNED, THE COMBINATION OF CLASSIC
+                                GLAMOUR AND STREETWEAR IS EXACTLY WHAT THE MAGAZINE NEEDS</p>
+                            <p>THE CAMERAS STARTED CLICKING, CAPTURING THE SPONTANEOUS STYLING SESSION AS THE TWO FRIENDS
+                                TRANSFORMED A SIMPLE SLEEPOVER INTO A HIGH-FASHION WORKSHOP.</p>
+                        </div>
+
+                        <!-- third_input_field: visibile SOLO per i magazine della community -->
+                        <div class="mag-third-input" id="mag-third-input" hidden>
+                            <input class="mag-third-input__field" type="text" placeholder="Describe this vibe in 3 wordz"
+                                aria-label="Describe this vibe in 3 wordz">
+                            <button type="button" class="mag-third-input__send">SEND</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <script src="magazines_page.js"></script>
+    <script type="module" src="magazine_objects.js"></script>
+</body>
+
+</html>
