@@ -5,6 +5,69 @@ const nickname = (localStorage.getItem("bratz_nickname") || "marpi.dollz").trim(
 const dollzBtn = document.getElementById("user-dollz-btn");
 if (dollzBtn) dollzBtn.textContent = nickname;
 
+// ---------- myfaves_page: i magazine salvati dalla community ----------
+// I preferiti sono persistiti dalla community_page in localStorage. Se ce ne
+// sono, la pagina passa da empty_page a myfaves_page (full). Il segnalibro di
+// ogni card è nello stato "salvato"; cliccandolo si rimuove dai preferiti.
+const FAVES_KEY = "bratz_saved_faves";
+function getFaves() {
+    try { return JSON.parse(localStorage.getItem(FAVES_KEY) || "[]") || []; }
+    catch (_) { return []; }
+}
+const favesGrid = document.getElementById("faves-grid");
+const favesEmpty = document.getElementById("faves-empty");
+
+function buildFaveCard(f) {
+    const card = document.createElement("article");
+    card.className = "community-card";
+
+    const photo = document.createElement("div");
+    photo.className = "community-card__photo";
+    const img = document.createElement("img");
+    img.src = f.img; img.alt = "";
+    photo.appendChild(img);
+
+    const below = document.createElement("div");
+    below.className = "community-card__below";
+    const text = document.createElement("div");
+    text.className = "community-card__text";
+    const title = document.createElement("p");
+    title.className = "community-card__title";
+    title.textContent = f.title;
+    const author = document.createElement("p");
+    author.className = "community-card__author";
+    author.textContent = f.author;
+    text.append(title, author);
+
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "community-card__save is-saved";
+    btn.setAttribute("aria-label", "Rimuovi dai preferiti");
+    btn.innerHTML =
+        '<svg class="community-card__save-icon" viewBox="0 0 22 28" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+        '<path d="M17.5 4.5V22.793L11 16.293L4.5 22.793V4.5H17.5Z" stroke="black" /></svg>';
+    btn.addEventListener("click", () => {
+        const faves = getFaves().filter((x) => x.id !== f.id);
+        localStorage.setItem(FAVES_KEY, JSON.stringify(faves));
+        renderFaves();
+    });
+
+    below.append(text, btn);
+    card.append(photo, below);
+    return card;
+}
+
+function renderFaves() {
+    if (!favesGrid || !favesEmpty) return;
+    const faves = getFaves();
+    if (!faves.length) { favesGrid.hidden = true; favesEmpty.hidden = false; return; }
+    favesEmpty.hidden = true;
+    favesGrid.hidden = false;
+    favesGrid.innerHTML = "";
+    faves.forEach((f) => favesGrid.appendChild(buildFaveCard(f)));
+}
+renderFaves();
+
 // ---------- Animazione "Loading" (1 → 2 → 3 punti in loop) ----------
 const loadingText = document.getElementById("loading-text");
 let dotsTimer = null;

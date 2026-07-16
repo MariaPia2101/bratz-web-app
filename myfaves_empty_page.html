@@ -55,11 +55,14 @@
                 <div class="bottom-container-subpage">
                     <p class="page-description">Your style library. You can flip<br>through your favorite issues.</p>
 
-                    <!-- container_empty -->
-                    <div class="empty-state empty-state--page">
+                    <!-- container_empty: mostrato solo se non ci sono preferiti -->
+                    <div class="empty-state empty-state--page" id="faves-empty">
                         <p class="empty-state__text">Empty style library.<br>Visit the community and<br>collect your
                             favorites.</p>
                     </div>
+
+                    <!-- myfaves_page (full): i magazine salvati dalla community -->
+                    <div class="community-grid" id="faves-grid" hidden></div>
                 </div>
 
             </div>

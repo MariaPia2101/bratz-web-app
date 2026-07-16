@@ -104,6 +104,10 @@ if (logo) {
     if (!card) return;
     card.classList.remove("reward-card--locked");
 
+    // description_text: passa al testo "unlocked"
+    const desc = card.querySelector(".reward-card__desc");
+    if (desc) desc.textContent = "Click the button below to copy your code and use it at checkout on the Bratz store.";
+
     const CODE = "BRATZ2026";
     const input = card.querySelector(".reward-input");
     if (input) input.textContent = CODE;

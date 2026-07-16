@@ -583,8 +583,31 @@ function renderTrophies() {
         card.classList.toggle("is-unlocked", st[n].on);
         const fill = card.querySelector(".trophy-bar__fill");
         if (fill) fill.style.width = Math.round(st[n].p * 100) + "%";
+        // description_text: cambia in base allo stato locked/unlocked
+        const desc = card.querySelector(".trophy-card__desc");
+        if (desc && TROPHY_DESC[n]) desc.textContent = st[n].on ? TROPHY_DESC[n].unlocked : TROPHY_DESC[n].locked;
     });
 }
+
+// Testi description_text delle card_trophies_doll per stato locked/unlocked.
+const TROPHY_DESC = {
+    1: {
+        locked: "This exclusive title is currently locked. To claim it and access the backstage design area, you need to explore the immersive room and interact with all the environmental hotspots.",
+        unlocked: "You mapped every corner of the space and proved you have the ultimate curiosity to scout the next big aesthetic trend.",
+    },
+    2: {
+        locked: "The archive vault piece remains hidden. Scan the 3D environment carefully and find the secret collectible items tucked away inside the room to unlock this legendary status badge.",
+        unlocked: "Your sharp fashion eye successfully uncovered the secret vault items hidden deep within the immersive scene.",
+    },
+    3: {
+        locked: "Your creative voice is waiting to be heard. Find the hidden objects, then write unique stories inspired by your discovery to unlock this storytelling achievement.",
+        unlocked: "You transformed all hidden objects into a high-fashion narrative, proving your creative voice cannot be ignored.",
+    },
+    4: {
+        locked: "To claim this title and unlock your exclusive real-world online shopping codes, you must fully complete and finalize all three custom stories in your magazine layout.",
+        unlocked: "Three major stories finalized and published. You officially run the most influential fashion magazine in the digital space.",
+    },
+};
 
 // Se il gioco è iniziato, la sezione goalz è comunque consultabile.
 if (getObjectsFound() > 0 || getSavedStories().length > 0) unlockTab("goalz");

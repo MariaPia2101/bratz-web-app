@@ -1296,6 +1296,11 @@ body {
     z-index: 4; /* sopra il pop_up che lo tocca, così resta cliccabile */
 }
 
+/* stato printed: il plus è disabled -> path bianco invece che nero */
+.mag-plus:disabled .icon-button__plus path {
+    stroke: #ffffff;
+}
+
 /* riga: magazine creati + slot per crearne un altro (bottom_container magazine_page) */
 .mag-row {
     display: flex;

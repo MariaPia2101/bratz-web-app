@@ -51,9 +51,37 @@ if (dollzBtn) dollzBtn.addEventListener("click", () => navigateWithLoading("user
 const logo = document.querySelector(".user-logo");
 if (logo) { logo.classList.add("is-link"); logo.addEventListener("click", () => navigateWithLoading("user_page.html")); }
 
-// Bookmark: toggle salvato (feedback visivo)
-document.querySelectorAll(".community-card__save").forEach((btn) => {
-    btn.addEventListener("click", () => btn.classList.toggle("is-saved"));
+// Bookmark: salva/rimuovi il magazine dai preferiti (persistiti in localStorage,
+// così compaiono nella pagina My faves). Lo stato "salvato" è ripristinato al load.
+const FAVES_KEY = "bratz_saved_faves";
+function getFaves() {
+    try { return JSON.parse(localStorage.getItem(FAVES_KEY) || "[]") || []; }
+    catch (_) { return []; }
+}
+function setFaves(a) { localStorage.setItem(FAVES_KEY, JSON.stringify(a)); }
+function cardData(card) {
+    const img = card.querySelector(".community-card__photo img");
+    const src = (img && img.getAttribute("src")) || "";
+    return {
+        id: src.split("/").pop(),   // basename immagine = id stabile
+        title: (card.querySelector(".community-card__title") || {}).textContent || "",
+        author: (card.querySelector(".community-card__author") || {}).textContent || "",
+        img: src,
+    };
+}
+
+document.querySelectorAll(".community-card").forEach((card) => {
+    const btn = card.querySelector(".community-card__save");
+    if (!btn) return;
+    const d = cardData(card);
+    if (getFaves().some((f) => f.id === d.id)) btn.classList.add("is-saved");
+    btn.addEventListener("click", () => {
+        const saved = btn.classList.toggle("is-saved");
+        let faves = getFaves();
+        if (saved) { if (!faves.some((f) => f.id === d.id)) faves.push(d); }
+        else { faves = faves.filter((f) => f.id !== d.id); }
+        setFaves(faves);
+    });
 });
 
 // Click sulla copertina di un magazine della community -> reading page CON
