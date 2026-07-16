@@ -1276,6 +1276,17 @@ body {
     .community-grid { grid-template-columns: 1fr; }
 }
 
+/* myfaves_page: le card salvate (complete_card_icon) hanno la STESSA dimensione
+   del magazine pubblicato dall'utente nella tab magazines (.mag-magazine): 207px
+   di larghezza, copertina in formato 207/230. */
+#faves-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+#faves-grid .community-card { width: 207px; }
+#faves-grid .community-card__photo { aspect-ratio: 207 / 230; }
+
 /* ===== magazines tab: copertina + plus (add) / magazine stampato (printed) ===== */
 .magazines-view { width: 100%; }
 
@@ -1943,6 +1954,14 @@ body {
 
 .mag-third-input__send:hover { background: var(--btn-fill-hover); }
 .mag-third-input__send:active { background: var(--btn-fill-tapped); }
+
+/* stato "sent" (tapped) dopo aver cliccato SEND */
+.mag-third-input__send.is-sent,
+.mag-third-input__send.is-sent:hover {
+    background: var(--btn-fill-tapped);
+    color: var(--btn-text-active);
+    cursor: default;
+}
 
 /* ===== Responsive sotto-pagine ===== */
 

@@ -16,9 +16,20 @@ if (type === "community") {
     if (spineTitle && params.get("title")) spineTitle.textContent = params.get("title");
     if (spineAuthor && params.get("author")) spineAuthor.textContent = params.get("author");
 } else {
-    // magazine proprio (Summer party) firmato col nickname
-    if (spineTitle) spineTitle.textContent = "Summer party";
+    // magazine proprio: titolo = titolo della PRIMA storia selezionata, firmato col nickname
+    if (spineTitle) spineTitle.textContent = ownMagazineTitle();
     if (spineAuthor) spineAuthor.textContent = nickname;
+}
+
+// Titolo del magazine dell'utente = titolo della prima storia selezionata.
+function ownMagazineTitle() {
+    try {
+        const sel = JSON.parse(localStorage.getItem("bratz_magazine_selected") || "[]") || [];
+        const stories = JSON.parse(localStorage.getItem("bratz_saved_stories") || "[]") || [];
+        const first = sel.length ? stories[sel[0]] : null;
+        const t = first && (first.title || "").trim();
+        return t || "Summer party";
+    } catch (_) { return "Summer party"; }
 }
 
 // ---------- third_input_field: solo per la community ----------
@@ -73,5 +84,18 @@ if (spine) {
         const back = sessionStorage.getItem("bratz_mag_return")
             || (type === "community" ? "community_page.html" : "yasmin_personality_page.html?tab=magazines");
         navigateWithLoading(back);
+    });
+}
+
+// ---------- third_input_field: dopo aver scritto e cliccato SEND, il bottone
+// passa allo stato tapped con testo "sent" (feedback di invio). ----------
+const sendBtn = document.querySelector(".mag-third-input__send");
+const sendInput = document.querySelector(".mag-third-input__field");
+if (sendBtn && sendInput) {
+    sendBtn.addEventListener("click", () => {
+        if (sendBtn.classList.contains("is-sent")) return;   // già inviato
+        if (!sendInput.value.trim()) return;                 // niente da inviare
+        sendBtn.textContent = "sent";
+        sendBtn.classList.add("is-sent");
     });
 }

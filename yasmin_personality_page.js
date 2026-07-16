@@ -393,6 +393,14 @@ function getMagState() {
 function getMagSelected() {
     try { return JSON.parse(localStorage.getItem(MAG_SEL_KEY) || "[]") || []; } catch (_) { return []; }
 }
+// Titolo del magazine stampato = titolo della PRIMA storia selezionata che lo compone.
+function getMagazineTitle() {
+    const sel = getMagSelected();
+    const stories = getSavedStories();
+    const first = sel.length ? stories[sel[0]] : null;
+    const t = first && (first.title || "").trim();
+    return t || "Summer party";
+}
 
 // Attiva il bottone "community" (dopo la stampa) e lo collega a community_page.
 function activateCommunity() {
@@ -467,7 +475,7 @@ function buildMagazineCard() {
     below.className = "mag-magazine__below";
     const title = document.createElement("p");
     title.className = "mag-magazine__title";
-    title.textContent = "Summer party";
+    title.textContent = getMagazineTitle();
     const author = document.createElement("p");
     author.className = "mag-magazine__author";
     author.textContent = nickname;
