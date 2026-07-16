@@ -54,7 +54,7 @@ const GAME_OBJECTS = [
 const GLOW_PULSE_SPEED = 2.2;        // velocità della pulsazione dell'alone
 const POPUP_DELAY_MS = 5000;         // il pop_up appare 5'' dopo l'ingresso/ritorno
 const OBJECT_DELAY_MS = 5000;        // l'oggetto appare 5'' dopo il pop_up
-const PICKUP_MS = 5000;              // durata dell'animazione "oggetto in primo piano" prima del pop_up
+const PICKUP_MS = 3000;              // durata dell'animazione "oggetto in primo piano" prima del pop_up
 
 // Movimento
 const MOVE_SPEED   = 2.2;
@@ -533,9 +533,7 @@ function startPickup(o) {
         gPos: o.glow.position.clone(), gScale: o.glow.scale.clone(),
     };
     pivot.attach(o.model);   // mantiene la posa mondo, ora figlio del pivot
-    pivot.attach(o.glow);    // l'alone segue l'oggetto
-    o.glow.visible = true;   // "sempre con il suo bagliore"
-    o.glow.material.opacity = 0.85;
+    o.glow.visible = false;  // durante il pickup NIENTE bagliore
     pickup = {
         o, pivot, orig,
         start: performance.now(),

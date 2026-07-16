@@ -6,16 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BRATZ — Magazine</title>
     <link rel="stylesheet" href="style.css">
-
-    <!-- three.js da CDN per i 3 oggetti trovati (solo per il proprio magazine) -->
-    <script type="importmap">
-    {
-        "imports": {
-            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-        }
-    }
-    </script>
 </head>
 
 <body>
@@ -52,14 +42,6 @@
                         </div>
                         <span class="mag-spine__author" id="mag-spine-author">Marpi.dollz</span>
                     </button>
-
-                    <!-- i 3 oggetti trovati che girano, al posto di Rectangle 1/2/3
-                         (solo per il proprio magazine: rimossi via JS per la community) -->
-                    <div class="mag-objects" id="mag-objects">
-                        <div class="mag-obj mag-obj--1"><canvas class="mag-obj__canvas" data-model="camera"></canvas></div>
-                        <div class="mag-obj mag-obj--2"><canvas class="mag-obj__canvas" data-model="lipstick"></canvas></div>
-                        <div class="mag-obj mag-obj--3"><canvas class="mag-obj__canvas" data-model="bag"></canvas></div>
-                    </div>
                 </section>
 
                 <!-- container_lecture: DESTRA, SCROLLA -->
