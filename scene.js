@@ -103,7 +103,7 @@ const IS_LOW = (typeof matchMedia === "function" && matchMedia("(pointer: coarse
 
 // ---------- Renderer ----------
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: !IS_LOW, powerPreference: "high-performance" });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, IS_LOW ? 1.25 : 2));
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, IS_LOW ? 1 : 2));
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -157,8 +157,10 @@ const LED_PINK    = 0xff9ed6; // rosa pastello
 const LED_MAGENTA = 0xff77c4; // insegna: rosa acceso ma non fucsia
 
 // Ambiente + emisferica: fill rosa pastello chiarissimo (niente fucsia).
-scene.add(new THREE.AmbientLight(0xfdeaf4, 0.55 * LIGHT_TUNE));
-scene.add(new THREE.HemisphereLight(0xfff2fa, 0xffe2f2, 0.35 * LIGHT_TUNE));
+// In LOW disattiviamo LED (RectAreaLight) e lampade (PointLight): alziamo un po'
+// ambient/emisferica per compensare, così la stanza resta illuminata.
+scene.add(new THREE.AmbientLight(0xfdeaf4, (IS_LOW ? 0.9 : 0.55) * LIGHT_TUNE));
+scene.add(new THREE.HemisphereLight(0xfff2fa, 0xffe2f2, (IS_LOW ? 0.6 : 0.35) * LIGHT_TUNE));
 
 // Key light direzionale: definizione + ombra morbida, praticamente bianca.
 const keyLight = new THREE.DirectionalLight(0xfff4f8, 0.85 * LIGHT_TUNE);
@@ -187,11 +189,14 @@ const AREA_LIGHTS = [
     // Insegna neon "BRATZ": illumina verso l'interno stanza
     { c: LED_MAGENTA, i: 4.5, w: 1.4, h: 2.0, p: [0.10, 1.40, 3.55], look: [0.10, 1.40, 0] },
 ];
-for (const a of AREA_LIGHTS) {
-    const l = new THREE.RectAreaLight(a.c, a.i * LIGHT_TUNE, a.w, a.h);
-    l.position.set(a.p[0], a.p[1], a.p[2]);
-    l.lookAt(a.look[0], a.look[1], a.look[2]);
-    scene.add(l);
+// Le RectAreaLight sono costose per-fragment: su LOW (mobile) non le aggiungiamo.
+if (!IS_LOW) {
+    for (const a of AREA_LIGHTS) {
+        const l = new THREE.RectAreaLight(a.c, a.i * LIGHT_TUNE, a.w, a.h);
+        l.position.set(a.p[0], a.p[1], a.p[2]);
+        l.lookAt(a.look[0], a.look[1], a.look[2]);
+        scene.add(l);
+    }
 }
 
 // ---------- Loading manager ----------
@@ -666,6 +671,12 @@ function repositionLinesFloor(environment) {
 
 // Carica la foto di sfondo come panorama equirettangolare (paesaggio urbano).
 async function loadCityBackground() {
+    // In LOW: niente panorama equirettangolare (texture pesante in memoria su
+    // mobile) -> sfondo a tinta unita soffusa oltre le finestre.
+    if (IS_LOW) {
+        scene.background = new THREE.Color(0xd9cfe0);
+        return;
+    }
     try {
         const tex = await new THREE.TextureLoader(manager).loadAsync(CITY_BG_URL);
         tex.mapping = THREE.EquirectangularReflectionMapping;
@@ -914,7 +925,7 @@ async function init() {
         classifyEnvironment(environment);
         repositionLinesFloor(environment);
         setupMirror(environment);
-        addBulbLights(environment);
+        if (!IS_LOW) addBulbLights(environment); // 9 PointLight: troppo pesanti su mobile
 
         const charModel = await loadModel(MODELS.character);
         enableShadows(charModel);

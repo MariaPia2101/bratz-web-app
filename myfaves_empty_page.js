@@ -22,10 +22,17 @@ function buildFaveCard(f) {
     card.className = "community-card";
 
     const photo = document.createElement("div");
-    photo.className = "community-card__photo";
+    photo.className = "community-card__photo is-link";
     const img = document.createElement("img");
     img.src = f.img; img.alt = "";
     photo.appendChild(img);
+    // Click sulla copertina -> apre il magazine in lettura (come dalla community).
+    // La spine, nella reading page, riporterà a My faves.
+    photo.addEventListener("click", () => {
+        const params = new URLSearchParams({ type: "community", title: f.title, author: f.author });
+        sessionStorage.setItem("bratz_mag_return", "myfaves_empty_page.html");
+        navigateWithLoading("magazines_page.html?" + params.toString());
+    });
 
     const below = document.createElement("div");
     below.className = "community-card__below";
