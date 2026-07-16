@@ -403,7 +403,7 @@ function activateCommunity() {
 // --- render dei 3 stati ---
 // Slot per creare un magazine: copertina vuota + plus (come mydollz-plus-btn) +
 // pop_up che TOCCA il plus button (fedele a magazines/plusbutton_page).
-function buildAddSlot() {
+function buildAddSlot(disabled) {
     const wrap = document.createElement("div");
     wrap.className = "mag-cover-wrap";
     const cover = document.createElement("div");
@@ -417,13 +417,20 @@ function buildAddSlot() {
         '<span class="icon-button__inner">' +
         '<svg class="icon-button__plus" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">' +
         '<path d="M10 1V19M1 10H19" stroke="black" stroke-width="1.2" /></svg></span>';
+    // Stato "printed" (magazines_page): il magazine è già stato creato, quindi il
+    // plus del box_add_magazine è disabilitato — fedele a yasmin/magazines_page.
+    if (disabled) {
+        plus.disabled = true;
+        wrap.append(cover, plus);
+        return wrap;
+    }
     plus.addEventListener("click", () => {
         localStorage.setItem(MAG_STATE_KEY, "select");
         localStorage.setItem(MAG_SEL_KEY, "[]");
         renderMagazines();
         updatePopup();
     });
-    // pop_up che tocca il plus
+    // pop_up che tocca il plus (solo in "add": guida l'utente all'azione)
     const pop = document.createElement("aside");
     pop.className = "mag-plus-popup";
     const close = document.createElement("button");
@@ -467,8 +474,10 @@ function buildMagazineCard() {
 function renderMagShelf() {
     const row = document.createElement("div");
     row.className = "mag-row";
-    if (getMagState() === "printed") row.appendChild(buildMagazineCard());
-    row.appendChild(buildAddSlot());
+    const printed = getMagState() === "printed";
+    if (printed) row.appendChild(buildMagazineCard());
+    // in "printed" il plus del box_add_magazine è disabilitato (magazines_page)
+    row.appendChild(buildAddSlot(printed));
     magView.appendChild(row);
 }
 
