@@ -2456,3 +2456,45 @@ body {
     }
     .mag-third-input { max-width: 100%; }
 }
+
+/* ===================================================================
+   TAB MAGAZINES (yasmin/magazines) — MEDIA QUERY MOBILE
+   Blocco isolato e modificabile a mano. Valori di partenza scalati dal
+   desktop; regola qui misure/posizioni per il mobile.
+   =================================================================== */
+@media (max-width: 768px) {
+    /* riga: copertina/plus + magazine stampato */
+    .mag-row {
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+
+    /* box_add_magazine (copertina vuota col plus) */
+    .mag-cover {
+        width: 160px;
+        height: 230px;
+    }
+
+    /* pop_up che tocca il plus (plusbutton_page) */
+    .mag-plus-popup {
+        left: 50%;
+        bottom: 50%;
+        width: 200px;
+        padding: 14px;
+        gap: 14px;
+    }
+
+    /* magazine stampato (Summer party) */
+    .mag-magazine {
+        width: 160px;
+    }
+    .mag-magazine__below {
+        padding: 12px;
+    }
+    .mag-magazine__title,
+    .mag-magazine__author {
+        font-size: 12px;
+        line-height: 15px;
+        letter-spacing: -0.84px;
+    }
+}
