@@ -1722,23 +1722,18 @@ body {
 }
 
 /* ===================================================================
-   MAGAZINE READING PAGE (magazines_page): "libro" a due pagine.
-   - container_spine (SINISTRA): spine fissa + i 3 oggetti trovati.
-   - container_lecture (DESTRA): editoriale scrollabile + third_input_field.
+   MAGAZINE READING PAGE (magazines_page)
+   Stessa struttura della stories_page (due colonne 720px), MA senza header.
+   - container_spine (SINISTRA): spine FISSA + area di lettura vuota.
+   - container_lecture (DESTRA): editoriale SCROLLABILE + third_input_field.
    =================================================================== */
 .mag-read {
+    position: relative;
     min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
     background: var(--bg-color);
 }
 
 .mag-read__content {
-    width: 100%;
-    display: flex;
-    justify-content: center;
     opacity: 0;
     transition: opacity 0.45s ease;
 }
@@ -1747,34 +1742,42 @@ body {
     opacity: 1;
 }
 
-.mag-book {
-    width: 1200px;
-    max-width: 100%;
-    height: calc(100vh - 48px);
+/* due colonne da 720px, centrate su max 1440 (come stories_page) */
+.mag-columns {
     display: flex;
-    background: var(--card-fill);
-    border: 1px solid var(--card-stroke);
-    overflow: hidden;
+    width: 100%;
+    max-width: 1440px;
+    margin: 0 auto;
+    height: 100vh;              /* solo il container_lecture scrolla */
 }
 
-.mag-page {
-    position: relative;
+.mag-col {
     flex: 1 1 50%;
+    box-sizing: border-box;
     min-width: 0;
+    background: var(--card-fill);
 }
 
-/* pagina sinistra: FISSA (non scrolla) */
-.mag-page--left {
+/* SINISTRA: fissa, contiene la spine */
+.mag-col--spine {
+    position: relative;
     overflow: hidden;
 }
 
-/* pagina destra: SCROLLA */
-.mag-page--right {
+/* DESTRA: scrolla */
+.mag-col--lecture {
     border-left: 1px solid var(--card-stroke);
     overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    padding: 153px 40px 48px 62px;
 }
 
-/* ---- spine (container_spine): fissa, cliccabile, con stati hover/tapped ---- */
+/* ---- spine (container_spine): fissa, cliccabile, stati hover/tapped ----
+   Il colore parte DAL BORDO della pagina: la spine e' ancorata a left:0 e il
+   fill copre il bordo; in hover il contenuto rientra di 20px (padding-left) e
+   la spine si allarga, senza lasciare un vuoto bianco sul bordo. */
 .mag-spine {
     position: absolute;
     left: 0;
@@ -1784,21 +1787,21 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
-    gap: 96px;
+    justify-content: space-between;
     padding: 48px 0;
     background: var(--card-fill);
     border: none;
     border-right: 1px solid var(--card-stroke);
     cursor: pointer;
     z-index: 3;
-    transition: background-color 0.15s ease, transform 0.15s ease;
+    overflow: hidden;
+    transition: background-color 0.18s ease, width 0.18s ease, padding-left 0.18s ease;
 }
 
-/* hover: rientra di 20px nella pagina e si tinge (fill/spine_hover) */
 .mag-spine:hover {
     background: var(--btn-fill-hover);
-    transform: translateX(20px);
+    width: 108px;
+    padding-left: 20px;
 }
 
 .mag-spine:active {
@@ -1813,6 +1816,13 @@ body {
     pointer-events: none;
 }
 
+.mag-spine__mid {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 150px;
+}
+
 .mag-spine__title,
 .mag-spine__vol,
 .mag-spine__author {
@@ -1824,68 +1834,25 @@ body {
     color: #000;
 }
 
-.mag-spine__title {
-    font-weight: 700;
-    font-size: 14px;
-}
+.mag-spine__title { font-weight: 700; font-size: 14px; }
+.mag-spine__vol   { font-weight: 400; font-size: 14px; }
+.mag-spine__author { font-weight: 400; font-size: 16px; letter-spacing: -1.12px; }
 
-.mag-spine__vol {
-    font-weight: 400;
-    font-size: 14px;
-}
-
-.mag-spine__author {
-    font-weight: 400;
-    font-size: 16px;
-    letter-spacing: -1.12px;
-}
-
-/* ---- i 3 oggetti trovati (camera/lipstick/bag) al posto di Rectangle 1/2/3 ---- */
-.mag-objects {
-    position: absolute;
-    left: 88px;
-    right: 0;
-    top: 0;
-    bottom: 0;
-}
-
-.mag-obj {
-    position: absolute;
-    background: #efedf1;
-}
-
-.mag-obj__canvas {
-    display: block;
-    width: 100%;
-    height: 100%;
-}
-
-.mag-obj--1 { left: 26%; top: 36%; width: 26%; height: 14%; }
-.mag-obj--2 { left: 66%; top: 53%; width: 11%; height: 13%; }
-.mag-obj--3 { left: 39%; top: 72%; width: 28%; height: 15%; }
-
-/* ---- container_lecture: editoriale + input ---- */
-.mag-lecture {
-    min-height: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 40px;
-    padding: 120px 48px 48px 62px;
-}
-
+/* ---- container_lecture: editoriale + third_input_field ---- */
 .mag-lecture__text {
     display: flex;
     flex-direction: column;
     gap: 16px;
+    max-width: 610px;
 }
 
 .mag-lecture__text p {
     margin: 0;
     font-family: var(--font-mono);
     font-weight: 400;
-    font-size: 15px;
-    line-height: 22px;
-    letter-spacing: -0.5px;
+    font-size: 16px;
+    line-height: 23px;
+    letter-spacing: 0;
     color: #000;
 }
 
@@ -1897,14 +1864,12 @@ body {
 .mag-third-input {
     display: flex;
     width: 100%;
-    max-width: 520px;
+    max-width: 610px;
     height: 35px;
     margin-top: auto;
 }
 
-.mag-third-input[hidden] {
-    display: none;
-}
+.mag-third-input[hidden] { display: none; }
 
 .mag-third-input__field {
     flex: 1 1 auto;
@@ -1921,9 +1886,7 @@ body {
     outline: none;
 }
 
-.mag-third-input__field::placeholder {
-    color: var(--input-text-disabled);
-}
+.mag-third-input__field::placeholder { color: var(--input-text-disabled); }
 
 .mag-third-input__send {
     flex: 0 0 auto;
@@ -1933,18 +1896,12 @@ body {
     font-family: var(--font-title);
     font-weight: 700;
     font-size: 14px;
-    letter-spacing: 0;
     cursor: pointer;
     transition: background-color 0.15s ease;
 }
 
-.mag-third-input__send:hover {
-    background: var(--btn-fill-hover);
-}
-
-.mag-third-input__send:active {
-    background: var(--btn-fill-tapped);
-}
+.mag-third-input__send:hover { background: var(--btn-fill-hover); }
+.mag-third-input__send:active { background: var(--btn-fill-tapped); }
 
 /* ===== Responsive sotto-pagine ===== */
 
@@ -2422,38 +2379,37 @@ body {
 
 /* ===== Magazine reading page: responsive mobile ===== */
 @media (max-width: 768px) {
-    .mag-read {
-        align-items: flex-start;
-        padding: 12px;
-    }
-    .mag-book {
+    /* colonna unica: la spine resta in alto (fissa sul suo blocco), la lettura sotto */
+    .mag-columns {
         flex-direction: column;
         height: auto;
-        min-height: calc(100vh - 24px);
+        min-height: 100vh;
     }
-    .mag-page {
+    .mag-col {
         flex: none;
         width: 100%;
     }
-    .mag-page--left {
-        height: 360px;
+    .mag-col--spine {
+        height: 320px;
     }
-    .mag-page--right {
+    .mag-col--lecture {
         border-left: none;
         border-top: 1px solid var(--card-stroke);
         overflow: visible;
-    }
-    .mag-spine {
-        width: 64px;
-        gap: 48px;
-        padding: 24px 0;
-    }
-    .mag-spine__logo { width: 96px; }
-    .mag-objects { left: 64px; }
-    .mag-lecture {
         padding: 40px 20px 24px 20px;
         gap: 28px;
     }
+    .mag-spine {
+        width: 64px;
+        padding: 24px 0;
+    }
+    .mag-spine:hover {
+        width: 80px;
+        padding-left: 16px;
+    }
+    .mag-spine__logo { width: 96px; }
+    .mag-spine__mid { gap: 80px; }
+    .mag-lecture__text p { font-size: 14px; line-height: 21px; }
     .mag-third-input { max-width: 100%; }
 }
 
