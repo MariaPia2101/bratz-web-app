@@ -28,10 +28,10 @@ const IS_LOW = (typeof matchMedia === "function" && matchMedia("(pointer: coarse
     || window.innerWidth < 820;
 
 // ---------- Configurazione ----------
-// Su mobile (LOW) usiamo environment4.glb (mesh decimata, più leggera) per stare
-// dentro i limiti di memoria di iOS; su desktop resta environment2.glb.
+// Su mobile (LOW) usiamo environment5.glb (mesh più leggera) per stare dentro
+// i limiti di memoria di iOS; su desktop resta environment2.glb.
 const MODELS = {
-    environment: IS_LOW ? "assets/3d/models/environment4.glb" : "assets/3d/models/environment2.glb",
+    environment: IS_LOW ? "assets/3d/models/environment5.glb" : "assets/3d/models/environment2.glb",
     character:   "assets/3d/models/character.glb",
 };
 
