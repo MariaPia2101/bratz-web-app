@@ -12,14 +12,18 @@ const type = params.get("type") || "own";
 // ---------- Spine: titolo + autore in base al magazine aperto ----------
 const spineTitle = document.getElementById("mag-spine-title");
 const spineAuthor = document.getElementById("mag-spine-author");
+const lectureTitle = document.getElementById("mag-lecture-title"); // heading mobile
+let magTitle;
 if (type === "community") {
-    if (spineTitle && params.get("title")) spineTitle.textContent = params.get("title");
+    magTitle = params.get("title") || "The slumber party";
     if (spineAuthor && params.get("author")) spineAuthor.textContent = params.get("author");
 } else {
     // magazine proprio: titolo = titolo della PRIMA storia selezionata, firmato col nickname
-    if (spineTitle) spineTitle.textContent = ownMagazineTitle();
+    magTitle = ownMagazineTitle();
     if (spineAuthor) spineAuthor.textContent = nickname;
 }
+if (spineTitle) spineTitle.textContent = magTitle;
+if (lectureTitle) lectureTitle.textContent = magTitle;   // heading mobile = stesso titolo
 
 // Titolo del magazine dell'utente = titolo della prima storia selezionata.
 function ownMagazineTitle() {

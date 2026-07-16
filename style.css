@@ -2438,40 +2438,60 @@ body {
     cursor: pointer;
 }
 
-/* ===== Magazine reading page: responsive mobile ===== */
+/* ===== Magazine reading page: responsive mobile (Figma magazines_page_mobile) ===== */
+/* heading titolo + trattino nel lecture: visibili SOLO su mobile (su desktop il
+   titolo sta nella spine). */
+.mag-lecture__title,
+.mag-lecture__dash { display: none; }
+
 @media (max-width: 768px) {
-    /* colonna unica: la spine resta in alto (fissa sul suo blocco), la lettura sotto */
+    /* spine STRETTA a sinistra + editoriale a destra (NON impilati): come Figma */
     .mag-columns {
-        flex-direction: column;
-        height: auto;
-        min-height: 100vh;
-    }
-    .mag-col {
-        flex: none;
-        width: 100%;
+        height: 100vh;
     }
     .mag-col--spine {
-        height: 320px;
+        flex: 0 0 auto;
+        width: 52px;               /* solo la spine */
     }
     .mag-col--lecture {
-        border-left: none;
-        border-top: 1px solid var(--card-stroke);
-        overflow: visible;
+        flex: 1 1 auto;
         padding: 40px 20px 24px 20px;
-        gap: 28px;
+        gap: 20px;
     }
     .mag-spine {
-        width: 64px;
+        width: 52px;
         padding: 24px 0;
     }
-    .mag-spine:hover {
-        width: 80px;
-        padding-left: 16px;
+    .mag-spine:hover {             /* niente espansione hover su mobile (spazio ridotto) */
+        width: 52px;
+        padding-left: 0;
     }
-    .mag-spine__logo { width: 96px; }
-    .mag-spine__mid { gap: 80px; }
-    .mag-lecture__text p { font-size: 14px; line-height: 21px; }
+    .mag-spine__logo { width: 90px; }
+    .mag-spine__mid { gap: 60px; }
+    .mag-lecture__text { max-width: none; }
+    .mag-lecture__text p { font-size: 13px; line-height: 20px; }
     .mag-third-input { max-width: 100%; }
+
+    /* heading "Slumber party" + trattino (tra intro ed editoriale) */
+    .mag-lecture__title {
+        display: block;
+        margin: 0;
+        font-family: var(--font-mono);
+        font-weight: 700;
+        font-size: 14px;
+        line-height: 17px;
+        letter-spacing: -0.5px;
+        color: #000;
+    }
+    .mag-lecture__dash {
+        display: block;
+        margin: 0;
+        font-family: var(--font-mono);
+        font-weight: 700;
+        font-size: 14px;
+        line-height: 17px;
+        color: #000;
+    }
 }
 
 /* ===================================================================
@@ -2514,4 +2534,9 @@ body {
         line-height: 15px;
         letter-spacing: -0.84px;
     }
+
+    /* My Faves: le card salvate hanno la stessa dimensione del mag-magazine
+       su mobile (175.5px di larghezza, copertina 207/230 -> ~250px totali). */
+    #faves-grid .community-card { width: 175.5px; }
+    #faves-grid { gap: 16px; }
 }

@@ -93,15 +93,15 @@ if (logo) {
 // passando per la loading-page di transito. Selettore generico: vale per il play
 // del popup, per la barra mobile e per eventuali futuri bottoni uguali.
 // I button disabilitati/nascosti non emettono click, quindi non serve altra guardia.
+function goToScene() {
+    // Ricorda la pagina di provenienza: marpi.dollz nella scena tornerà qui.
+    sessionStorage.setItem("bratz_return_page", location.pathname.split("/").pop() || "user_page.html");
+    navigateWithLoading("scene.html");
+}
 document.querySelectorAll(".primary-button").forEach((btn) => {
+    if (btn.id === "mobile-play-btn") return; // la barra mobile ha un handler dedicato (play/print)
     const label = btn.textContent.trim().replace(/\s+/g, " ").toLowerCase();
-    if (label === "play game") {
-        btn.addEventListener("click", () => {
-            // Ricorda la pagina di provenienza: marpi.dollz nella scena tornerà qui.
-            sessionStorage.setItem("bratz_return_page", location.pathname.split("/").pop() || "user_page.html");
-            navigateWithLoading("scene.html");
-        });
-    }
+    if (label === "play game") btn.addEventListener("click", goToScene);
 });
 
 // ---------- Tabs del container_side_30%: cambiano SOLO il container_side_70% ----------
@@ -114,6 +114,16 @@ const popupPrint = document.getElementById("popup-print-btn");
 const popupStart = document.getElementById("popup-start-btn");
 const popupClose = document.getElementById("personality-popup-close");
 const mobilePlay = document.getElementById("mobile-play-btn");   // button_bar mobile
+
+// Barra mobile: nello stato "select" dei magazines fa da bottone PRINT (come il
+// desktop), altrimenti da "play game". La modalità è impostata in updatePopup.
+if (mobilePlay) {
+    mobilePlay.addEventListener("click", () => {
+        if (mobilePlay.disabled) return;
+        if (mobilePlay.dataset.mode === "print") doPrintMagazine();
+        else goToScene();
+    });
+}
 
 let selected = false;   // personalità scelta?
 let activeTab = "identity";
@@ -164,12 +174,24 @@ function updatePopup() {
     } else {
         popup.classList.add("is-hidden");
     }
-    // button_bar mobile: sempre presente; attiva quando lo è il play del popup,
-    // altrimenti disattiva (es. identity senza personalità scelta)
+    // button_bar mobile: nello stato "select" dei magazines diventa "print"
+    // (come il desktop: disabled finché non sono scelte 3 storie, poi active);
+    // in tutti gli altri casi resta "play game".
     if (mobilePlay) {
-        const active = !popupPlay.hidden;
-        mobilePlay.classList.toggle("active", active);
-        mobilePlay.disabled = !active;
+        const inSelect = activeTab === "magazines" && getSavedStories().length >= 3 && getMagState() === "select";
+        if (inSelect) {
+            const can = getMagSelected().length >= 3;
+            mobilePlay.dataset.mode = "print";
+            mobilePlay.textContent = "print";
+            mobilePlay.classList.toggle("active", can);
+            mobilePlay.disabled = !can;
+        } else {
+            const active = !popupPlay.hidden;
+            mobilePlay.dataset.mode = "play";
+            mobilePlay.textContent = "play game";
+            mobilePlay.classList.toggle("active", active);
+            mobilePlay.disabled = !active;
+        }
     }
 }
 
