@@ -229,10 +229,14 @@ function hideLoading() {
 // Il decoder Draco viene RICREATO dopo aver decodificato l'ambiente (il modello
 // più pesante): così i worker WASM e la loro heap vengono liberati subito, senza
 // restare allocati per tutta la sessione -> meno pressione di memoria su iOS.
-function makeDracoLoader() {
+function makeDracoLoader(type) {
     const d = new DRACOLoader(manager);
     d.setDecoderPath(DRACO_DECODER_PATH);
-    d.setDecoderConfig({ type: "wasm" }); // worker WebAssembly
+    // Su mobile (iOS Safari) il decoder WASM va in "Aborted()" per OOM sui modelli
+    // grandi: la heap WASM ha un tetto e non riesce a crescere. Il decoder JS usa
+    // la memoria gestita dal GC (più tollerante) -> decodifica senza crashare
+    // (più lento, ma è un caricamento una tantum). Su desktop resta WASM.
+    d.setDecoderConfig({ type: type || (IS_LOW ? "js" : "wasm") });
     return d;
 }
 let dracoLoader = makeDracoLoader();
@@ -240,11 +244,23 @@ dracoLoader.preload();                     // inizializza il decoder PRIMA dei l
 const gltfLoader = new GLTFLoader(manager);
 gltfLoader.setDRACOLoader(dracoLoader);
 
-// Rilascia il decoder Draco corrente e ne crea uno nuovo (heap WASM azzerata).
-function recycleDraco() {
+// Rilascia il decoder Draco corrente e ne crea uno nuovo (heap azzerata).
+function recycleDraco(type) {
     try { dracoLoader.dispose(); } catch (_) { /* ignora */ }
-    dracoLoader = makeDracoLoader();
+    dracoLoader = makeDracoLoader(type);
     gltfLoader.setDRACOLoader(dracoLoader);
+}
+
+// Carica l'ambiente; se il decoder abortisce (OOM WASM) riprova UNA volta col
+// decoder JS e una heap nuova -> massima probabilità di farcela su iOS.
+async function loadEnvironmentRobust() {
+    try {
+        return await loadModel(MODELS.environment);
+    } catch (e) {
+        console.warn("[scene] Ambiente: 1° tentativo fallito, riprovo col decoder JS.", e);
+        recycleDraco("js");
+        return await loadModel(MODELS.environment);
+    }
 }
 
 // ---------- Gestione memoria (VRAM): dispose + downscale texture ----------
@@ -1033,7 +1049,7 @@ function applyCharacterTransform() {
 // ---------- Avvio ----------
 async function init() {
     try {
-        const environment = await loadModel(MODELS.environment);
+        const environment = await loadEnvironmentRobust();
         // Parsing dell'ambiente completato: libera SUBITO il decoder Draco (heap
         // WASM) prima di continuare. È il modello più pesante -> massimo sollievo
         // di memoria per iOS Safari.
