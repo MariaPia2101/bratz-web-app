@@ -120,7 +120,7 @@ const mobilePlay = document.getElementById("mobile-play-btn");   // button_bar m
 if (mobilePlay) {
     mobilePlay.addEventListener("click", () => {
         if (mobilePlay.disabled) return;
-        if (mobilePlay.dataset.mode === "print") doPrintMagazine();
+        if (mobilePlay.dataset.mode === "print") printWithLoading();
         else goToScene();
     });
 }
@@ -223,7 +223,7 @@ if (popupClose) {
 
 // Bottone "print" nel pop_up (select_page dei magazines)
 if (popupPrint) {
-    popupPrint.addEventListener("click", () => { if (!popupPrint.disabled) doPrintMagazine(); });
+    popupPrint.addEventListener("click", () => { if (!popupPrint.disabled) printWithLoading(); });
 }
 
 function setActiveTab(name) {
@@ -601,6 +601,28 @@ function renderMagSelect(stories) {
     });
 
     magView.append(grid);
+}
+
+// Finto caricamento veloce alla stampa: dopo aver scelto le 3 storie e cliccato
+// "print", compare la loading_page per un attimo, poi si mostra il magazine stampato.
+let printing = false;
+function printWithLoading() {
+    if (printing) return;
+    if (getMagSelected().length < 3) return;
+    printing = true;
+    setProgress(0);
+    loadingPage.style.display = "flex";
+    loadingPage.style.opacity = "1";
+    startDots();
+    // barra che si riempie in fretta (finto caricamento)
+    let pct = 0;
+    const iv = setInterval(() => { pct = Math.min(100, pct + 20); setProgress(pct); if (pct >= 100) clearInterval(iv); }, 80);
+    setTimeout(() => {
+        doPrintMagazine();               // stampa reale + render dello stato "printed"
+        stopDots();
+        loadingPage.style.opacity = "0";
+        setTimeout(() => { loadingPage.style.display = "none"; printing = false; }, 450);
+    }, 700);
 }
 
 // Azione "print" (dal pop_up): stampa il magazine e attiva la community.
