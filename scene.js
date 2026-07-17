@@ -542,6 +542,14 @@ function setMagazinePopup() {
     print.textContent = "print";
     print.addEventListener("click", () => { window.location.href = "yasmin_personality_page.html?tab=magazines"; });
     gamePopup.append(close, text, print);
+    // Audio: quando appare l'obiettivo "crea il magazine" (solo finché non è stampato).
+    if (localStorage.getItem("bratz_magazine_printed") !== "1") {
+        try {
+            const cue = new Audio(encodeURI("assets/audio/lets start our team magazine.mp3"));
+            const pr = cue.play();
+            if (pr && typeof pr.then === "function") pr.catch(() => {});
+        } catch (_) { /* audio non disponibile: nessun blocco */ }
+    }
 }
 
 // Pop-up "story": Close + testo + bottone "write" (fedele al Figma 3dgame/story_page).
@@ -578,6 +586,10 @@ function openStories() {
     localStorage.setItem("bratz_story_edit_index", "-1");
     localStorage.removeItem("bratz_story_title");
     localStorage.removeItem("bratz_story_body");
+    // Oggetto della storia in corso (0=camera, 1=lipstick, 2=bag): serve alla
+    // stories_page per scegliere la traccia musicale giusta.
+    localStorage.setItem("bratz_story_object",
+        String(Math.max(0, Math.min(GAME_OBJECTS.length - 1, getObjectsFound() - 1))));
     storiesFrame.src = "stories_page.html?t=" + Date.now(); // ricarica -> editor vuoto
     storiesFrame.hidden = false;
     storiesOpen = true;           // congela il loop 3D (vedi animate)

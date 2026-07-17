@@ -92,8 +92,9 @@
             max-width: 610px;
         }
 
-        /* Testo "music" in basso: stesso stile di .instruction-text ma NERO e
-           cliccabile. Al click (musica ferma) diventa grigio sbarrato. */
+        /* Testo "music" in basso: stesso stile di .instruction-text ma nel COLORE
+           tapped dei bottoni (#c7a9ff) e cliccabile. Al click (musica ferma) resta
+           dello stesso colore ma diventa sbarrato. */
         .instruction-music {
             align-self: flex-start;
             margin-top: auto;      /* spinge il testo in fondo al container_instruction */
@@ -107,12 +108,12 @@
             line-height: 23px;
             letter-spacing: 0;
             text-transform: uppercase;
-            color: #000;
+            color: var(--btn-fill-tapped);
             transition: color 0.2s ease;
         }
 
         .instruction-music.is-muted {
-            color: var(--instruction-grey);
+            color: var(--btn-fill-tapped);
             text-decoration: line-through;
         }
 
@@ -305,7 +306,7 @@ continue your story<span class="only-desktop"> on the right page</span>...</p>
     </main>
 
     <script src="community-unlock.js"></script>
-    <script src="stories_page.js"></script>
+    <script src="stories_page.js?v=2"></script>
 </body>
 
 </html>

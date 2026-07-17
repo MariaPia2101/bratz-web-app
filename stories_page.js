@@ -67,6 +67,7 @@ function navigateWithLoading(url) {
 // si era fermato, senza reload/caricamento iniziale. Fuori dall'iframe: fallback.
 const inSceneOverlay = window.parent && window.parent !== window;
 function goBack() {
+    if (typeof stopStoryMusic === "function") stopStoryMusic();
     if (inSceneOverlay) {
         window.parent.postMessage({ type: "bratz:stories-close" }, "*");
     } else {
@@ -204,14 +205,50 @@ if (saveBtn) {
     });
 }
 
-// ---------- Musica (container_instruction): testo cliccabile ----------
-// All'apertura la musica è "attiva" (testo nero). Al click si ferma e il testo
-// diventa grigio sbarrato. Per ora nessun audio: solo lo stato visivo/toggle.
+// ---------- Musica (container_instruction): testo cliccabile + traccia audio ----------
+// La traccia dipende dall'oggetto della storia in corso (impostato dalla scena 3D):
+//   0 = camera.glb   -> Dollz Doll by Sasha
+//   1 = lipstick.glb -> Superbloomin by Yasmin
+//   2 = bag.glb      -> If I'm Being Honest by Cloe
+// All'apertura la musica è "attiva" (testo colore tapped): parte in loop. Al click
+// si ferma (pausa) e il testo resta dello stesso colore ma sbarrato.
+const MUSIC_TRACKS = [
+    "assets/audio/Dollz Doll by Sasha  Official Audio  Bratz.mp3",
+    "assets/audio/Superbloomin by Yasmin  Official Audio  Bratz.mp3",
+    "assets/audio/If I’m Being Honest by Cloe  Official Audio  Bratz.mp3",
+];
 const musicBtn = document.getElementById("stories-music");
-if (musicBtn) {
+let storyMusic = null;
+(function initMusic() {
+    if (!musicBtn) return;
+    let idx = parseInt(localStorage.getItem("bratz_story_object"), 10);
+    if (Number.isNaN(idx) || idx < 0) idx = 0;
+    idx = Math.min(idx, MUSIC_TRACKS.length - 1);
+    try {
+        storyMusic = new Audio(encodeURI(MUSIC_TRACKS[idx]));
+        storyMusic.loop = true;
+    } catch (_) { storyMusic = null; }
+
+    // Prova a partire subito (il click "write" che apre questa pagina può valere
+    // come gesto utente). Se l'autoplay è bloccato, parte al primo click sul toggle.
+    if (storyMusic) {
+        const p = storyMusic.play();
+        if (p && typeof p.then === "function") p.catch(() => {});
+    }
+
     musicBtn.addEventListener("click", () => {
         const muted = musicBtn.classList.toggle("is-muted");
-        // TODO: agganciare qui play/pause della traccia audio quando disponibile.
-        // muted === true  -> musica ferma; false -> musica in riproduzione.
+        if (!storyMusic) return;
+        if (muted) {
+            storyMusic.pause();                 // musica ferma
+        } else {
+            const p = storyMusic.play();        // musica in riproduzione
+            if (p && typeof p.then === "function") p.catch(() => {});
+        }
     });
-}
+})();
+
+// Ferma la musica quando si lascia/chiude la pagina (anche l'overlay 3D che
+// nasconde l'iframe senza distruggerlo).
+function stopStoryMusic() { if (storyMusic) { storyMusic.pause(); } }
+window.addEventListener("pagehide", stopStoryMusic);

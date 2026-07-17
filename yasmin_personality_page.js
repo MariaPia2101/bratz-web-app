@@ -277,6 +277,25 @@ function applySelection(btn, persist) {
     }
     if (persist) localStorage.setItem(SELECTED_KEY, String(selectButtons.indexOf(btn)));
     updatePopup();
+    // Solo su scelta reale: parte "timetoplay" e il popup compare in dissolvenza
+    // a tempo con l'audio (la dissolvenza scatta quando l'audio inizia davvero).
+    if (persist) playSelectionCue();
+}
+
+// Audio "timetoplay" + dissolvenza del popup sincronizzata all'avvio del suono.
+function playSelectionCue() {
+    let faded = false;
+    const fadeOnce = () => { if (faded) return; faded = true; fxFade(popup); };
+    let audio = null;
+    try { audio = new Audio("assets/audio/timetoplay.mp3"); } catch (_) { audio = null; }
+    if (audio) {
+        audio.addEventListener("play", fadeOnce, { once: true });
+        const p = audio.play();
+        if (p && typeof p.then === "function") p.catch(fadeOnce); // autoplay bloccato -> dissolvi comunque
+        setTimeout(fadeOnce, 250); // rete di sicurezza se 'play' non scatta
+    } else {
+        fadeOnce();
+    }
 }
 
 selectButtons.forEach((btn) => {
