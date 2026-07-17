@@ -2563,10 +2563,11 @@ body {
     #faves-grid { gap: 19px; }
 }
 
-/* ===== Bottoni "select" delle storie nel magazine — SOLO mobile =====
+/* ===== Bottoni "select" e "modify" delle storie — SOLO mobile =====
    Larghezza dedicata (146px), modificabile a mano qui senza toccare altro. */
 @media (max-width: 768px) {
-    .mag-select {
+    .mag-select,
+    .story-modify {
         width: 146px;
         flex: 0 0 auto;   /* non si restringe nel container flex */
     }
