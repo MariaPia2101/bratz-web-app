@@ -659,7 +659,25 @@ renderer.domElement.addEventListener("pointerdown", (e) => {
     _clickNdc.x = (e.clientX / window.innerWidth) * 2 - 1;
     _clickNdc.y = -(e.clientY / window.innerHeight) * 2 + 1;
     _clickRay.setFromCamera(_clickNdc, camera);
-    if (_clickRay.intersectObject(o.model, true).length) {
+    let hit = _clickRay.intersectObject(o.model, true).length > 0;
+
+    // Su MOBILE l'area cliccabile è molto più generosa: se il raggio non colpisce
+    // la mesh (piccola e difficile da centrare al tocco), basta toccare VICINO
+    // all'oggetto — entro un raggio in pixel dalla sua posizione sullo schermo.
+    if (!hit && IS_LOW) {
+        o.model.updateMatrixWorld(true);
+        const center = new THREE.Box3().setFromObject(o.model).getCenter(new THREE.Vector3());
+        center.project(camera);
+        if (center.z < 1) {   // solo se l'oggetto è davanti alla camera
+            const sx = (center.x * 0.5 + 0.5) * window.innerWidth;
+            const sy = (-center.y * 0.5 + 0.5) * window.innerHeight;
+            const dx = e.clientX - sx, dy = e.clientY - sy;
+            const TAP_R = Math.max(90, window.innerWidth * 0.14);   // area di tocco ampia
+            if (dx * dx + dy * dy <= TAP_R * TAP_R) hit = true;
+        }
+    }
+
+    if (hit) {
         // Oggetto "trovato": +1 e parte l'animazione (ingrandisce, va in primo
         // piano e gira col suo bagliore). Dopo PICKUP_MS esce il pop_up "write".
         setObjectsFound(Math.max(getObjectsFound(), activeObjectIndex + 1));

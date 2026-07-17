@@ -4,6 +4,11 @@
 // utente, quindi il suono è consentito. Ogni click crea una riproduzione a sé,
 // così clic ravvicinati si sovrappongono senza tagliarsi.
 (function () {
+    // Su MOBILE il suono del click NON si deve sentire.
+    var IS_MOBILE = (typeof matchMedia === "function" && matchMedia("(pointer: coarse)").matches)
+        || window.innerWidth < 820;
+    if (IS_MOBILE) return;
+
     function playClick() {
         if (window.BratzAudio) {
             window.BratzAudio.play("click");

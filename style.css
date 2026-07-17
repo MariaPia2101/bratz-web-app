@@ -2469,19 +2469,32 @@ body {
 .mag-lecture__dash { display: none; }
 
 @media (max-width: 768px) {
+    /* La pagina di lettura è ANCORATA al viewport: così la spine resta FISSA e
+       scorre solo il container_lecture (niente scroll dell'intera pagina che
+       trascinava anche la spine). */
+    .mag-read {
+        position: fixed;
+        inset: 0;
+        min-height: 0;
+        height: 100%;
+    }
+    .mag-read__content { height: 100%; }
     /* spine STRETTA a sinistra + editoriale a destra (NON impilati): come Figma */
     .mag-columns {
-        height: 100vh;
+        height: 100%;
     }
     .mag-col--spine {
         flex: 0 0 auto;
         width: 52px;               /* solo la spine */
+        overflow: hidden;          /* la spine non scorre */
     }
     .mag-col--lecture {
         flex: 1 1 auto;
         padding: 40px 20px 24px 20px;
         gap: 20px;
         border-left: none;
+        overflow-y: auto;                     /* unico elemento scrollabile */
+        -webkit-overflow-scrolling: touch;    /* scroll fluido su iOS */
     }
     .mag-spine {
         width: 52px;
