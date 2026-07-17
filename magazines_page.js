@@ -79,6 +79,14 @@ if (type !== "community") fillOwnMagazineBody();
 const thirdInput = document.getElementById("mag-third-input");
 if (thirdInput) thirdInput.hidden = (type !== "community");
 
+// Su MOBILE il placeholder dell'input feedback è più corto: "Describe in 3 wordz".
+const IS_MOBILE = (typeof matchMedia === "function" && matchMedia("(pointer: coarse)").matches)
+    || window.innerWidth < 820;
+if (IS_MOBILE) {
+    const fb = document.querySelector(".mag-third-input__field");
+    if (fb) fb.setAttribute("placeholder", "Describe in 3 wordz");
+}
+
 // ---------- Loading reale legato alle immagini ----------
 const loadingText = document.getElementById("loading-text");
 let dotsTimer = null;

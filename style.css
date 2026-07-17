@@ -2508,27 +2508,12 @@ body {
     .mag-lecture__text { max-width: none; }
     .mag-lecture__text p { font-size: 13px; line-height: 20px; }
     .mag-third-input { max-width: 100%; }
+    /* SEND (feedback community): larghezza dedicata mobile, modificabile a mano. */
+    .mag-third-input__send { width: 146px; }
 
-    /* heading "Slumber party" + trattino (tra intro ed editoriale) */
-    .mag-lecture__title {
-        display: block;
-        margin: 0;
-        font-family: var(--font-mono);
-        font-weight: 700;
-        font-size: 14px;
-        line-height: 17px;
-        letter-spacing: -0.5px;
-        color: #000;
-    }
-    .mag-lecture__dash {
-        display: block;
-        margin: 0;
-        font-family: var(--font-mono);
-        font-weight: 700;
-        font-size: 14px;
-        line-height: 17px;
-        color: #000;
-    }
+    /* Su mobile NON si mostrano il titolo e il trattino nel container_lecture. */
+    .mag-lecture__title,
+    .mag-lecture__dash { display: none; }
 }
 
 /* ===================================================================
