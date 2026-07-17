@@ -109,13 +109,6 @@ body {
     min-height: 100vh;
     font-family: var(--font-mono);
     color: #000;
-    /* Ogni pagina si apre SEMPRE con una dissolvenza in ingresso. */
-    animation: page-open-fade 0.45s ease both;
-}
-
-@keyframes page-open-fade {
-    from { opacity: 0; }
-    to   { opacity: 1; }
 }
 
 /* ===== Sfondo ===== */
