@@ -62,27 +62,74 @@ function reveal() {
     setTimeout(() => { loadingPage.style.display = "none"; }, 450);
 }
 
-// Immagini caricate = ULTIMA parte del caricamento: parte l'INTRO e la pagina si
-// rivela ESATTAMENTE alla fine dell'audio. Se l'autoplay è bloccato o l'audio
-// non parte, si rivela subito (nessun blocco). Rete di sicurezza a 8''.
+// Immagini caricate = ULTIMA parte del caricamento: parte l'INTRO (con dissolvenza
+// audio in ingresso e in uscita) e la user_page si rivela — con la sua dissolvenza —
+// a 1'' dall'inizio dell'audio. L'audio si sente SOLO alla primissima apertura in
+// assoluto (flag in localStorage): dalle volte successive la pagina si rivela subito,
+// senza suono. Se l'autoplay è bloccato o l'audio non parte, si rivela subito.
+const INTRO_FLAG = "bratz_intro_played";
+const AUDIO_FADE_MS = 700;   // durata dissolvenza audio in/out
+const REVEAL_DELAY_MS = 1000; // la pagina appare a 1'' dell'audio
+
 let introStarted = false;
 function onImagesReady() {
     if (introStarted) { return; }
     introStarted = true;
     setProgress(100);
+
     let done = false;
     const revealOnce = () => { if (!done) { done = true; reveal(); } };
+
+    // Già sentito una volta: nessun audio, rivelo subito (con dissolvenza della pagina).
+    if (localStorage.getItem(INTRO_FLAG)) { revealOnce(); return; }
+
     let audio = null;
-    try { audio = new Audio("assets/audio/INTRO.m4a"); } catch (_) { audio = null; }
-    if (audio) {
-        audio.addEventListener("ended", revealOnce, { once: true });
-        audio.addEventListener("error", revealOnce, { once: true });
-        const p = audio.play();
-        if (p && typeof p.then === "function") p.catch(revealOnce); // autoplay bloccato -> rivela subito
-    } else {
-        revealOnce();
+    try { audio = new Audio("assets/audio/INTRO.m4a"); audio.volume = 0; } catch (_) { audio = null; }
+    if (!audio) { revealOnce(); return; }
+
+    // Rampa lineare del volume da 'from' a 'to' in 'ms'.
+    function fadeAudio(from, to, ms) {
+        const steps = 20;
+        let i = 0;
+        const timer = setInterval(() => {
+            i++;
+            audio.volume = Math.max(0, Math.min(1, from + (to - from) * (i / steps)));
+            if (i >= steps) { clearInterval(timer); }
+        }, ms / steps);
     }
-    setTimeout(revealOnce, 8000); // fallback assoluto
+
+    // Programma la dissolvenza in uscita poco prima della fine della traccia.
+    let fadedOut = false;
+    audio.addEventListener("loadedmetadata", () => {
+        const dur = audio.duration;
+        if (isFinite(dur) && dur > 0) {
+            const startFadeAt = Math.max(0, dur - AUDIO_FADE_MS / 1000);
+            audio.addEventListener("timeupdate", () => {
+                if (!fadedOut && audio.currentTime >= startFadeAt) {
+                    fadedOut = true;
+                    fadeAudio(audio.volume, 0, AUDIO_FADE_MS);
+                }
+            });
+        }
+    }, { once: true });
+    audio.addEventListener("ended", () => { audio.volume = 0; }, { once: true });
+    audio.addEventListener("error", revealOnce, { once: true });
+
+    const p = audio.play();
+    if (p && typeof p.then === "function") {
+        p.then(() => {
+            localStorage.setItem(INTRO_FLAG, "1"); // sentito: non ripartirà più
+            fadeAudio(0, 1, AUDIO_FADE_MS);        // dissolvenza in ingresso
+            setTimeout(revealOnce, REVEAL_DELAY_MS); // pagina a 1'' dell'audio
+        }).catch(revealOnce);                       // autoplay bloccato -> rivela subito
+    } else {
+        // Ambiente senza Promise: prova comunque a suonare e rivelare a 1''.
+        localStorage.setItem(INTRO_FLAG, "1");
+        fadeAudio(0, 1, AUDIO_FADE_MS);
+        setTimeout(revealOnce, REVEAL_DELAY_MS);
+    }
+
+    setTimeout(revealOnce, 8000); // rete di sicurezza assoluta
 }
 
 // Conta ogni immagine man mano che finisce di caricare (load o error)
