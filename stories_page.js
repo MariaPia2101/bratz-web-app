@@ -203,3 +203,15 @@ if (saveBtn) {
         saveBtn.textContent = "saved";
     });
 }
+
+// ---------- Musica (container_instruction): testo cliccabile ----------
+// All'apertura la musica è "attiva" (testo nero). Al click si ferma e il testo
+// diventa grigio sbarrato. Per ora nessun audio: solo lo stato visivo/toggle.
+const musicBtn = document.getElementById("stories-music");
+if (musicBtn) {
+    musicBtn.addEventListener("click", () => {
+        const muted = musicBtn.classList.toggle("is-muted");
+        // TODO: agganciare qui play/pause della traccia audio quando disponibile.
+        // muted === true  -> musica ferma; false -> musica in riproduzione.
+    });
+}

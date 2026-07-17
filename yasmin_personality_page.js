@@ -127,6 +127,25 @@ if (mobilePlay) {
 
 let selected = false;   // personalità scelta?
 let activeTab = "identity";
+let booted = false;     // true dopo il render iniziale: gli fx animano solo a runtime
+
+// ---------- Effetti di transizione morbidi (sblocchi / cambio tab / popup) ----------
+// fxUnlock: bagliore + dissolvenza grigio->bianco quando un tasto si sblocca.
+function fxUnlock(el) {
+    if (!el) return;
+    el.classList.remove("fx-unlock");
+    void el.offsetWidth;            // forza il replay dell'animazione
+    el.classList.add("fx-unlock");
+    setTimeout(() => el.classList.remove("fx-unlock"), 750);
+}
+// fxFade: leggera dissolvenza in ingresso quando cambia un popup / pannello.
+function fxFade(el) {
+    if (!el) return;
+    el.classList.remove("fx-fadein");
+    void el.offsetWidth;
+    el.classList.add("fx-fadein");
+    setTimeout(() => el.classList.remove("fx-fadein"), 450);
+}
 
 function updatePopup() {
     if (popupPrint) popupPrint.hidden = true;   // il print compare solo nella select_page
@@ -214,6 +233,10 @@ function setActiveTab(name) {
     });
     panels.forEach((p) => { p.hidden = p.dataset.tab !== name; });
     updatePopup();
+    // dissolvenza leggera del pannello mostrato e del popup (come i popup 3D)
+    const shown = panels.find((p) => p.dataset.tab === name);
+    fxFade(shown);
+    fxFade(popup);
 }
 
 tabs.forEach((tab) => {
@@ -246,6 +269,7 @@ function applySelection(btn, persist) {
                 t.disabled = false;
                 t.classList.remove("side-locked");
                 if (t.dataset.tab !== activeTab) t.classList.add("active");
+                if (persist) fxUnlock(t);   // solo su click reale (non al ripristino)
             }
         });
     }
@@ -281,6 +305,7 @@ function unlockTab(name) {
         tab.disabled = false;
         tab.classList.remove("side-locked");
         if (tab.dataset.tab !== activeTab) tab.classList.add("active");
+        if (booted) fxUnlock(tab);   // bagliore solo a runtime, non al primo render
     }
 }
 
@@ -431,6 +456,7 @@ function activateCommunity() {
     c.dataset.communityReady = "1";
     c.disabled = false;
     c.classList.add("active");
+    if (booted) fxUnlock(c);   // bagliore di sblocco solo a runtime
     c.addEventListener("click", () => navigateWithLoading("community_page.html"));
 }
 
@@ -655,3 +681,6 @@ if (new URLSearchParams(location.search).get("tab") === "magazines") {
     const magTab = tabs.find((t) => t.dataset.tab === "magazines");
     if (magTab && !magTab.disabled) setActiveTab("magazines");
 }
+
+// Render iniziale completato: da ora gli sblocchi animano (fxUnlock/fxFade).
+booted = true;

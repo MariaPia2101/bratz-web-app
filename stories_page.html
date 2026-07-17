@@ -81,6 +81,8 @@
             box-sizing: border-box;
             background: var(--fill-reading);
             padding: 153px 62px 48px 40px;
+            display: flex;
+            flex-direction: column;
         }
 
         .instruction-stories {
@@ -88,6 +90,30 @@
             flex-direction: column;
             gap: 72px;
             max-width: 610px;
+        }
+
+        /* Testo "music" in basso: stesso stile di .instruction-text ma NERO e
+           cliccabile. Al click (musica ferma) diventa grigio sbarrato. */
+        .instruction-music {
+            align-self: flex-start;
+            margin-top: auto;      /* spinge il testo in fondo al container_instruction */
+            padding: 0;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-family: var(--font-mono, "Akkurat Mono");
+            font-weight: 400;
+            font-size: 16px;
+            line-height: 23px;
+            letter-spacing: 0;
+            text-transform: uppercase;
+            color: #000;
+            transition: color 0.2s ease;
+        }
+
+        .instruction-music.is-muted {
+            color: var(--instruction-grey);
+            text-decoration: line-through;
         }
 
         .instruction-text {
@@ -262,6 +288,8 @@ In the quiet of the evening, the ultimate styling sanctuary was finally ready. T
 
 continue your story<span class="only-desktop"> on the right page</span>...</p>
                 </div>
+                <!-- musica: nera cliccabile; al click si ferma e diventa grigia sbarrata -->
+                <button type="button" class="instruction-music" id="stories-music">music</button>
             </section>
 
             <!-- container_lecture: vuoto, compilabile durante la scrittura.
