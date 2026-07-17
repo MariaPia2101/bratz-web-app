@@ -234,20 +234,7 @@
 <body>
     <canvas id="scene-canvas"></canvas>
 
-    <!-- ===== Overlay di caricamento (barra di avanzamento reale del download dei modelli) ===== -->
-    <section class="loading-page" id="scene-loading" aria-hidden="false">
-        <div class="loading-input">
-            <img class="loading-logo" src="assets/images/logo_image.gif" alt="Bratz">
-
-            <div class="container-bar-and-text">
-                <div class="loading-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"
-                    id="scene-loading-bar">
-                    <div class="loading-bar-fill" id="scene-loading-fill"></div>
-                </div>
-                <p class="loading-text" id="scene-loading-text">Loading...</p>
-            </div>
-        </div>
-    </section>
+    <!-- Loading page 3D rimossa: il canvas WebGL è mostrato direttamente. -->
 
     <!-- Suggerimento comandi movimento -->
     <div id="scene-hint">⬆️⬇️ / W S muoviti &nbsp;·&nbsp; ⬅️➡️ / A D gira &nbsp;·&nbsp; Shift corri</div>
@@ -276,7 +263,7 @@
     <iframe id="stories-frame" class="stories-frame" title="Stories" hidden></iframe>
 
     <script src="community-unlock.js"></script>
-    <script type="module" src="scene.js?v=33"></script>
+    <script type="module" src="scene.js?v=34"></script>
 </body>
 
 </html>

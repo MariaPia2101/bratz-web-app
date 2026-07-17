@@ -206,20 +206,23 @@ if (!IS_LOW) {
 }
 
 // ---------- Loading manager ----------
+// La loading page del 3D è stata rimossa (su iPhone l'overlay sovrapposto al
+// canvas WebGL pesava): tutte le funzioni sono null-safe se gli elementi non ci sono.
 const manager = new THREE.LoadingManager();
 manager.onProgress = (url, loaded, total) => setProgress(total ? Math.round((loaded / total) * 100) : 0);
-manager.onLoad = () => { setProgress(100); }; // il loading si chiude dopo il PRIMO render (init)
-manager.onError = (url) => { console.error("[scene] Errore caricamento:", url); loadingText.textContent = "Load error"; };
+manager.onLoad = () => { setProgress(100); };
+manager.onError = (url) => { console.error("[scene] Errore caricamento:", url); if (loadingText) loadingText.textContent = "Load error"; };
 
 function setProgress(pct) {
-    loadingFill.style.width = pct + "%";
-    loadingBar.setAttribute("aria-valuenow", String(pct));
-    loadingText.textContent = pct < 100 ? `Loading ${pct}%` : "Ready";
+    if (loadingFill) loadingFill.style.width = pct + "%";
+    if (loadingBar) loadingBar.setAttribute("aria-valuenow", String(pct));
+    if (loadingText) loadingText.textContent = pct < 100 ? `Loading ${pct}%` : "Ready";
 }
 let loadingHidden = false;
 function hideLoading() {
     if (loadingHidden) return;
     loadingHidden = true;
+    if (!loadingEl) return;
     loadingEl.classList.add("is-hidden");
     loadingEl.setAttribute("aria-hidden", "true");
     setTimeout(() => { loadingEl.style.display = "none"; }, 700);
@@ -1111,25 +1114,27 @@ async function init() {
 }
 
 // Feedback chiaro se il 3D non parte (es. decoder Draco in "Aborted" / memoria):
-// niente blocco totale, mostro un messaggio e un modo per tornare indietro.
+// niente loading page (rimossa), mostro un piccolo messaggio + "torna indietro".
 function showSceneError() {
     try { dracoLoader.dispose(); } catch (_) { /* ignora */ }
-    if (loadingText) loadingText.textContent = "Scena 3D non caricabile qui.";
-    if (loadingBar) loadingBar.style.display = "none";
-    const input = loadingEl && loadingEl.querySelector(".loading-input");
-    if (input && !document.getElementById("scene-error-back")) {
-        const back = document.createElement("button");
-        back.id = "scene-error-back";
-        back.type = "button";
-        back.className = "primary-button active";
-        back.textContent = "torna indietro";
-        back.style.cssText = "width:207px;margin-top:8px;";
-        back.addEventListener("click", () => {
-            window.location.href = sessionStorage.getItem("bratz_return_page") || "user_page.html";
-        });
-        input.appendChild(back);
-    }
-    loadingEl && loadingEl.classList.remove("is-hidden");
+    if (document.getElementById("scene-error")) return;
+    const box = document.createElement("div");
+    box.id = "scene-error";
+    box.style.cssText = "position:fixed;inset:0;z-index:30;display:flex;flex-direction:column;" +
+        "align-items:center;justify-content:center;gap:16px;background:#fff;color:#000;" +
+        "font-family:system-ui,sans-serif;font-size:15px;text-align:center;padding:24px;";
+    const msg = document.createElement("p");
+    msg.textContent = "Scena 3D non caricabile su questo dispositivo.";
+    msg.style.margin = "0";
+    const back = document.createElement("button");
+    back.type = "button";
+    back.textContent = "TORNA INDIETRO";
+    back.style.cssText = "padding:11px 22px;background:#fff;border:2px solid #000;cursor:pointer;font:inherit;";
+    back.addEventListener("click", () => {
+        window.location.href = sessionStorage.getItem("bratz_return_page") || "user_page.html";
+    });
+    box.append(msg, back);
+    document.body.appendChild(box);
 }
 
 // Spawn valido: dal centro verso l'esterno a spirale, il primo punto che è
