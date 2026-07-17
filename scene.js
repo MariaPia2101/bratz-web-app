@@ -28,9 +28,12 @@ const IS_LOW = (typeof matchMedia === "function" && matchMedia("(pointer: coarse
     || window.innerWidth < 820;
 
 // ---------- Configurazione ----------
-// Stesso ambiente environment2.glb e stessa loading page su desktop e mobile.
+// Desktop: environment2.glb (pesante). Mobile: environment_mobile.glb (leggero,
+// ~3.4MB) — prova dedicata per far girare la scena su iPhone senza crash Draco.
 const MODELS = {
-    environment: "assets/3d/models/environment2.glb",
+    environment: IS_LOW
+        ? "assets/3d/models/environment_mobile.glb"
+        : "assets/3d/models/environment2.glb",
     character:   "assets/3d/models/character.glb",
 };
 
@@ -103,6 +106,13 @@ const loadingEl   = document.getElementById("scene-loading");
 const loadingBar  = document.getElementById("scene-loading-bar");
 const loadingFill = document.getElementById("scene-loading-fill");
 const loadingText = document.getElementById("scene-loading-text");
+
+// Su MOBILE niente loading-page: l'ambiente leggero carica in fretta e l'overlay
+// causava lo schermo nero/bianco su iPhone. Su desktop resta invariata.
+if (IS_LOW && loadingEl) {
+    loadingEl.style.display = "none";
+    loadingEl.setAttribute("aria-hidden", "true");
+}
 
 // ---------- Renderer ----------
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: !IS_LOW, powerPreference: "high-performance" });
