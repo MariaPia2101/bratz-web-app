@@ -2565,5 +2565,5 @@ body {
     /* My Faves: le card salvate hanno la stessa dimensione del mag-magazine
        su mobile (175.5px di larghezza, copertina 207/230 -> ~250px totali). */
     #faves-grid .community-card { width: 175.5px; }
-    #faves-grid { gap: 16px; }
+    #faves-grid { gap: 19px; }
 }
