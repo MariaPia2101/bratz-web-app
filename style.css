@@ -894,27 +894,22 @@ body {
     object-fit: cover;
     object-position: center;
     user-select: none;
-    transition: filter 0.35s ease;
+    /* dissolvenza del bagliore in ingresso/uscita (0.55s) */
+    transition: filter 0.55s ease;
 }
 
-/* Hover sulla doll (mydollz_page): stesso bagliore bianco degli oggetti 3D —
-   illumina sia la bambola (drop-shadow che segue la sagoma) sia tutto il
-   rettangolo (box-shadow), con una leggera pulsazione. */
-.doll-photo { transition: box-shadow 0.35s ease; }
-.doll-photo:hover { box-shadow: 0 0 48px 6px rgba(255, 255, 255, 0.85); }
-.doll-photo:hover img { animation: doll-glow 1.8s ease-in-out infinite; }
-
-@keyframes doll-glow {
-    0%, 100% {
-        filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.85))
-                drop-shadow(0 0 18px rgba(255, 255, 255, 0.55))
-                brightness(1.05);
-    }
-    50% {
-        filter: drop-shadow(0 0 16px #ffffff)
-                drop-shadow(0 0 30px rgba(255, 255, 255, 0.85))
-                brightness(1.12);
-    }
+/* Hover sulla doll (mydollz_page): bagliore bianco ACCENTUATO che segue la
+   sagoma (drop-shadow) + tutto il rettangolo (box-shadow). Compare/scompare in
+   dissolvenza tramite le transition (niente pulsazione). */
+.doll-photo { transition: box-shadow 0.55s ease; }
+.doll-photo:hover {
+    box-shadow: 0 0 90px 16px rgba(255, 255, 255, 0.95);
+}
+.doll-photo:hover img {
+    filter: drop-shadow(0 0 22px #ffffff)
+            drop-shadow(0 0 46px rgba(255, 255, 255, 0.95))
+            drop-shadow(0 0 80px rgba(255, 255, 255, 0.7))
+            brightness(1.18);
 }
 
 /* container_doll_text */

@@ -181,8 +181,10 @@ function updatePopup() {
             if (popupPrint) {
                 popupPrint.hidden = false;
                 const can = getMagSelected().length >= 3;
+                const was = popupPrint.classList.contains("active");
                 popupPrint.disabled = !can;
                 popupPrint.classList.toggle("active", can);
+                if (booted && can && !was) fxUnlock(popupPrint);   // sblocco del print: bagliore
             }
         } else {
             // add / printed: pop_up del container_side_30% della magazines_page
@@ -487,6 +489,8 @@ function buildAddSlot(disabled) {
             localStorage.setItem(MAG_SEL_KEY, "[]");
             renderMagazines();
             updatePopup();
+            fxFade(magView);   // step add -> select: dissolvenza
+            fxFade(popup);
         });
     }
     // pop_up che tocca il plus (presente in entrambi gli stati, testo diverso):
@@ -590,11 +594,13 @@ function doPrintMagazine() {
     if (getMagSelected().length < 3) return;
     localStorage.setItem(MAG_PRINTED_KEY, "1");
     localStorage.setItem(MAG_STATE_KEY, "printed");
-    activateCommunity();
+    activateCommunity();   // il bottone community diventa bianco (con fxUnlock)
     renderMagazines();
     renderGoalz();   // l'obiettivo "publish" lascia il posto al drop di domani
     renderTrophies(); // sblocca la 4ª card (Editor in Chief)
     updatePopup();
+    fxFade(magView);   // step select -> printed: dissolvenza
+    fxFade(popup);
 }
 
 function renderMagazines() {

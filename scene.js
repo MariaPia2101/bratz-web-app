@@ -28,10 +28,9 @@ const IS_LOW = (typeof matchMedia === "function" && matchMedia("(pointer: coarse
     || window.innerWidth < 820;
 
 // ---------- Configurazione ----------
-// Desktop: environment2.glb (con loading page). Mobile: environment.glb e
-// nessuna loading page (nascosta più sotto).
+// Stesso ambiente environment2.glb e stessa loading page su desktop e mobile.
 const MODELS = {
-    environment: IS_LOW ? "assets/3d/models/environment.glb" : "assets/3d/models/environment2.glb",
+    environment: "assets/3d/models/environment2.glb",
     character:   "assets/3d/models/character.glb",
 };
 
@@ -104,9 +103,6 @@ const loadingEl   = document.getElementById("scene-loading");
 const loadingBar  = document.getElementById("scene-loading-bar");
 const loadingFill = document.getElementById("scene-loading-fill");
 const loadingText = document.getElementById("scene-loading-text");
-// Su mobile NIENTE loading page (l'overlay pesava sul canvas): la nascondiamo
-// subito, il canvas 3D è mostrato direttamente. Su desktop resta.
-if (IS_LOW && loadingEl) loadingEl.style.display = "none";
 
 // ---------- Renderer ----------
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: !IS_LOW, powerPreference: "high-performance" });

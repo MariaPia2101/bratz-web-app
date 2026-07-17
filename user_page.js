@@ -48,18 +48,41 @@ function setProgress(pct) {
 function markLoaded() {
     loaded = Math.min(total, loaded + 1);
     setProgress((loaded / total) * 100);
-    if (loaded >= total) finish();
+    if (loaded >= total) onImagesReady();
 }
 
-function finish() {
+// Rivela la pagina (dissolvenza dell'overlay e comparsa fluida del contenuto).
+function reveal() {
     if (finished) return;
     finished = true;
     setProgress(100);
     stopDots();
-    // dissolvenza dell'overlay e comparsa fluida del contenuto
     content.classList.add("is-ready");
     loadingPage.style.opacity = "0";
     setTimeout(() => { loadingPage.style.display = "none"; }, 450);
+}
+
+// Immagini caricate = ULTIMA parte del caricamento: parte l'INTRO e la pagina si
+// rivela ESATTAMENTE alla fine dell'audio. Se l'autoplay è bloccato o l'audio
+// non parte, si rivela subito (nessun blocco). Rete di sicurezza a 8''.
+let introStarted = false;
+function onImagesReady() {
+    if (introStarted) { return; }
+    introStarted = true;
+    setProgress(100);
+    let done = false;
+    const revealOnce = () => { if (!done) { done = true; reveal(); } };
+    let audio = null;
+    try { audio = new Audio("assets/audio/INTRO.m4a"); } catch (_) { audio = null; }
+    if (audio) {
+        audio.addEventListener("ended", revealOnce, { once: true });
+        audio.addEventListener("error", revealOnce, { once: true });
+        const p = audio.play();
+        if (p && typeof p.then === "function") p.catch(revealOnce); // autoplay bloccato -> rivela subito
+    } else {
+        revealOnce();
+    }
+    setTimeout(revealOnce, 8000); // fallback assoluto
 }
 
 // Conta ogni immagine man mano che finisce di caricare (load o error)
@@ -72,8 +95,8 @@ images.forEach((img) => {
     }
 });
 
-// Rete di sicurezza: quando l'intera pagina è caricata, completa comunque
-window.addEventListener("load", finish);
+// Rete di sicurezza: quando l'intera pagina è caricata, avvia comunque la sequenza
+window.addEventListener("load", onImagesReady);
 
 // ---------- "See more" delle card → pagina dedicata con loading di transito reale ----------
 function navigateWithLoading(url) {
