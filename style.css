@@ -917,7 +917,8 @@ body {
     opacity: 0;
     transition: opacity 0.55s ease;
 }
-.doll-photo:hover::after { opacity: 1; }
+/* bagliore più leggero: l'overlay a piena intensità sarebbe troppo forte */
+.doll-photo:hover::after { opacity: 0.5; }
 
 /* container_doll_text */
 .container-doll-text {
@@ -1948,6 +1949,13 @@ body {
 
 .mag-lecture__text p.is-muted {
     color: #b3b3b3;
+}
+
+/* Testo del magazine dell'utente = unione dei description_text delle storie:
+   stesso stile del testo delle istruzioni (mono, MAIUSCOLO) ma in nero. */
+.mag-lecture__text p.mag-lecture__story {
+    color: #000;
+    text-transform: uppercase;
 }
 
 /* third_input_field (visibile solo per la community) */

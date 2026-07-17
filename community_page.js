@@ -1,7 +1,12 @@
 // ===== COMMUNITY PAGE: nickname + loading + navigazione + bookmark =====
 
-// Audio di apertura pagina (normalizzato): styling.
-if (window.BratzAudio) window.BratzAudio.play("styling");
+// Audio di apertura (styling): SOLO alla prima apertura e SOLO a pagina caricata
+// del tutto (dopo la loading_page). La community si raggiunge già "attiva".
+function playOpenCue() {
+    if (localStorage.getItem("bratz_cue_community")) return;   // già sentito
+    if (window.BratzAudio) window.BratzAudio.play("styling");
+    localStorage.setItem("bratz_cue_community", "1");
+}
 
 // Nickname nell'header
 const nickname = (localStorage.getItem("bratz_nickname") || "marpi.dollz").trim();
@@ -36,7 +41,7 @@ function finish() {
     setProgress(100); stopDots();
     if (content) content.classList.add("is-ready");
     loadingPage.style.opacity = "0";
-    setTimeout(() => { loadingPage.style.display = "none"; }, 450);
+    setTimeout(() => { loadingPage.style.display = "none"; playOpenCue(); }, 450);
 }
 images.forEach((img) => {
     if (img.complete && img.naturalWidth > 0) markLoaded();

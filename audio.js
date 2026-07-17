@@ -16,7 +16,7 @@
         "slamming":   { url: "assets/audio/slamming.mp3",    rms: 0.0432, peak: 0.310 },
         "rocking":    { url: "assets/audio/rocking.mp3",     rms: 0.0459, peak: 0.460 },
         "timetoplay": { url: "assets/audio/timetoplay.mp3",  rms: 0.0226, peak: 0.157 },
-        "click":      { url: "assets/audio/click.mp3",       rms: 0.0217, peak: 0.353 },
+        "click":      { url: "assets/audio/click2.mp3",      rms: 0.0115, peak: 0.187 },
         "song0":      { url: "assets/audio/Dollz Doll by Sasha  Official Audio  Bratz.mp3",         rms: 0.3544, peak: 1.0 },
         "song1":      { url: "assets/audio/Superbloomin by Yasmin  Official Audio  Bratz.mp3",      rms: 0.3399, peak: 1.0 },
         "song2":      { url: "assets/audio/If I’m Being Honest by Cloe  Official Audio  Bratz.mp3", rms: 0.3570, peak: 1.0 }

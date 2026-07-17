@@ -59,23 +59,18 @@ function fillOwnMagazineBody() {
         p.remove();
     });
 
-    // Aggiunge un paragrafo per ogni storia (titolo + corpo), mantenendo gli a capo.
+    // Solo i description_text delle storie (NIENTE titoli): un paragrafo per storia,
+    // stesso stile del testo delle istruzioni ma in nero (.mag-lecture__story).
     chosen.forEach((story) => {
-        const title = (story.title || "").trim();
         const body = (story.body || "").trim();
-        if (title) {
-            const pt = document.createElement("p");
-            pt.textContent = title;
-            lecture.appendChild(pt);
-        }
-        if (body) {
-            const pb = document.createElement("p");
-            body.split(/\n+/).forEach((line, idx) => {
-                if (idx) pb.appendChild(document.createElement("br"));
-                pb.appendChild(document.createTextNode(line));
-            });
-            lecture.appendChild(pb);
-        }
+        if (!body) return;
+        const pb = document.createElement("p");
+        pb.className = "mag-lecture__story";
+        body.split(/\n+/).forEach((line, idx) => {
+            if (idx) pb.appendChild(document.createElement("br"));
+            pb.appendChild(document.createTextNode(line));
+        });
+        lecture.appendChild(pb);
     });
 }
 if (type !== "community") fillOwnMagazineBody();

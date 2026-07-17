@@ -1,7 +1,13 @@
 // ===== MY FAVES / EMPTY PAGE: nickname + loading reale + navigazione =====
 
-// Audio di apertura pagina (normalizzato): slamming.
-if (window.BratzAudio) window.BratzAudio.play("slamming");
+// Audio di apertura (slamming): SOLO alla prima apertura, SOLO a pagina caricata
+// del tutto e SOLO quando la pagina è "attiva" (ci sono magazine tra i preferiti).
+function playOpenCue() {
+    if (localStorage.getItem("bratz_cue_faves")) return;   // già sentito
+    if (getFaves().length === 0) return;                   // non ancora attiva
+    if (window.BratzAudio) window.BratzAudio.play("slamming");
+    localStorage.setItem("bratz_cue_faves", "1");
+}
 
 // ---------- Nickname (persistito nell'onboarding) nel bottone header ----------
 const nickname = (localStorage.getItem("bratz_nickname") || "marpi.dollz").trim();
@@ -128,7 +134,7 @@ function finish() {
     stopDots();
     content.classList.add("is-ready");
     loadingPage.style.opacity = "0";
-    setTimeout(() => { loadingPage.style.display = "none"; }, 450);
+    setTimeout(() => { loadingPage.style.display = "none"; playOpenCue(); }, 450);
 }
 
 images.forEach((img) => {

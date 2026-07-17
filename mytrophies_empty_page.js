@@ -1,7 +1,24 @@
 // ===== MY TROPHIES / EMPTY PAGE: nickname + loading reale + navigazione =====
 
-// Audio di apertura pagina (normalizzato): rocking.
-if (window.BratzAudio) window.BratzAudio.play("rocking");
+// La pagina trophies è "attiva" quando il primo premio è sbloccato
+// (3 oggetti + 3 storie + magazine stampato).
+function trophyPageActive() {
+    const found = parseInt(localStorage.getItem("bratz_objects_found"), 10) || 0;
+    let stories = 0;
+    try { stories = (JSON.parse(localStorage.getItem("bratz_saved_stories") || "[]") || []).length; }
+    catch (_) { stories = 0; }
+    const printed = localStorage.getItem("bratz_magazine_printed") === "1";
+    return found >= 3 && stories >= 3 && printed;
+}
+
+// Audio di apertura (rocking): SOLO alla prima apertura, SOLO a pagina caricata
+// del tutto e SOLO quando la pagina è "attiva" (primo premio sbloccato).
+function playOpenCue() {
+    if (localStorage.getItem("bratz_cue_trophies")) return;   // già sentito
+    if (!trophyPageActive()) return;                          // non ancora attiva
+    if (window.BratzAudio) window.BratzAudio.play("rocking");
+    localStorage.setItem("bratz_cue_trophies", "1");
+}
 
 // ---------- Nickname (persistito nell'onboarding) nel bottone header ----------
 const nickname = (localStorage.getItem("bratz_nickname") || "marpi.dollz").trim();
@@ -58,7 +75,7 @@ function finish() {
     stopDots();
     content.classList.add("is-ready");
     loadingPage.style.opacity = "0";
-    setTimeout(() => { loadingPage.style.display = "none"; }, 450);
+    setTimeout(() => { loadingPage.style.display = "none"; playOpenCue(); }, 450);
 }
 
 images.forEach((img) => {

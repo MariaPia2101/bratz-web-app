@@ -9,7 +9,7 @@
             window.BratzAudio.play("click");
         } else {
             // Fallback minimale se audio.js non è caricato.
-            try { var a = new Audio("assets/audio/click.mp3"); a.play().catch(function () {}); } catch (_) {}
+            try { var a = new Audio("assets/audio/click2.mp3"); a.play().catch(function () {}); } catch (_) {}
         }
     }
     // Fase di cattura: si sente anche se un handler chiama stopPropagation.
