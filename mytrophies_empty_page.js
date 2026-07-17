@@ -1,5 +1,8 @@
 // ===== MY TROPHIES / EMPTY PAGE: nickname + loading reale + navigazione =====
 
+// Audio di apertura pagina (normalizzato): rocking.
+if (window.BratzAudio) window.BratzAudio.play("rocking");
+
 // ---------- Nickname (persistito nell'onboarding) nel bottone header ----------
 const nickname = (localStorage.getItem("bratz_nickname") || "marpi.dollz").trim();
 const dollzBtn = document.getElementById("user-dollz-btn");

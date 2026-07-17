@@ -1,5 +1,8 @@
 // ===== COMMUNITY PAGE: nickname + loading + navigazione + bookmark =====
 
+// Audio di apertura pagina (normalizzato): styling.
+if (window.BratzAudio) window.BratzAudio.play("styling");
+
 // Nickname nell'header
 const nickname = (localStorage.getItem("bratz_nickname") || "marpi.dollz").trim();
 const dollzBtn = document.getElementById("user-dollz-btn");

@@ -212,39 +212,24 @@ if (saveBtn) {
 //   2 = bag.glb      -> If I'm Being Honest by Cloe
 // All'apertura la musica è "attiva" (testo colore tapped): parte in loop. Al click
 // si ferma (pausa) e il testo resta dello stesso colore ma sbarrato.
-const MUSIC_TRACKS = [
-    "assets/audio/Dollz Doll by Sasha  Official Audio  Bratz.mp3",
-    "assets/audio/Superbloomin by Yasmin  Official Audio  Bratz.mp3",
-    "assets/audio/If I’m Being Honest by Cloe  Official Audio  Bratz.mp3",
-];
+// Le tracce sono normalizzate allo stesso volume (BratzAudio): song0/1/2.
 const musicBtn = document.getElementById("stories-music");
 let storyMusic = null;
 (function initMusic() {
-    if (!musicBtn) return;
+    if (!musicBtn || !window.BratzAudio) return;
     let idx = parseInt(localStorage.getItem("bratz_story_object"), 10);
     if (Number.isNaN(idx) || idx < 0) idx = 0;
-    idx = Math.min(idx, MUSIC_TRACKS.length - 1);
-    try {
-        storyMusic = new Audio(encodeURI(MUSIC_TRACKS[idx]));
-        storyMusic.loop = true;
-    } catch (_) { storyMusic = null; }
+    idx = Math.min(idx, 2);
 
-    // Prova a partire subito (il click "write" che apre questa pagina può valere
-    // come gesto utente). Se l'autoplay è bloccato, parte al primo click sul toggle.
-    if (storyMusic) {
-        const p = storyMusic.play();
-        if (p && typeof p.then === "function") p.catch(() => {});
-    }
+    // Parte subito (il click "write" che apre questa pagina vale come gesto utente).
+    // Se l'audio è bloccato, riparte al primo click sul toggle.
+    storyMusic = window.BratzAudio.play("song" + idx, { loop: true });
 
     musicBtn.addEventListener("click", () => {
         const muted = musicBtn.classList.toggle("is-muted");
         if (!storyMusic) return;
-        if (muted) {
-            storyMusic.pause();                 // musica ferma
-        } else {
-            const p = storyMusic.play();        // musica in riproduzione
-            if (p && typeof p.then === "function") p.catch(() => {});
-        }
+        if (muted) storyMusic.pause();   // musica ferma
+        else storyMusic.resume();        // musica in riproduzione
     });
 })();
 

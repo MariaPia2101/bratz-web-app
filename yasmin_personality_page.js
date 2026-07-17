@@ -282,20 +282,15 @@ function applySelection(btn, persist) {
     if (persist) playSelectionCue();
 }
 
-// Audio "timetoplay" + dissolvenza del popup sincronizzata all'avvio del suono.
+// Audio "timetoplay" (normalizzato) + dissolvenza del popup sincronizzata all'avvio.
 function playSelectionCue() {
     let faded = false;
     const fadeOnce = () => { if (faded) return; faded = true; fxFade(popup); };
-    let audio = null;
-    try { audio = new Audio("assets/audio/timetoplay.mp3"); } catch (_) { audio = null; }
-    if (audio) {
-        audio.addEventListener("play", fadeOnce, { once: true });
-        const p = audio.play();
-        if (p && typeof p.then === "function") p.catch(fadeOnce); // autoplay bloccato -> dissolvi comunque
-        setTimeout(fadeOnce, 250); // rete di sicurezza se 'play' non scatta
-    } else {
-        fadeOnce();
+    const handle = window.BratzAudio ? window.BratzAudio.play("timetoplay") : null;
+    if (handle && handle.el) {
+        handle.el.addEventListener("play", fadeOnce, { once: true });
     }
+    setTimeout(fadeOnce, 250); // rete di sicurezza se 'play' non scatta (autoplay bloccato)
 }
 
 selectButtons.forEach((btn) => {

@@ -544,11 +544,7 @@ function setMagazinePopup() {
     gamePopup.append(close, text, print);
     // Audio: quando appare l'obiettivo "crea il magazine" (solo finché non è stampato).
     if (localStorage.getItem("bratz_magazine_printed") !== "1") {
-        try {
-            const cue = new Audio(encodeURI("assets/audio/lets start our team magazine.mp3"));
-            const pr = cue.play();
-            if (pr && typeof pr.then === "function") pr.catch(() => {});
-        } catch (_) { /* audio non disponibile: nessun blocco */ }
+        if (window.BratzAudio) window.BratzAudio.play("magazine");
     }
 }
 

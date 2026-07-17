@@ -83,51 +83,20 @@ function onImagesReady() {
     // Già sentito una volta: nessun audio, rivelo subito (con dissolvenza della pagina).
     if (localStorage.getItem(INTRO_FLAG)) { revealOnce(); return; }
 
-    let audio = null;
-    try { audio = new Audio("assets/audio/INTRO.m4a"); audio.volume = 0; } catch (_) { audio = null; }
-    if (!audio) { revealOnce(); return; }
-
-    // Rampa lineare del volume da 'from' a 'to' in 'ms'.
-    function fadeAudio(from, to, ms) {
-        const steps = 20;
-        let i = 0;
-        const timer = setInterval(() => {
-            i++;
-            audio.volume = Math.max(0, Math.min(1, from + (to - from) * (i / steps)));
-            if (i >= steps) { clearInterval(timer); }
-        }, ms / steps);
-    }
-
-    // Programma la dissolvenza in uscita poco prima della fine della traccia.
-    let fadedOut = false;
-    audio.addEventListener("loadedmetadata", () => {
-        const dur = audio.duration;
-        if (isFinite(dur) && dur > 0) {
-            const startFadeAt = Math.max(0, dur - AUDIO_FADE_MS / 1000);
-            audio.addEventListener("timeupdate", () => {
-                if (!fadedOut && audio.currentTime >= startFadeAt) {
-                    fadedOut = true;
-                    fadeAudio(audio.volume, 0, AUDIO_FADE_MS);
-                }
-            });
-        }
-    }, { once: true });
-    audio.addEventListener("ended", () => { audio.volume = 0; }, { once: true });
-    audio.addEventListener("error", revealOnce, { once: true });
-
-    const p = audio.play();
-    if (p && typeof p.then === "function") {
-        p.then(() => {
+    // INTRO normalizzato allo stesso volume delle altre tracce (BratzAudio), con
+    // dissolvenza audio in ingresso/uscita. La pagina si rivela a 1'' dall'avvio;
+    // se l'audio non parte (autoplay bloccato / errore) si rivela subito.
+    if (!window.BratzAudio) { revealOnce(); return; }
+    window.BratzAudio.playIntro("assets/audio/INTRO.m4a", {
+        fadeInMs: AUDIO_FADE_MS,
+        fadeOutMs: AUDIO_FADE_MS,
+        onStarted: () => {
             localStorage.setItem(INTRO_FLAG, "1"); // sentito: non ripartirà più
-            fadeAudio(0, 1, AUDIO_FADE_MS);        // dissolvenza in ingresso
             setTimeout(revealOnce, REVEAL_DELAY_MS); // pagina a 1'' dell'audio
-        }).catch(revealOnce);                       // autoplay bloccato -> rivela subito
-    } else {
-        // Ambiente senza Promise: prova comunque a suonare e rivelare a 1''.
-        localStorage.setItem(INTRO_FLAG, "1");
-        fadeAudio(0, 1, AUDIO_FADE_MS);
-        setTimeout(revealOnce, REVEAL_DELAY_MS);
-    }
+        },
+        onEnded: revealOnce,   // rivela alla fine (se non già rivelata)
+        onFail: revealOnce,    // audio non disponibile/bloccato -> rivela subito
+    });
 
     setTimeout(revealOnce, 8000); // rete di sicurezza assoluta
 }

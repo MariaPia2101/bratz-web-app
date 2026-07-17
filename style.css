@@ -898,14 +898,26 @@ body {
     transition: filter 0.55s ease;
 }
 
-/* Hover sulla doll (mydollz_page): alone VIOLA (stesso colore tapped dei bottoni)
-   TUTT'INTORNO alla bambola — non sopra di essa. Nessuna brightness sull'immagine:
-   solo il box-shadow attorno al rettangolo. Compare/scompare in dissolvenza. */
-.doll-photo { transition: box-shadow 0.55s ease; }
-.doll-photo:hover {
-    box-shadow: 0 0 40px 6px rgba(199, 169, 255, 0.85),
-                0 0 100px 22px rgba(199, 169, 255, 0.95);
+/* Hover sulla doll (mydollz_page): bagliore VIOLA (stesso colore tapped dei bottoni)
+   SOPRA la bambola — un velo di luce viola che si posa sull'immagine (non un alone
+   attorno). Realizzato con un overlay ::after ritagliato dentro il rettangolo
+   (overflow:hidden) in modalità "screen" (aggiunge luce). Dissolvenza 0.55s. */
+.doll-photo { position: relative; }
+.doll-photo::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(circle at 50% 42%,
+                rgba(199, 169, 255, 0.75) 0%,
+                rgba(199, 169, 255, 0.45) 45%,
+                rgba(199, 169, 255, 0.20) 70%,
+                rgba(199, 169, 255, 0.08) 100%);
+    mix-blend-mode: screen;
+    opacity: 0;
+    transition: opacity 0.55s ease;
 }
+.doll-photo:hover::after { opacity: 1; }
 
 /* container_doll_text */
 .container-doll-text {
