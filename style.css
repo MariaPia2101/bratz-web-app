@@ -898,18 +898,13 @@ body {
     transition: filter 0.55s ease;
 }
 
-/* Hover sulla doll (mydollz_page): bagliore bianco ACCENTUATO che segue la
-   sagoma (drop-shadow) + tutto il rettangolo (box-shadow). Compare/scompare in
-   dissolvenza tramite le transition (niente pulsazione). */
+/* Hover sulla doll (mydollz_page): alone VIOLA (stesso colore tapped dei bottoni)
+   TUTT'INTORNO alla bambola — non sopra di essa. Nessuna brightness sull'immagine:
+   solo il box-shadow attorno al rettangolo. Compare/scompare in dissolvenza. */
 .doll-photo { transition: box-shadow 0.55s ease; }
 .doll-photo:hover {
-    box-shadow: 0 0 90px 16px rgba(255, 255, 255, 0.95);
-}
-.doll-photo:hover img {
-    filter: drop-shadow(0 0 22px #ffffff)
-            drop-shadow(0 0 46px rgba(255, 255, 255, 0.95))
-            drop-shadow(0 0 80px rgba(255, 255, 255, 0.7))
-            brightness(1.18);
+    box-shadow: 0 0 40px 6px rgba(199, 169, 255, 0.85),
+                0 0 100px 22px rgba(199, 169, 255, 0.95);
 }
 
 /* container_doll_text */

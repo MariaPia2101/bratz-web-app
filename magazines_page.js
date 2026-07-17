@@ -36,6 +36,50 @@ function ownMagazineTitle() {
     } catch (_) { return "Summer party"; }
 }
 
+// ---------- Corpo del magazine PROPRIO = insieme delle 3 storie scritte ----------
+// Il testo NERO dell'editoriale (per type=own) è l'unione dei testi delle tre
+// storie selezionate. Si conserva il paragrafo introduttivo grigio (.is-muted) e
+// il titolo/trattino mostrati solo su mobile; si sostituiscono i paragrafi neri.
+function fillOwnMagazineBody() {
+    const lecture = document.querySelector(".mag-lecture__text");
+    if (!lecture) return;
+    let sel, stories;
+    try {
+        sel = JSON.parse(localStorage.getItem("bratz_magazine_selected") || "[]") || [];
+        stories = JSON.parse(localStorage.getItem("bratz_saved_stories") || "[]") || [];
+    } catch (_) { return; }
+    const chosen = sel.map((i) => stories[i]).filter(Boolean);
+    if (!chosen.length) return;   // nessuna storia: lascia il testo segnaposto
+
+    // Rimuove i paragrafi NERI segnaposto, tenendo l'intro grigia e il titolo/dash mobile.
+    lecture.querySelectorAll("p").forEach((p) => {
+        if (p.classList.contains("is-muted") ||
+            p.classList.contains("mag-lecture__title") ||
+            p.classList.contains("mag-lecture__dash")) return;
+        p.remove();
+    });
+
+    // Aggiunge un paragrafo per ogni storia (titolo + corpo), mantenendo gli a capo.
+    chosen.forEach((story) => {
+        const title = (story.title || "").trim();
+        const body = (story.body || "").trim();
+        if (title) {
+            const pt = document.createElement("p");
+            pt.textContent = title;
+            lecture.appendChild(pt);
+        }
+        if (body) {
+            const pb = document.createElement("p");
+            body.split(/\n+/).forEach((line, idx) => {
+                if (idx) pb.appendChild(document.createElement("br"));
+                pb.appendChild(document.createTextNode(line));
+            });
+            lecture.appendChild(pb);
+        }
+    });
+}
+if (type !== "community") fillOwnMagazineBody();
+
 // ---------- third_input_field: solo per la community ----------
 const thirdInput = document.getElementById("mag-third-input");
 if (thirdInput) thirdInput.hidden = (type !== "community");

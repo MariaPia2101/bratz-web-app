@@ -233,6 +233,18 @@
                 line-height: 22px;
                 letter-spacing: -0.98px;
             }
+            /* Testo "music" su MOBILE: regola separata (stessi valori del desktop),
+               così è modificabile a mano senza toccare la versione desktop. */
+            .instruction-music {
+                font-size: 16px;
+                line-height: 23px;
+                letter-spacing: 0;
+                color: var(--btn-fill-tapped);
+            }
+            .instruction-music.is-muted {
+                color: var(--btn-fill-tapped);
+                text-decoration: line-through;
+            }
             .container-lecture {
                 border-left: none;
                 border-top: 1px solid var(--stroke-card);
@@ -307,6 +319,7 @@ continue your story<span class="only-desktop"> on the right page</span>...</p>
 
     <script src="community-unlock.js"></script>
     <script src="stories_page.js?v=2"></script>
+    <script src="click-sound.js"></script>
 </body>
 
 </html>
