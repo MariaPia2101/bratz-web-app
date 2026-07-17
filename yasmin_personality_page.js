@@ -130,7 +130,7 @@ let activeTab = "identity";
 let booted = false;     // true dopo il render iniziale: gli fx animano solo a runtime
 
 // ---------- Effetti di transizione morbidi (sblocchi / cambio tab / popup) ----------
-// fxUnlock: bagliore + dissolvenza grigio->bianco quando un tasto si sblocca.
+// fxUnlock: dissolvenza grigio->bianco quando un tasto si sblocca (nessun bagliore).
 function fxUnlock(el) {
     if (!el) return;
     el.classList.remove("fx-unlock");
@@ -282,10 +282,15 @@ function applySelection(btn, persist) {
     if (persist) playSelectionCue();
 }
 
-// Audio "timetoplay" (normalizzato) + dissolvenza del popup sincronizzata all'avvio.
+// Dissolvenza del popup ad ogni selezione; l'audio "timetoplay" si sente SOLO la
+// primissima volta in assoluto che si sceglie una personalità (flag persistente).
 function playSelectionCue() {
     let faded = false;
     const fadeOnce = () => { if (faded) return; faded = true; fxFade(popup); };
+
+    if (localStorage.getItem("bratz_timetoplay_played")) { fadeOnce(); return; }
+    localStorage.setItem("bratz_timetoplay_played", "1");
+
     const handle = window.BratzAudio ? window.BratzAudio.play("timetoplay") : null;
     if (handle && handle.el) {
         handle.el.addEventListener("play", fadeOnce, { once: true });

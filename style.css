@@ -302,13 +302,12 @@ body {
     transition: background-color 0.18s ease, color 0.18s ease; /* hover reattivo */
 }
 
-/* Sblocco morbido (grigio disabled -> bagliore -> bianco active): applicato via
-   JS con la classe .fx-unlock nel momento in cui un tasto si sblocca. Stessa
-   filosofia della dissolvenza dei popup 3D. */
+/* Sblocco morbido (grigio disabled -> bianco active): SOLO dissolvenza del
+   colore/sfondo, NESSUN bagliore. Applicato via JS con la classe .fx-unlock nel
+   momento in cui un tasto si sblocca. */
 @keyframes fx-unlock {
-    0%   { background: var(--btn-fill-disabled); color: var(--btn-text-disabled); box-shadow: 0 0 0 0 rgba(228, 213, 255, 0); }
-    45%  { box-shadow: 0 0 20px 5px rgba(228, 213, 255, 0.9); }
-    100% { background: var(--btn-fill-active); color: var(--btn-text-active); box-shadow: 0 0 0 0 rgba(228, 213, 255, 0); }
+    0%   { background: var(--btn-fill-disabled); color: var(--btn-text-disabled); }
+    100% { background: var(--btn-fill-active); color: var(--btn-text-active); }
 }
 .fx-unlock { animation: fx-unlock 0.7s ease both; }
 
@@ -901,31 +900,9 @@ body {
     object-fit: cover;
     object-position: center;
     user-select: none;
-    /* dissolvenza del bagliore in ingresso/uscita (0.55s) */
-    transition: filter 0.55s ease;
 }
 
-/* Hover sulla doll (mydollz_page): bagliore VIOLA (stesso colore tapped dei bottoni)
-   SOPRA la bambola — un velo di luce viola che si posa sull'immagine (non un alone
-   attorno). Realizzato con un overlay ::after ritagliato dentro il rettangolo
-   (overflow:hidden) in modalità "screen" (aggiunge luce). Dissolvenza 0.55s. */
-.doll-photo { position: relative; }
-.doll-photo::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background: radial-gradient(circle at 50% 42%,
-                rgba(199, 169, 255, 0.75) 0%,
-                rgba(199, 169, 255, 0.45) 45%,
-                rgba(199, 169, 255, 0.20) 70%,
-                rgba(199, 169, 255, 0.08) 100%);
-    mix-blend-mode: screen;
-    opacity: 0;
-    transition: opacity 0.55s ease;
-}
-/* bagliore più leggero: l'overlay a piena intensità sarebbe troppo forte */
-.doll-photo:hover::after { opacity: 0.5; }
+/* Nessun bagliore sulla bambola (rimosso su richiesta). */
 
 /* container_doll_text */
 .container-doll-text {
