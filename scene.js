@@ -432,6 +432,7 @@ let floorRefY = 0;         // livello nominale del pavimento (per il filtro osta
 const floorMeshes = [];    // mesh su cui appoggiare i piedi (Foundament_Home_)
 const colliders = [];      // ostacoli movimento: { minX, maxX, minZ, maxZ }
 const occluders = [];      // TUTTE le mesh: la camera non ci passa attraverso
+let stairsBox = null;      // bbox (mondo) delle scale (Stairs_And_Upperstairs_Mesh_), per il pop-up di prossimità
 
 // Input tastiera
 const keys = new Set();
@@ -612,6 +613,46 @@ window.addEventListener("message", (e) => {
     if (e.data && e.data.type === "bratz:stories-close") closeStories();
 });
 
+// ---------- Pop-up "runway chiusa": compare avvicinandosi alle scale ----------
+const stairsPopup = document.getElementById("stairs-popup");
+const stairsPopupClose = document.getElementById("stairs-popup-close");
+let stairsNear = false;       // il character è vicino alle scale?
+let stairsDismissed = false;  // l'utente ha chiuso il pop-up per questo avvicinamento
+const STAIRS_NEAR_ON = 1.1;   // distanza (unità mondo) a cui compare
+const STAIRS_NEAR_OFF = 1.9;  // distanza a cui si considera "allontanato" (isteresi)
+
+function showStairsPopup() {
+    if (!stairsPopup) return;
+    stairsPopup.hidden = false;
+    requestAnimationFrame(() => stairsPopup.classList.add("is-visible"));
+}
+function hideStairsPopup() {
+    if (!stairsPopup) return;
+    stairsPopup.classList.remove("is-visible");
+    setTimeout(() => { stairsPopup.hidden = true; }, 300);
+}
+if (stairsPopupClose) {
+    stairsPopupClose.addEventListener("click", () => { stairsDismissed = true; hideStairsPopup(); });
+}
+
+// Chiamata ogni frame: mostra il pop-up quando ci si avvicina alle scale.
+function checkStairsProximity() {
+    if (!stairsBox || !stairsPopup) return;
+    const px = character.x, pz = character.z;
+    // distanza (x,z) dal footprint rettangolare delle scale
+    const dx = Math.max(stairsBox.min.x - px, 0, px - stairsBox.max.x);
+    const dz = Math.max(stairsBox.min.z - pz, 0, pz - stairsBox.max.z);
+    const dist = Math.hypot(dx, dz);
+    if (!stairsNear && dist <= STAIRS_NEAR_ON) {
+        stairsNear = true;
+        if (!stairsDismissed) showStairsPopup();
+    } else if (stairsNear && dist >= STAIRS_NEAR_OFF) {
+        stairsNear = false;
+        stairsDismissed = false;   // allontanandosi, alla prossima volta ricompare
+        hideStairsPopup();
+    }
+}
+
 // ---------- Macchina delle fasi (obiettivi / oggetti) ----------
 function revealObject(index) {
     const o = gameObjects[index];
@@ -791,7 +832,11 @@ function classifyEnvironment(environment) {
         // (ma resta comunque bloccato, non ci sale). I divani hanno padding ancora
         // più ridotto, così ci si può avvicinare/appoggiare.
         let pad = CHARACTER_RADIUS;
-        if (hasName(o, "stair")) pad = STAIRS_PAD;
+        if (hasName(o, "stair")) {
+            pad = STAIRS_PAD;
+            // registra il footprint delle scale per il pop-up di prossimità
+            stairsBox = stairsBox ? stairsBox.union(b) : b.clone();
+        }
         else if (hasName(o, "sofa")) pad = SOFA_PAD;
         candidates.push({ box: b.clone(), pad });
     });
@@ -1241,6 +1286,7 @@ function animate() {
 
         applyCharacterTransform();
         updateCamera();
+        checkStairsProximity();   // pop-up "runway chiusa" vicino alle scale
     }
 
     // Alone bianco pulsante dell'oggetto attivo (da cercare)

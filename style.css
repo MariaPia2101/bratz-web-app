@@ -1621,6 +1621,10 @@ body {
 .trophy-card.is-unlocked .trophy-card__title { color: var(--card-stroke); }
 .trophy-card.is-unlocked .trophy-card__desc { color: var(--card-stroke); }
 
+/* La barra si vede SOLO quando la card è sbloccata (mentre l'utente svolge i
+   compiti). Sulle card ancora locked la barra NON è visibile. */
+.trophy-card:not(.is-unlocked) .trophy-bar { display: none; }
+
 /* Pop-up nascosto per i tab senza contenuto dedicato */
 .personality-popup.is-hidden {
     display: none;

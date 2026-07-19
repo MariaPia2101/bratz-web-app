@@ -200,6 +200,28 @@
             pointer-events: auto;
         }
 
+        /* ===== Pop-up "runway chiusa" (vicino alle scale): CENTRATO sullo schermo ===== */
+        .stairs-popup {
+            position: fixed;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 12;
+            width: 280px;
+            max-width: calc(100% - 32px);
+            box-sizing: border-box;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            background: var(--popup-fill, #fff);
+            border: 1px solid var(--popup-stroke, #000);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .stairs-popup[hidden] { display: none; }
+        .stairs-popup.is-visible { opacity: 1; }
+
         /* ===== Mobile: stessa logica delle altre pagine (breakpoint 768px):
            logo in alto a tutta larghezza, i due bottoni affiancati sotto. ===== */
         @media (max-width: 768px) {
@@ -272,13 +294,19 @@
         </aside>
     </div>
 
+    <!-- Pop-up "runway chiusa": compare al CENTRO avvicinandosi alle scale -->
+    <aside class="stairs-popup" id="stairs-popup" aria-hidden="true" hidden>
+        <button type="button" class="enter-popup-close" id="stairs-popup-close">Close</button>
+        <p class="enter-popup-text">Hey babe. This runway is closed. Unlock the next Bratz doll to climb these stairs.</p>
+    </aside>
+
     <!-- Overlay "stories": tiene viva la scena 3D sotto, così tornando indietro riprende dal punto esatto -->
     <iframe id="stories-frame" class="stories-frame" title="Stories" hidden></iframe>
 
     <script src="audio.js?v=3"></script>
     <script src="community-unlock.js"></script>
-    <script type="module" src="scene.js?v=40"></script>
-    <script src="click-sound.js?v=4"></script>
+    <script type="module" src="scene.js?v=41"></script>
+    <script src="click-sound.js?v=5"></script>
 </body>
 
 </html>
