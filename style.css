@@ -2339,7 +2339,7 @@ body {
     }
 
     .mobile-bottombar .primary-button {
-        width: 207px;
+        width: 175.5px;   /* come i bottoni dell'header su mobile */
         font-size: 12px;
     }
 
